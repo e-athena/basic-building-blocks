@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Version>6.2.0-pre1.4</Version>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <DocumentationFile>bin\Debug\net6.0\Athena.Infrastructure.FreeSql.OTel.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <DocumentationFile>bin\Release\net6.0\Athena.Infrastructure.FreeSql.OTel.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Athena.Infrastructure.FreeSql\Athena.Infrastructure.FreeSql.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="OpenTelemetry.Exporter.Zipkin" Version="1.5.1" />
+        <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.5.1" />
+        <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9.14" />
+        <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9.14" />
+    </ItemGroup>
+</Project>

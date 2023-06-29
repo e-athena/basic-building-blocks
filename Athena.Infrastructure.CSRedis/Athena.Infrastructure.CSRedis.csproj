@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageVersion>6.1.1</PackageVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Caching.CSRedis" Version="3.8.670" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Athena.Infrastructure\Athena.Infrastructure.csproj" />
+    </ItemGroup>
+</Project>

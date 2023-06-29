@@ -1,0 +1,13 @@
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.EntityFrameworkCore.Design;
+global using Microsoft.EntityFrameworkCore.Infrastructure;
+global using Microsoft.Extensions.DependencyInjection;
+global using System.Reflection;
+global using Microsoft.EntityFrameworkCore.Migrations;
+global using System.Linq.Expressions;
+global using System.Linq.Dynamic.Core;
+global using System.ComponentModel.DataAnnotations;
+global using Athena.Infrastructure.Exceptions;
+global using MySqlConnector;
+global using Microsoft.Extensions.Configuration;
+global using Athena.Infrastructure.EfCore;

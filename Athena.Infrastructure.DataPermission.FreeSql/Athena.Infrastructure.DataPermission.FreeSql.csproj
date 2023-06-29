@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Version>6.0.4</Version>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Athena.Infrastructure.DataPermission\Athena.Infrastructure.DataPermission.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="FreeSql" Version="3.2.697" />
+    </ItemGroup>
+
+</Project>

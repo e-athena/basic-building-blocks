@@ -1,0 +1,9 @@
+global using Microsoft.AspNetCore.Builder;
+global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.PlatformAbstractions;
+global using Microsoft.OpenApi.Models;
+global using Swashbuckle.AspNetCore.ReDoc;
+global using Swashbuckle.AspNetCore.Swagger;
+global using Swashbuckle.AspNetCore.SwaggerGen;
+global using Swashbuckle.AspNetCore.SwaggerUI;
