@@ -46,7 +46,7 @@ public static class Extensions
             cfg.CacheKeyFormat = config.CacheKeyFormat;
             cfg.CacheExpireSeconds = config.CacheExpireSeconds;
         });
-        services.AddSingleton<IQueryFilterService, FreeSqlQueryFilterService>();
+        services.AddSingleton<IQueryFilterService, SqlSugarQueryFilterService>();
         return services;
     }
 }

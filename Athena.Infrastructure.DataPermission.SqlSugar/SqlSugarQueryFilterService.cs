@@ -1,6 +1,5 @@
 using Athena.Infrastructure.Caching;
 using Athena.Infrastructure.Providers;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -9,14 +8,14 @@ namespace Athena.Infrastructure.DataPermission.SqlSugar;
 /// <summary>
 /// 
 /// </summary>
-public class FreeSqlQueryFilterService : QueryFilterServiceBase, IQueryFilterService
+public class SqlSugarQueryFilterService : QueryFilterServiceBase, IQueryFilterService
 {
     private readonly ICacheManager _cacheManager;
-    private readonly ILogger<FreeSqlQueryFilterService> _logger;
+    private readonly ILogger<SqlSugarQueryFilterService> _logger;
     private readonly DataPermissionConfig _config;
 
 
-    public FreeSqlQueryFilterService(
+    public SqlSugarQueryFilterService(
         ICacheManager cacheManager,
         ILoggerFactory loggerFactory,
         ISqlSugarClient sqlSugarClient,
@@ -25,7 +24,7 @@ public class FreeSqlQueryFilterService : QueryFilterServiceBase, IQueryFilterSer
     ) : base(sqlSugarClient, dataPermissions, dataPermissionService)
     {
         _cacheManager = cacheManager;
-        _logger = loggerFactory.CreateLogger<FreeSqlQueryFilterService>();
+        _logger = loggerFactory.CreateLogger<SqlSugarQueryFilterService>();
         _config = AthenaProvider.GetService<IOptions<DataPermissionConfig>>()?.Value ??
                   new DataPermissionConfig();
     }
