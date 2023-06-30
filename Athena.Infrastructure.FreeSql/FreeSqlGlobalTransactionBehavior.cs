@@ -217,12 +217,12 @@ public class FreeSqlGlobalTransactionBehavior<TRequest, TResponse> : IPipelineBe
     {
         get
         {
-            if (_httpContextAccessor == null)
+            var context = _httpContextAccessor?.HttpContext;
+            if (context == null)
             {
                 return null;
             }
 
-            var context = _httpContextAccessor.HttpContext;
             var tenantId = context.Request.Headers["TenantId"];
             if (!string.IsNullOrEmpty(tenantId))
             {
@@ -235,7 +235,7 @@ public class FreeSqlGlobalTransactionBehavior<TRequest, TResponse> : IPipelineBe
                 : context.User.FindFirst("TenantId")?.Value) ?? null;
         }
     }
-    
+
     /// <summary>
     /// 读取应用ID
     /// </summary>
@@ -243,12 +243,12 @@ public class FreeSqlGlobalTransactionBehavior<TRequest, TResponse> : IPipelineBe
     {
         get
         {
-            if (_httpContextAccessor == null)
+            var context = _httpContextAccessor?.HttpContext;
+            if (context == null)
             {
                 return null;
             }
 
-            var context = _httpContextAccessor.HttpContext;
             var appId = context.Request.Headers["AppId"];
             if (!string.IsNullOrEmpty(appId))
             {

@@ -224,12 +224,12 @@ public class SqlSugarGlobalTransactionBehavior<TRequest, TResponse> : IPipelineB
     {
         get
         {
-            if (_httpContextAccessor == null)
+            var context = _httpContextAccessor?.HttpContext;
+            if (context == null)
             {
                 return null;
             }
 
-            var context = _httpContextAccessor.HttpContext;
             var tenantId = context.Request.Headers["TenantId"];
             if (!string.IsNullOrEmpty(tenantId))
             {
@@ -250,12 +250,12 @@ public class SqlSugarGlobalTransactionBehavior<TRequest, TResponse> : IPipelineB
     {
         get
         {
-            if (_httpContextAccessor == null)
+            var context = _httpContextAccessor?.HttpContext;
+            if (context == null)
             {
                 return null;
             }
 
-            var context = _httpContextAccessor.HttpContext;
             var appId = context.Request.Headers["AppId"];
             if (!string.IsNullOrEmpty(appId))
             {
