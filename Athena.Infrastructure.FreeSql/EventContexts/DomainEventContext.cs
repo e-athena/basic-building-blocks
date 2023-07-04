@@ -36,6 +36,7 @@ public class DomainEventContext : IDomainEventContext
             {
                 //IMPORTANT: because we have identity
                 c.MetaData.TryAdd("id", state.Key.Split(",")[1]);
+                c.MetaData.TryAdd("type", 1);
             }
 
             list.AddRange(stateValues);

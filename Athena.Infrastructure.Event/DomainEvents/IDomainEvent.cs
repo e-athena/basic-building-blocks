@@ -12,6 +12,11 @@ public interface IDomainEvent : INotification
     string? GetId();
 
     /// <summary>
+    /// 根跟踪Id
+    /// </summary>
+    string? RootTraceId { get; set; }
+
+    /// <summary>
     /// 创建时间
     /// </summary>
     DateTime CreatedOn { get; set; }

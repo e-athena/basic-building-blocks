@@ -38,7 +38,9 @@ public class IntegrationEventContext : IIntegrationEventContext
             {
                 //IMPORTANT: because we have identity
                 c.MetaData.TryAdd("id", state.Key.Split(",")[1]);
+                c.MetaData.TryAdd("type", 2);
             }
+
             list.AddRange(stateValues);
             // 移除
             _unitOfWorkManager.Current.States.Remove(state.Key);

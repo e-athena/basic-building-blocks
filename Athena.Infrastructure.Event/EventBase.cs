@@ -34,6 +34,11 @@ public abstract class EventBase : IDomainEvent, IIntegrationEvent
     public string EventId { get; set; } = ObjectId.GenerateNewStringId();
 
     /// <summary>
+    /// 根跟踪Id
+    /// </summary>
+    public string? RootTraceId { get; set; }
+
+    /// <summary>
     /// 事件名称
     /// </summary>
     public string EventName { get; set; }

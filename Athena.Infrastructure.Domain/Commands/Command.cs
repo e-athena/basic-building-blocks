@@ -3,7 +3,7 @@ namespace Athena.Infrastructure.Domain.Commands;
 /// <summary>
 /// 兼容ENode的Command
 /// </summary>
-public class Command : ITxRequest<string>
+public class Command : TxTraceRequest<string>
 {
     private string _aggregateRootId = string.Empty;
 

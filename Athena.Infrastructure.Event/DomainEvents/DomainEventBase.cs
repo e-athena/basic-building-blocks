@@ -27,6 +27,11 @@ public abstract class DomainEventBase : IDomainEvent
     }
 
     /// <summary>
+    /// 根追踪ID
+    /// </summary>
+    public string? RootTraceId { get; set; }
+
+    /// <summary>
     /// 事件ID
     /// </summary>
     public string EventId { get; set; } = ObjectId.GenerateNewStringId();

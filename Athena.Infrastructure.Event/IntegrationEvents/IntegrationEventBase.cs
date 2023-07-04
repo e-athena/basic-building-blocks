@@ -53,6 +53,11 @@ public abstract class IntegrationEventBase : IIntegrationEvent
     public string EventId { get; set; } = Guid.NewGuid().ToString("N");
 
     /// <summary>
+    /// 根追踪ID
+    /// </summary>
+    public string? RootTraceId { get; set; }
+
+    /// <summary>
     /// 构造函数
     /// </summary>
     protected IntegrationEventBase()

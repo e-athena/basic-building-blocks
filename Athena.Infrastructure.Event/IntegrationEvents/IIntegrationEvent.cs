@@ -27,6 +27,11 @@ public interface IIntegrationEvent
     string EventId { get; set; }
 
     /// <summary>
+    /// 根跟踪Id
+    /// </summary>
+    string? RootTraceId { get; set; }
+
+    /// <summary>
     /// 事件名称
     /// </summary>
     string EventName { get; set; }

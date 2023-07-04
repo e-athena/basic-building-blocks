@@ -62,10 +62,17 @@ public class FreeSqlGlobalTransactionBehavior<TRequest, TResponse> : IPipelineBe
         CancellationToken cancellationToken = default
     )
     {
-        if (request is not ITransactionRequest)
+        if (
+            request is not ITxTraceRequest<TResponse> &&
+            request is not ITxRequest<TResponse> &&
+            request is not ITransactionRequest
+        )
         {
             return await next();
         }
+
+        var txRequest = request as ITxTraceRequest<TResponse>;
+        var rootTraceId = txRequest?.RootTraceId ?? Activity.Current?.TraceId.ToString();
 
         var freeSqlActivitySource = FreeSqlOTelActivityManager.Instance;
         using var activity = FreeSqlOTelActivityManager.Instance.StartActivity("全局事务处理");
@@ -94,13 +101,13 @@ public class FreeSqlGlobalTransactionBehavior<TRequest, TResponse> : IPipelineBe
             using (freeSqlActivitySource.StartActivity("领域事件发布"))
             {
                 // 领域事件发布处理
-                await DomainEventHandleAsync(cancellationToken);
+                await DomainEventHandleAsync(rootTraceId, cancellationToken);
             }
 
             using (freeSqlActivitySource.StartActivity("集成事件发布"))
             {
                 // 集成事件发布处理
-                await IntegrationEventHandleAsync(cancellationToken);
+                await IntegrationEventHandleAsync(rootTraceId, cancellationToken);
             }
 
             using (freeSqlActivitySource.StartActivity("提交事务"))
@@ -152,8 +159,9 @@ public class FreeSqlGlobalTransactionBehavior<TRequest, TResponse> : IPipelineBe
     /// <summary>
     /// 领域事件处理
     /// </summary>
+    /// <param name="rootTraceId"></param>
     /// <param name="cancellationToken"></param>
-    private async Task DomainEventHandleAsync(CancellationToken cancellationToken)
+    private async Task DomainEventHandleAsync(string? rootTraceId, CancellationToken cancellationToken)
     {
         // 多层领域事件发布处理
         do
@@ -167,6 +175,8 @@ public class FreeSqlGlobalTransactionBehavior<TRequest, TResponse> : IPipelineBe
             foreach (var @event in events)
             {
                 // publish
+                @event.RootTraceId ??= rootTraceId;
+                @event.RootTraceId ??= Guid.NewGuid().ToString("N");
                 await _mediator.Publish(@event, cancellationToken);
             }
         } while (true);
@@ -176,8 +186,9 @@ public class FreeSqlGlobalTransactionBehavior<TRequest, TResponse> : IPipelineBe
     /// 集成事件处理
     /// <remarks>集成事件依赖CAP</remarks>
     /// </summary>
+    /// <param name="rootTraceId"></param>
     /// <param name="cancellationToken"></param>
-    private async Task IntegrationEventHandleAsync(CancellationToken cancellationToken)
+    private async Task IntegrationEventHandleAsync(string? rootTraceId, CancellationToken cancellationToken)
     {
         if (_capPublisher == null)
         {
@@ -200,6 +211,8 @@ public class FreeSqlGlobalTransactionBehavior<TRequest, TResponse> : IPipelineBe
             {
                 @event.TenantId = tenantId;
                 @event.AppId = appId;
+                @event.RootTraceId ??= rootTraceId;
+                @event.RootTraceId ??= Guid.NewGuid().ToString("N");
                 await _capPublisher.PublishAsync(
                     @event.EventName,
                     @event,

@@ -5,25 +5,23 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>6.5.3-preview.20230703.1</Version>
+        <Version>6.0.0-preview.20230703.3</Version>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <DocumentationFile>bin\Debug\net6.0\Athena.Infrastructure.Event.xml</DocumentationFile>
+      <DocumentationFile>bin\Debug\net6.0\Athena.Infrastructure.EventTracking.xml</DocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <DocumentationFile>bin\Release\net6.0\Athena.Infrastructure.Event.xml</DocumentationFile>
+      <DocumentationFile>bin\Release\net6.0\Athena.Infrastructure.EventTracking.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Athena.Infrastructure\Athena.Infrastructure.csproj" />
+        <PackageReference Include="Rougamo.Fody" Version="1.4.1" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="DotNetCore.CAP" Version="6.2.1" />
-        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
+      <ProjectReference Include="..\Athena.Infrastructure.Event\Athena.Infrastructure.Event.csproj" />
     </ItemGroup>
-
 </Project>
