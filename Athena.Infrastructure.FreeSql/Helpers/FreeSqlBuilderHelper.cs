@@ -60,6 +60,11 @@ public static class FreeSqlBuilderHelper
                 e.ModifyResult.MapType = typeof(int);
             }
 
+            if (Nullable.GetUnderlyingType(e.Property.PropertyType)?.IsEnum == true)
+            {
+                e.ModifyResult.MapType = typeof(int?);
+            }
+
             if (e.Property
                     .GetCustomAttributes(typeof(RowVersionAttribute), false)
                     .FirstOrDefault() is RowVersionAttribute)

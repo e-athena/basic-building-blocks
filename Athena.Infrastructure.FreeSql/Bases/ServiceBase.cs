@@ -116,8 +116,56 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
         return entity;
     }
 
+    #region Query
+
+    /// <summary>
+    /// 查询对象
+    /// </summary>
+    protected override ISelect<T> Queryable => GetDefaultRepository<T, string>().Select;
+
+    /// <summary>
+    /// 查询对象
+    /// </summary>
+    /// <returns></returns>
+    protected override ISelect<T> Query()
+    {
+        return Queryable;
+    }
+
+    /// <summary>
+    /// 查询对象
+    /// </summary>
+    /// <typeparam name="T1"></typeparam>
+    /// <returns></returns>
+    protected override ISelect<T1> Query<T1>()
+    {
+        return GetOtherRepository<T1, string>().Select;
+    }
+
+    #endregion
+
 
     #region 工作单元
+
+    private DefaultRepository<TEntity, TEntityKey> GetOtherRepository<TEntity, TEntityKey>()
+        where TEntity : class
+    {
+        if (_unitOfWorkManager == null)
+        {
+            throw new ArgumentNullException(nameof(UnitOfWorkManager), "未注入[UnitOfWorkManager]实例");
+        }
+
+        _repositories ??= new ConcurrentDictionary<string, object?>();
+
+        if (_repositories.GetOrAdd(typeof(TEntity).Name,
+                new DefaultRepository<TEntity, TEntityKey>(_unitOfWorkManager?.Orm, _unitOfWorkManager)) is not
+            DefaultRepository<TEntity, TEntityKey> repository)
+        {
+            throw new ArgumentNullException(nameof(repository), "获取[DefaultRepository]失败");
+        }
+
+        return repository;
+    }
 
     private DefaultRepository<TEntity, TEntityKey> GetDefaultRepository<TEntity, TEntityKey>()
         where TEntity : EntityCore, new()
