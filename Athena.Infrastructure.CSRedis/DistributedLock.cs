@@ -1,5 +1,3 @@
-using Athena.Infrastructure.DistributedLocks;
-
 namespace Athena.Infrastructure.CSRedis;
 
 /// <summary>
@@ -56,10 +54,10 @@ public sealed class DistributedLock : IDistributedLock
     /// <param name="resourceName">服务的名称</param>
     /// <param name="key">要锁定的关键词</param> 
     /// <returns>如果锁成功，则返回true，否则返回false</returns>
-    public async Task<ILockResource?> TryLockAsync(string resourceName, string key)
+    public async Task<bool> TryLockAsync(string resourceName, string key)
     {
-        var lockResource = new LockResource(resourceName, key);
-        return await lockResource.LockAsync(_defaultExpiredTimeSpan);
+        var lockResult = await TryGetLockAsync(resourceName, key);
+        return lockResult != null;
     }
 
     /// <summary>
@@ -69,10 +67,22 @@ public sealed class DistributedLock : IDistributedLock
     /// <param name="key">要锁定的关键词</param>
     /// <param name="timeSpan">要锁定的时间</param> 
     /// <returns>如果锁成功，则返回锁资源，否则返回null</returns>
-    public async Task<ILockResource?> TryLockAsync(string resourceName, string key, TimeSpan timeSpan)
+    public async Task<bool> TryLockAsync(string resourceName, string key, TimeSpan timeSpan)
+    {
+        var lockResult = await TryGetLockAsync(resourceName, key, timeSpan);
+        return lockResult != null;
+    }
+
+    public Task<ILockResource?> TryGetLockAsync(string resourceName, string key)
     {
         var lockResource = new LockResource(resourceName, key);
-        return await lockResource.LockAsync(timeSpan);
+        return lockResource.LockAsync(_defaultExpiredTimeSpan);
+    }
+
+    public Task<ILockResource?> TryGetLockAsync(string resourceName, string key, TimeSpan timeSpan)
+    {
+        var lockResource = new LockResource(resourceName, key);
+        return lockResource.LockAsync(timeSpan);
     }
 }
 

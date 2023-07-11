@@ -26,7 +26,7 @@ public interface IDistributedLock
     /// <param name="resourceName">服务的名称</param>
     /// <param name="key">要锁定的关键词</param> 
     /// <returns>如果锁成功，则返回true，否则返回false</returns>
-    Task<ILockResource?> TryLockAsync(string resourceName, string key);
+    Task<bool> TryLockAsync(string resourceName, string key);
 
     /// <summary>
     /// 试图锁一个关键词，如果锁成功，则返回true，否则返回false，不会持续等待
@@ -34,6 +34,24 @@ public interface IDistributedLock
     /// <param name="resourceName">服务的名称</param>
     /// <param name="key">要锁定的关键词</param>
     /// <param name="timeSpan">要锁定的时间</param> 
-    /// <returns>如果锁成功，则返回锁资源，否则返回null</returns>
-    Task<ILockResource?> TryLockAsync(string resourceName, string key, TimeSpan timeSpan);
+    /// <returns>如果锁成功，则返回true，否则返回false</returns>
+    Task<bool> TryLockAsync(string resourceName, string key, TimeSpan timeSpan);
+
+
+    /// <summary>
+    /// 试图锁一个关键词，如果锁成功，则返回true，否则返回false，不会持续等待,锁的有效期是一分钟
+    /// </summary>
+    /// <param name="resourceName">服务的名称</param>
+    /// <param name="key">要锁定的关键词</param> 
+    /// <returns>如果锁成功，则返回true，否则返回false</returns>
+    Task<ILockResource?> TryGetLockAsync(string resourceName, string key);
+
+    /// <summary>
+    /// 试图锁一个关键词，如果锁成功，则返回true，否则返回false，不会持续等待
+    /// </summary>
+    /// <param name="resourceName">服务的名称</param>
+    /// <param name="key">要锁定的关键词</param>
+    /// <param name="timeSpan">要锁定的时间</param> 
+    /// <returns>如果锁成功，则返回true，否则返回false</returns>
+    Task<ILockResource?> TryGetLockAsync(string resourceName, string key, TimeSpan timeSpan);
 }

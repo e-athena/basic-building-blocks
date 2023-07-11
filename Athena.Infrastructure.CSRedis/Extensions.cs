@@ -1,5 +1,4 @@
-using Athena.Infrastructure.DistributedLocks;
-
+// ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
 
 public static class Extensions
@@ -69,6 +68,7 @@ public static class Extensions
         var csRedis = new CSRedisClient(config.Configuration, config.Sentinels.ToArray());
         RedisHelper.Initialization(csRedis);
         services.AddSingleton<ICacheManager, RedisCacheAdapter>();
+        services.AddSingleton<IDistributedLock, DistributedLock>();
         services.AddSingleton<IDistributedCache>(new CSRedisCache(RedisHelper.Instance));
 
         return services;
