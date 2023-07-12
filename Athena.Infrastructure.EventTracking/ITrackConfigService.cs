@@ -30,4 +30,12 @@ public interface ITrackConfigService
     /// <param name="id"></param>
     /// <returns></returns>
     Task<GetTrackConfigInfoResponse?> GetAsync(string id);
+
+    /// <summary>
+    /// 删除
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<int> DeleteAsync(string id, CancellationToken cancellationToken = default);
 }

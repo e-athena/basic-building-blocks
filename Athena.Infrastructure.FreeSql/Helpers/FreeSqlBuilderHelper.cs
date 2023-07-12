@@ -33,9 +33,17 @@ public static class FreeSqlBuilderHelper
             .UseConnectionString(dataType.Value, connectionString)
             .UseMonitorCommand(null, (cmd, traceLog) =>
             {
+                if (AthenaProvider.DefaultLog == null || !AthenaProvider.DefaultLog.IsEnabled(LogLevel.Debug))
+                {
+                    return;
+                }
+
                 // 打印日志
-                AthenaProvider.DefaultLog?.LogDebug("SQL监控：{Sql}", traceLog);
-                AthenaProvider.DefaultLog?.LogDebug("CommandText：{CommandText}", cmd.CommandText);
+                Console.WriteLine("----------------------------------SQL监控开始----------------------------------");
+                Console.WriteLine($"{cmd.Connection?.Database ?? string.Empty} {traceLog}");
+                Console.WriteLine("----------------------------------SQL监控结束----------------------------------");
+                // AthenaProvider.DefaultLog?.LogDebug("SQL监控：{Sql}", traceLog);
+                // AthenaProvider.DefaultLog?.LogDebug("CommandText：{CommandText}", cmd.CommandText);
             })
             // 自动同步实体结构到数据库
             .UseAutoSyncStructure(isAutoSyncStructure);
@@ -51,7 +59,7 @@ public static class FreeSqlBuilderHelper
             }
 
             // 打印日志
-            AthenaProvider.DefaultLog?.LogWarning("SQL监控，执行时间超过800毫秒：{Sql}", args.Log);
+            AthenaProvider.DefaultLog?.LogWarning("SQL监控，执行时间超过800毫秒：{Sql}", args.Log.Replace("\r\n", " "));
         };
         freeSql.Aop.ConfigEntityProperty += (_, e) =>
         {

@@ -8,6 +8,7 @@ global using Athena.Infrastructure.Exceptions;
 global using Athena.Infrastructure.FreeSql;
 global using Athena.Infrastructure.FreeSql.Bases;
 global using Athena.Infrastructure.FreeSql.Helpers;
+global using Athena.Infrastructure.Helpers;
 global using Athena.Infrastructure.Messaging.Responses;
 global using FreeSql;
 global using Microsoft.Extensions.Configuration;

@@ -77,6 +77,7 @@ public class FreeSqlGlobalTransactionBehavior<TRequest, TResponse> : IPipelineBe
         var freeSqlActivitySource = FreeSqlOTelActivityManager.Instance;
         using var activity = FreeSqlOTelActivityManager.Instance.StartActivity("全局事务处理");
         activity?.SetTag("execute.request", JsonSerializer.Serialize(request));
+        activity?.SetTag("execute.request.type", request.GetType().FullName);
         IUnitOfWork? uow;
         ICapTransaction? capTransaction = null;
         using (freeSqlActivitySource.StartActivity("开启事务"))
@@ -139,8 +140,13 @@ public class FreeSqlGlobalTransactionBehavior<TRequest, TResponse> : IPipelineBe
         {
             using var errorActivity = freeSqlActivitySource.StartActivity("发生未知异常");
             errorActivity?.SetTag("execute.exception", ex.Message);
-            errorActivity?.SetTag("inner.exception", ex.InnerException?.Message ?? string.Empty);
-            errorActivity?.SetTag("inner.exception.type", ex.InnerException?.GetType().FullName ?? string.Empty);
+            errorActivity?.SetTag("execute.exception.type", ex.GetType().FullName);
+            if (ex.InnerException != null)
+            {
+                errorActivity?.SetTag("inner.exception", ex.InnerException?.Message ?? string.Empty);
+                errorActivity?.SetTag("inner.exception.type", ex.InnerException?.GetType().FullName ?? string.Empty);
+            }
+
             errorActivity?.SetStatus(ActivityStatusCode.Error);
             _logger.LogError(ex, "{Message}", ex.Message);
             uow?.Rollback();

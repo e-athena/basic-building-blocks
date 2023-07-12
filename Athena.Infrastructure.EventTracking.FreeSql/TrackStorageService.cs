@@ -1,3 +1,4 @@
+using Athena.Infrastructure.DistributedLocks;
 using Athena.Infrastructure.EventTracking.Enums;
 using Athena.Infrastructure.EventTracking.Messaging.Models;
 using Athena.Infrastructure.EventTracking.Messaging.Requests;
@@ -8,23 +9,42 @@ namespace Athena.Infrastructure.EventTracking.FreeSql;
 public class TrackStorageService : QueryServiceBase<Track>, ITrackStorageService
 {
     private readonly ILogger<TrackStorageService> _logger;
-    private readonly IFreeSql _freeSql;
+    private readonly FreeSqlCloud _freeSql;
+    private readonly IDistributedLock _distributedLock;
 
-    public TrackStorageService(FreeSqlCloud freeSql, ILoggerFactory loggerFactory) : base(freeSql)
+    public TrackStorageService(FreeSqlCloud freeSql, ILoggerFactory loggerFactory, IDistributedLock distributedLock) :
+        base(freeSql)
     {
         _logger = loggerFactory.CreateLogger<TrackStorageService>();
         _freeSql = freeSql;
+        _distributedLock = distributedLock;
     }
 
     public async Task WriteAsync(Track track, CancellationToken cancellationToken = default)
     {
         // 根据TraceId查询该追踪是否已经初始化
+        checkInitStatus:
         var isInit = await QueryableNoTracking
             .Where(p => p.TraceId == track.TraceId)
             .AnyAsync(cancellationToken);
         // 如果未初始化则初始化追踪配置
         if (!isInit)
         {
+            const string resourceName = "TrackStorageCheckInitStatus";
+            // 获取一个锁，用于防止多个服务请求同时写入同一个TraceId的追踪
+            var lockResource = await _distributedLock.TryGetLockAsync(resourceName, track.TraceId);
+            // 如果获取不到锁，则因为有别的处理正在初始化追踪信息，直接跳转至isInit重新读取配置
+            if (lockResource == null)
+            {
+                _logger.LogDebug("获取锁失败，跳转至isInit重新读取配置，TraceId：{TraceId}", track.TraceId);
+                if (EnvironmentHelper.IsDevelopment)
+                {
+                    Console.WriteLine("[TrackStorage:WriteAsync]获取锁失败，跳转至isInit重新读取配置，TraceId：{0}", track.TraceId);
+                }
+
+                goto checkInitStatus;
+            }
+
             // 根据事件类型全名读取追踪配置上级ID为空的配置
             var config = await QueryNoTracking<TrackConfig>()
                 .Where(p => p.EventTypeFullName == track.EventTypeFullName)
@@ -68,9 +88,9 @@ public class TrackStorageService : QueryServiceBase<Track>, ITrackStorageService
                 });
             }
 
-
             // 初始化链路数据
             var entities = new List<Track>();
+            // 转换链路数据
             ConvertTrack(configs, entities, track);
 
             if (!entities.Any())
@@ -78,7 +98,10 @@ public class TrackStorageService : QueryServiceBase<Track>, ITrackStorageService
                 return;
             }
 
+            // 写入链路数据
             await _freeSql.Insert(entities).ExecuteAffrowsAsync(cancellationToken);
+            // 释放锁
+            await lockResource.ReleaseAsync();
             return;
         }
 
@@ -126,6 +149,10 @@ public class TrackStorageService : QueryServiceBase<Track>, ITrackStorageService
     {
         return QueryableNoTracking
             .Where(p => p.ParentId == null || p.TrackStatus == TrackStatus.Fail)
+            .HasWhere(request.Keyword, p =>
+                p.TraceId == request.Keyword ||
+                p.BusinessId == request.Keyword
+            )
             .OrderByDescending(p => p.TrackStatus)
             .OrderByDescending(p => p.CreatedOn)
             .ToPagingAsync(request, p => new GetTrackPagingResponse());
@@ -154,6 +181,13 @@ public class TrackStorageService : QueryServiceBase<Track>, ITrackStorageService
         var results = new List<DecompositionTreeGraphModel>();
         GetTreeChildren(list, results);
         return results.FirstOrDefault();
+    }
+
+    public Task<int> DeleteAsync(string traceId, CancellationToken cancellationToken = default)
+    {
+        return _freeSql.Delete<Track>()
+            .Where(p => p.TraceId == traceId)
+            .ExecuteAffrowsAsync(cancellationToken);
     }
 
     /// <summary>
@@ -239,29 +273,43 @@ public class TrackStorageService : QueryServiceBase<Track>, ITrackStorageService
                     };
                 }
 
-                items = new List<DecompositionTreeGraphValueItem>
-                {
-                    new()
+                items = item.TrackStatus == TrackStatus.NotExecute
+                    ? new List<DecompositionTreeGraphValueItem>
                     {
-                        Text = "执行状态",
-                        Value = item.TrackStatus.ToDescription()
-                    },
-                    new()
+                        new()
+                        {
+                            Text = "执行状态",
+                            Value = item.TrackStatus.ToDescription()
+                        }
+                    }
+                    : new List<DecompositionTreeGraphValueItem>
                     {
-                        Text = "执行耗时",
-                        Value = ts ?? "-"
-                    },
-                    new()
-                    {
-                        Text = "开始执行时间",
-                        Value = item.BeginExecuteTime?.ToString("yyyy-MM-dd HH:mm:ss") ?? "-"
-                    },
-                    new()
-                    {
-                        Text = "执行完成时间",
-                        Value = item.EndExecuteTime?.ToString("yyyy-MM-dd HH:mm:ss") ?? "-"
-                    },
-                };
+                        new()
+                        {
+                            Text = "执行状态",
+                            Value = item.TrackStatus.ToDescription()
+                        },
+                        new()
+                        {
+                            Text = "执行耗时",
+                            Value = ts ?? "-"
+                        },
+                        new()
+                        {
+                            Text = "开始执行时间",
+                            Value = item.BeginExecuteTime?.ToString("yyyy-MM-dd HH:mm:ss") ?? "-"
+                        },
+                        new()
+                        {
+                            Text = "执行完成时间",
+                            Value = item.EndExecuteTime?.ToString("yyyy-MM-dd HH:mm:ss") ?? "-"
+                        },
+                        new()
+                        {
+                            Text = "执行服务名称",
+                            Value = item.ExecuteAppName
+                        },
+                    };
             }
 
             var res = new DecompositionTreeGraphModel
@@ -310,6 +358,7 @@ public class TrackStorageService : QueryServiceBase<Track>, ITrackStorageService
             var res = new Track
             {
                 ParentId = trackParentId,
+                BusinessId = parentId == null ? track.BusinessId : null,
                 TraceId = track.TraceId,
                 EventType = track.EventType ?? p.EventType,
                 EventName = p.EventName,

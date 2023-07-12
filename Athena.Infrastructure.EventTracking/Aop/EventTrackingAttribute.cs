@@ -1,6 +1,8 @@
 using System.Text.Json;
+using Athena.Infrastructure.Event;
 using Athena.Infrastructure.Providers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Rougamo.Context;
 
 namespace Athena.Infrastructure.EventTracking.Aop;
@@ -12,12 +14,7 @@ namespace Athena.Infrastructure.EventTracking.Aop;
 public class EventTrackingAttribute : Rougamo.MoAttribute
 {
     private readonly ITrackService? _trackService = AthenaProvider.Provider?.GetService<ITrackService>();
-
-    // /// <summary>
-    // /// 依赖事件类型
-    // /// </summary>
-    // public Type[]? DependentEventTypes { get; set; }
-
+    
     /// <summary>
     /// 
     /// </summary>
@@ -30,23 +27,39 @@ public class EventTrackingAttribute : Rougamo.MoAttribute
             return;
         }
 
-        var requestType = context.Arguments[0].GetType();
-        var payloadStr = JsonSerializer.Serialize(context.Arguments[0]);
-        var payload = JsonSerializer.Deserialize<EventTrackingBase>(payloadStr);
-        if (payload?.RootTraceId != null)
+        if (context.Arguments[0] is not EventBase payload)
         {
-            _trackService.Write(
-                Track.ExecuteBegin(
-                    payload.RootTraceId,
-                    payload.GetEventType(),
-                    requestType,
-                    payloadStr,
-                    context.TargetType
-                )
-            );
+            base.OnEntry(context);
+            return;
         }
 
-        base.OnEntry(context);
+        try
+        {
+            var requestType = payload.GetType();
+            var payloadStr = JsonSerializer.Serialize(context.Arguments[0]);
+            if (payload.RootTraceId != null)
+            {
+                _trackService.Write(
+                    Track.ExecuteBegin(
+                        payload.RootTraceId,
+                        GetEventType(payload.MetaData),
+                        requestType,
+                        payloadStr,
+                        context.TargetType,
+                        GetBusinessId(payload.MetaData)
+                    )
+                );
+            }
+        }
+        catch (Exception exception)
+        {
+            // ignored
+            AthenaProvider.DefaultLog?.LogError(exception, "EventTrackingAttribute.OnEntry");
+        }
+        finally
+        {
+            base.OnEntry(context);
+        }
     }
 
     /// <summary>
@@ -61,22 +74,36 @@ public class EventTrackingAttribute : Rougamo.MoAttribute
             return;
         }
 
-        var requestType = context.Arguments[0].GetType();
-        var payloadStr = JsonSerializer.Serialize(context.Arguments[0]);
-        var payload = JsonSerializer.Deserialize<EventTrackingBase>(payloadStr);
-        if (payload?.RootTraceId != null)
+        if (context.Arguments[0] is not EventBase payload)
         {
-            _trackService.Write(
-                Track.ExecuteSuccess(
-                    payload.RootTraceId,
-                    payload.GetEventType(),
-                    requestType,
-                    context.TargetType
-                )
-            );
+            base.OnSuccess(context);
+            return;
         }
 
-        base.OnSuccess(context);
+        try
+        {
+            var requestType = payload.GetType();
+            if (payload.RootTraceId != null)
+            {
+                _trackService.Write(
+                    Track.ExecuteSuccess(
+                        payload.RootTraceId,
+                        GetEventType(payload.MetaData),
+                        requestType,
+                        context.TargetType
+                    )
+                );
+            }
+        }
+        catch (Exception exception)
+        {
+            // ignored
+            AthenaProvider.DefaultLog?.LogError(exception, "EventTrackingAttribute.OnSuccess");
+        }
+        finally
+        {
+            base.OnSuccess(context);
+        }
     }
 
     /// <summary>
@@ -87,61 +114,78 @@ public class EventTrackingAttribute : Rougamo.MoAttribute
     {
         if (context.Arguments.Length == 0 || _trackService == null)
         {
-            base.OnSuccess(context);
+            base.OnException(context);
             return;
         }
 
-        var requestType = context.Arguments[0].GetType();
-        var payloadStr = JsonSerializer.Serialize(context.Arguments[0]);
-        var payload = JsonSerializer.Deserialize<EventTrackingBase>(payloadStr);
-        if (payload?.RootTraceId != null)
+        if (context.Arguments[0] is not EventBase payload)
         {
-            _trackService.Write(
-                Track.ExecuteFail(
-                    payload.RootTraceId,
-                    payload.GetEventType(),
-                    requestType,
-                    context.TargetType,
-                    context.Exception
-                )
-            );
+            base.OnException(context);
+            return;
         }
 
-        base.OnException(context);
+        try
+        {
+            var requestType = payload.GetType();
+            if (payload.RootTraceId != null)
+            {
+                _trackService.Write(
+                    Track.ExecuteFail(
+                        payload.RootTraceId,
+                        GetEventType(payload.MetaData),
+                        requestType,
+                        context.TargetType,
+                        context.Exception
+                    )
+                );
+            }
+        }
+        catch (Exception exception)
+        {
+            // ignored
+            AthenaProvider.DefaultLog?.LogError(exception, "EventTrackingAttribute.OnException");
+        }
+        finally
+        {
+            base.OnException(context);
+        }
     }
-}
-
-/// <summary>
-/// 
-/// </summary>
-public class EventTrackingBase
-{
-    /// <summary>
-    /// 根事件ID
-    /// </summary>
-    public string? RootTraceId { get; set; }
-
-    /// <summary>
-    /// 元数据
-    /// </summary>
-    private IDictionary<string, object>? MetaData { get; set; }
 
     /// <summary>
     /// 读取事件类型
     /// </summary>
     /// <returns></returns>
-    public EventType? GetEventType()
+    private static EventType? GetEventType(IDictionary<string, object> metaData)
     {
-        if (MetaData == null || MetaData.Count == 0)
+        if (metaData.Count == 0)
         {
             return null;
         }
 
-        if (!MetaData.TryGetValue("type", out var type))
+        if (!metaData.TryGetValue("type", out var type))
         {
             return null;
         }
 
-        return (EventType) Convert.ToInt32(type);
+        if (int.TryParse(type.ToString(), out var intType))
+        {
+            return (EventType) intType;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// 读取业务Id
+    /// </summary>
+    /// <returns></returns>
+    private static string? GetBusinessId(IDictionary<string, object> metaData)
+    {
+        if (metaData.Count == 0)
+        {
+            return null;
+        }
+
+        return !metaData.TryGetValue("id", out var id) ? null : id.ToString();
     }
 }

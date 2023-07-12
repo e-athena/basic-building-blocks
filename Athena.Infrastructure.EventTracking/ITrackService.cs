@@ -1,7 +1,7 @@
 namespace Athena.Infrastructure.EventTracking;
 
 /// <summary>
-/// 日志服务接口
+/// 追踪服务接口
 /// </summary>
 public interface ITrackService
 {

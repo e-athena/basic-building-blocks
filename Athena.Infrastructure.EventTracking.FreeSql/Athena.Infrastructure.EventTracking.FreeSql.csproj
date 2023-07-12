@@ -5,8 +5,9 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>6.0.0-preview.20230703.3</Version>
+        <Version>6.0.0-preview.20230712.2</Version>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
+        <PackageIcon>e-athena.png</PackageIcon>
     </PropertyGroup>
 
     <ItemGroup>
@@ -15,6 +16,12 @@
     <ItemGroup>
         <ProjectReference Include="..\Athena.Infrastructure.EventTracking\Athena.Infrastructure.EventTracking.csproj" />
         <ProjectReference Include="..\Athena.Infrastructure.FreeSql\Athena.Infrastructure.FreeSql.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Update="e-athena.png">
+        <Pack>True</Pack>
+        <PackagePath></PackagePath>
+      </None>
     </ItemGroup>
 
 </Project>

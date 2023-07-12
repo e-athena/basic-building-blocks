@@ -54,13 +54,17 @@ internal class FreeSqlMonitoringApi : IMonitoringApi
             .WhereIf(!string.IsNullOrEmpty(queryDto.Group), p => p.Group == queryDto.Group)
             .WhereIf(!string.IsNullOrEmpty(queryDto.Content),
                 p => p.Content.Contains(queryDto.Content!));
-        var count = query.Count();
+        // var count = query.Count();
         var result = query
-            .Page(queryDto.CurrentPage, queryDto.PageSize)
-            .ToList();
+            // .Page(queryDto.CurrentPage, queryDto.PageSize)
+            .ToPageAsync(new GetPageRequestBase(queryDto.CurrentPage, queryDto.PageSize))
+            .ConfigureAwait(false)
+            .GetAwaiter()
+            .GetResult();
+        // .ToList();
         return new PagedQueryResult<MessageDto>
         {
-            Items = result.Select(p => new MessageDto
+            Items = (result.Items ?? new List<Published>()).Select(p => new MessageDto
             {
                 Id = p.Id.ToString(),
                 Name = p.Name,
@@ -74,7 +78,7 @@ internal class FreeSqlMonitoringApi : IMonitoringApi
             }).ToList(),
             PageIndex = queryDto.CurrentPage,
             PageSize = queryDto.PageSize,
-            Totals = count
+            Totals = result.TotalItems
         };
     }
 
@@ -132,6 +136,7 @@ internal class FreeSqlMonitoringApi : IMonitoringApi
             ReceivedFailed = recCount.FirstOrDefault(p => p.Key == nameof(StatusName.Failed))?.Count ?? 0
         };
     }
+
     private int GetNumberOfMessage(string tableName, string statusName)
     {
         var count = _freeSql.Select<MessageDto>()

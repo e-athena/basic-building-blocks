@@ -1,14 +1,16 @@
 using System.Reflection;
 using System.Xml;
 using System.Xml.XPath;
+using Athena.Infrastructure.Event;
 using Athena.Infrastructure.Summaries;
+using Athena.Infrastructure.ViewModels;
 using DotNetCore.CAP;
 using MediatR;
 
 namespace Athena.Infrastructure.EventTracking.Helpers;
 
 /// <summary>
-/// 
+/// 事件追踪帮助类
 /// </summary>
 public static class EventTrackingHelper
 {
@@ -17,6 +19,12 @@ public static class EventTrackingHelper
     /// </summary>
     private static readonly ConcurrentDictionary<string, IList<EventTrackingInfo>>
         EventTrackingListCache = new();
+
+    /// <summary>
+    /// 缓存
+    /// </summary>
+    private static readonly ConcurrentDictionary<string, IList<SelectViewModel>>
+        EventSelectListCache = new();
 
     /// <summary>
     /// 读取事件跟踪信息列表
@@ -153,6 +161,71 @@ public static class EventTrackingHelper
         }
 
         return treeList;
+    }
+
+    /// <summary>
+    /// 读取事件下拉列表
+    /// </summary>
+    /// <param name="assemblies"></param>
+    /// <returns></returns>
+    public static IList<SelectViewModel> GetEventSelectList(List<Assembly> assemblies)
+    {
+        // 继续了EventBase的类型
+        var list = new List<SelectViewModel>();
+        foreach (var assembly in assemblies)
+        {
+            var assemblyName = assembly.GetName().Name;
+            // 读取缓存
+            if (EventSelectListCache.TryGetValue(assemblyName!, out var cacheResult))
+            {
+                list.AddRange(cacheResult);
+            }
+            else
+            {
+                // 读取继续了EventBase的类型
+                var types = assembly
+                    .GetExportedTypes()
+                    .Where(p => p.BaseType != null)
+                    .Where(p =>
+                        p.BaseType == typeof(EventBase) ||
+                        (
+                            p.BaseType!.IsGenericType &&
+                            p.BaseType.GetGenericTypeDefinition() == typeof(DomainEvent<>)
+                        )
+                    )
+                    .ToList();
+
+                XPathNavigator? xmlNavigator = null;
+                var filePath = assembly.ManifestModule.FullyQualifiedName.Replace(".dll", ".xml");
+                if (File.Exists(filePath))
+                {
+                    XmlDocument document = new();
+                    document.Load(new FileInfo(filePath).OpenRead());
+                    xmlNavigator = document.CreateNavigator();
+                }
+
+                foreach (var type in types)
+                {
+                    var processorName = GetTypeSummaryName(xmlNavigator, type, type.Name);
+                    var typeName = type.Name;
+
+                    list.Add(new SelectViewModel
+                    {
+                        Label = processorName.Replace("事件", ""),
+                        Value = typeName
+                    });
+                }
+
+                // 加入缓存
+                EventSelectListCache.TryAdd(assemblyName!, list);
+            }
+        }
+
+        // 根据Value去重
+        list = list.GroupBy(p => new {p.Value})
+            .Select(p => p.First())
+            .ToList();
+        return list;
     }
 
     /// <summary>

@@ -8,12 +8,10 @@ namespace Athena.Infrastructure.EventTracking.FreeSql;
 /// </summary>
 public class TrackConfigService : QueryServiceBase<TrackConfig>, ITrackConfigService
 {
-    private readonly ILogger<TrackStorageService> _logger;
-    private readonly IFreeSql _freeSql;
+    private readonly FreeSqlCloud _freeSql;
 
-    public TrackConfigService(FreeSqlCloud freeSql, ILoggerFactory loggerFactory) : base(freeSql)
+    public TrackConfigService(FreeSqlCloud freeSql) : base(freeSql)
     {
-        _logger = loggerFactory.CreateLogger<TrackStorageService>();
         _freeSql = freeSql;
     }
 
@@ -38,6 +36,11 @@ public class TrackConfigService : QueryServiceBase<TrackConfig>, ITrackConfigSer
         var configs = new List<TrackConfig>();
         // 转换Id
         ConvertTrackConfig(request.Configs, configs);
+        if (configs.Count != request.Configs.Count)
+        {
+            throw FriendlyException.Of("配置错误，转换失败");
+        }
+
         // 批量新增
         await _freeSql.Insert(configs).ExecuteAffrowsAsync(cancellationToken);
     }
@@ -63,6 +66,20 @@ public class TrackConfigService : QueryServiceBase<TrackConfig>, ITrackConfigSer
         var results = new List<GetTrackConfigInfoResponse>();
         GetTreeChildren(list, results);
         return results.FirstOrDefault();
+    }
+
+    /// <summary>
+    /// 删除
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public Task<int> DeleteAsync(string id, CancellationToken cancellationToken = default)
+    {
+        return _freeSql.Delete<TrackConfig>()
+            .Where(p => p.Id == id || p.ConfigId == id)
+            .ExecuteAffrowsAsync(cancellationToken);
     }
 
     /// <summary>

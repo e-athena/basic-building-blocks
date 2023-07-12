@@ -7,8 +7,4 @@ namespace Athena.Infrastructure.EventTracking.Messaging.Requests;
 /// </summary>
 public class GetTrackPagingRequest : GetPagingRequestBase
 {
-    /// <summary>
-    /// 错误数据
-    /// </summary>
-    public bool? Error { get; set; }
 }

@@ -1,3 +1,5 @@
+using Microsoft.Extensions.PlatformAbstractions;
+
 namespace Athena.Infrastructure.EventTracking.Models;
 
 /// <summary>
@@ -6,6 +8,11 @@ namespace Athena.Infrastructure.EventTracking.Models;
 [Table("event_tracking_tracks")]
 public class Track : EntityBase
 {
+    /// <summary>
+    /// 业务Id
+    /// </summary>
+    public string? BusinessId { get; set; }
+
     /// <summary>
     /// 上级Id
     /// <remarks>为空时为根节点</remarks>
@@ -65,6 +72,11 @@ public class Track : EntityBase
     public string? ProcessorFullName { get; set; }
 
     /// <summary>
+    /// 执行应用名
+    /// </summary>
+    public string ExecuteAppName { get; set; } = PlatformServices.Default.Application.ApplicationName;
+
+    /// <summary>
     /// 异常信息
     /// </summary>
     [MaxLength(-1)]
@@ -95,11 +107,12 @@ public class Track : EntityBase
     /// <param name="type"></param>
     /// <param name="payload"></param>
     /// <param name="processorType"></param>
+    /// <param name="businessId"></param>
     /// <returns></returns>
     public static Track ExecuteBegin(
         string traceId,
         EventType? eventType,
-        Type type, string payload, Type processorType)
+        Type type, string payload, Type processorType, string? businessId = null)
     {
         return new Track
         {
@@ -109,7 +122,8 @@ public class Track : EntityBase
             Payload = payload,
             ProcessorFullName = processorType.FullName,
             TrackStatus = TrackStatus.Executing,
-            BeginExecuteTime = DateTime.Now
+            BeginExecuteTime = DateTime.Now,
+            BusinessId = businessId
         };
     }
 

@@ -31,11 +31,19 @@ public interface ITrackStorageService
     /// <param name="id">Id</param>
     /// <returns></returns>
     Task<GetTrackInfoResponse?> GetAsync(string id);
-    
+
     /// <summary>
     /// 读取详情
     /// </summary>
     /// <param name="traceId"></param>
     /// <returns></returns>
     Task<DecompositionTreeGraphModel?> GetDecompositionTreeGraphAsync(string traceId);
+
+    /// <summary>
+    /// 删除
+    /// </summary>
+    /// <param name="traceId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<int> DeleteAsync(string traceId, CancellationToken cancellationToken = default);
 }

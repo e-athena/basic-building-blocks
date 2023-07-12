@@ -6,7 +6,7 @@ namespace Athena.Infrastructure.FreeRedis;
 public static class RedisHelper
 {
     /// <summary>
-    /// 
+    /// Redis实例
     /// </summary>
     public static RedisClient? Instance { get; private set; }
 
@@ -16,6 +16,11 @@ public static class RedisHelper
     /// <param name="cli"></param>
     public static void Initialization(RedisClient cli)
     {
+        if (Instance != null)
+        {
+            throw new Exception("RedisHelper已经初始化");
+        }
+
         Instance = cli;
     }
 }
