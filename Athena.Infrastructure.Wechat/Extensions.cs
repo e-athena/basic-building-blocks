@@ -1,4 +1,5 @@
 // ReSharper disable once CheckNamespace
+
 namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
@@ -6,6 +7,19 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// </summary>
 public static class Extensions
 {
+    /// <summary>
+    /// 添加微信API客户端工厂
+    /// </summary>
+    /// <param name="services"></param>
+    /// <returns></returns>
+    public static IServiceCollection AddCustomWeChatApiClientFactory(
+        this IServiceCollection services)
+    {
+        services.AddHttpClient();
+        services.AddSingleton<IWechatApiClientFactory, WechatApiClientFactory>();
+        return services;
+    }
+
     /// <summary>
     /// 添加微信API
     /// </summary>
@@ -38,8 +52,7 @@ public static class Extensions
             opts.Token = officialAccountConfig.Token;
             opts.EncodingAesKey = officialAccountConfig.EncodingAesKey;
         });
-        services.AddHttpClient();
-        services.AddSingleton<IWechatApiClientFactory, WechatApiClientFactory>();
+        services.AddCustomWeChatApiClientFactory();
         return services;
     }
 

@@ -5,7 +5,9 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>6.1.8</PackageVersion>
+        <PackageVersion>6.1.9-preview.20230715.1</PackageVersion>
+        <PackageIcon>e-athena.png</PackageIcon>
+        <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -24,5 +26,12 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Athena.Infrastructure\Athena.Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="e-athena.png">
+        <Pack>True</Pack>
+        <PackagePath></PackagePath>
+      </None>
     </ItemGroup>
 </Project>

@@ -38,4 +38,19 @@ public interface IWechatApiClientFactory
     /// </summary>
     /// <returns></returns>
     Task<string> GetAccessTokenAsync(WechatApiClient client);
+    
+    /// <summary>
+    /// 刷新AccessToken
+    /// </summary>
+    /// <param name="appId"></param>
+    /// <param name="appSecret"></param>
+    /// <returns></returns>
+    Task<bool> RefreshAccessTokenAsync(string appId, string appSecret);
+    
+    /// <summary>
+    /// 刷新AccessToken
+    /// </summary>
+    /// <param name="client"></param>
+    /// <returns></returns>
+    Task<bool> RefreshAccessTokenAsync(WechatApiClient client);
 }

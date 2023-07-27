@@ -54,8 +54,8 @@ public class WechatApiClientFactory : IWechatApiClientFactory
 
     public Task<string> GetAccessTokenAsync(WechatApiClient client)
     {
-        var key = $"{_wechatApiClientOptions.Value.AppId}:access_token";
-        return GetAccessTokenAsync(CreateClient(), key);
+        var key = $"{client.Credentials.AppId}:access_token";
+        return GetAccessTokenAsync(client, key);
     }
 
     private async Task<string> GetAccessTokenAsync(WechatApiClient client, string key)
@@ -72,6 +72,30 @@ public class WechatApiClientFactory : IWechatApiClientFactory
         }, TimeSpan.FromMinutes(119));
 
         return accessToken!;
+    }
+
+    public Task<bool> RefreshAccessTokenAsync(string appId, string appSecret)
+    {
+        var key = $"{appId}:access_token";
+        return RefreshAccessTokenAsync(CreateClient(appId, appSecret), key);
+    }
+
+    public Task<bool> RefreshAccessTokenAsync(WechatApiClient client)
+    {
+        var key = $"{client.Credentials.AppId}:access_token";
+        return RefreshAccessTokenAsync(client, key);
+    }
+
+    private async Task<bool> RefreshAccessTokenAsync(WechatApiClient client, string key)
+    {
+        var res = await client.ExecuteCgibinTokenAsync(new CgibinTokenRequest());
+        if (!res.IsSuccessful())
+        {
+            throw new Exception(res.ErrorMessage);
+        }
+
+        await _cacheManager.SetStringAsync(key, res.AccessToken, TimeSpan.FromMinutes(119));
+        return true;
     }
 }
 

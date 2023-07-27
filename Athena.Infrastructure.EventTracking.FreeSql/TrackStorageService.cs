@@ -58,6 +58,8 @@ public class TrackStorageService : QueryServiceBase<Track>, ITrackStorageService
             if (config == null)
             {
                 _logger.LogWarning("未配置事件类型 {EventTypeFullName} 的追踪配置", track.EventTypeFullName);
+                // 释放锁
+                await lockResource.ReleaseAsync();
                 return;
             }
 
@@ -70,6 +72,8 @@ public class TrackStorageService : QueryServiceBase<Track>, ITrackStorageService
             if (configs.Count == 0)
             {
                 _logger.LogWarning("未配置事件类型 {EventTypeFullName} 的追踪配置", track.EventTypeFullName);
+                // 释放锁
+                await lockResource.ReleaseAsync();
                 return;
             }
 
@@ -95,6 +99,8 @@ public class TrackStorageService : QueryServiceBase<Track>, ITrackStorageService
 
             if (!entities.Any())
             {
+                // 释放锁
+                await lockResource.ReleaseAsync();
                 return;
             }
 
@@ -136,6 +142,7 @@ public class TrackStorageService : QueryServiceBase<Track>, ITrackStorageService
                 entity.BeginExecuteTime = track.BeginExecuteTime;
                 entity.Payload = track.Payload;
                 entity.ProcessorFullName = track.ProcessorFullName;
+                entity.ExecuteAppName = track.ExecuteAppName;
                 break;
         }
 
@@ -225,11 +232,11 @@ public class TrackStorageService : QueryServiceBase<Track>, ITrackStorageService
                     var timeSpan = endTime - beginTime;
                     ts = timeSpan switch
                     {
-                        _ when timeSpan.Value.TotalMilliseconds < 1000 => $"{timeSpan.Value.TotalMilliseconds}ms",
-                        _ when timeSpan.Value.TotalSeconds < 60 => $"{timeSpan.Value.TotalSeconds}s",
-                        _ when timeSpan.Value.TotalMinutes < 60 => $"{timeSpan.Value.TotalMinutes}m",
-                        _ when timeSpan.Value.TotalHours < 24 => $"{timeSpan.Value.TotalHours}h",
-                        _ when timeSpan.Value.TotalDays < 30 => $"{timeSpan.Value.TotalDays}d",
+                        _ when timeSpan.Value.TotalMilliseconds < 1000 => $"{timeSpan.Value.TotalMilliseconds}毫秒",
+                        _ when timeSpan.Value.TotalSeconds < 60 => $"{timeSpan.Value.TotalSeconds}秒",
+                        _ when timeSpan.Value.TotalMinutes < 60 => $"{timeSpan.Value.TotalMinutes}分钟",
+                        _ when timeSpan.Value.TotalHours < 24 => $"{timeSpan.Value.TotalHours}小时",
+                        _ when timeSpan.Value.TotalDays < 30 => $"{timeSpan.Value.TotalDays}天",
                         _ when timeSpan.Value.TotalDays < 365 => $"{timeSpan.Value.TotalDays / 30}月",
                         _ => $"{timeSpan.Value.TotalDays / 365}年"
                     };
@@ -263,11 +270,11 @@ public class TrackStorageService : QueryServiceBase<Track>, ITrackStorageService
                     var timeSpan = item.EndExecuteTime - item.BeginExecuteTime;
                     ts = timeSpan switch
                     {
-                        _ when timeSpan.Value.TotalMilliseconds < 1000 => $"{timeSpan.Value.TotalMilliseconds}ms",
-                        _ when timeSpan.Value.TotalSeconds < 60 => $"{timeSpan.Value.TotalSeconds}s",
-                        _ when timeSpan.Value.TotalMinutes < 60 => $"{timeSpan.Value.TotalMinutes}m",
-                        _ when timeSpan.Value.TotalHours < 24 => $"{timeSpan.Value.TotalHours}h",
-                        _ when timeSpan.Value.TotalDays < 30 => $"{timeSpan.Value.TotalDays}d",
+                        _ when timeSpan.Value.TotalMilliseconds < 1000 => $"{timeSpan.Value.TotalMilliseconds}毫秒",
+                        _ when timeSpan.Value.TotalSeconds < 60 => $"{timeSpan.Value.TotalSeconds}秒",
+                        _ when timeSpan.Value.TotalMinutes < 60 => $"{timeSpan.Value.TotalMinutes}分钟",
+                        _ when timeSpan.Value.TotalHours < 24 => $"{timeSpan.Value.TotalHours}小时",
+                        _ when timeSpan.Value.TotalDays < 30 => $"{timeSpan.Value.TotalDays}天",
                         _ when timeSpan.Value.TotalDays < 365 => $"{timeSpan.Value.TotalDays / 30}月",
                         _ => $"{timeSpan.Value.TotalDays / 365}年"
                     };
@@ -317,7 +324,9 @@ public class TrackStorageService : QueryServiceBase<Track>, ITrackStorageService
                 Id = item.Id,
                 Value = new DecompositionTreeGraphValue
                 {
-                    Title = item.EventName,
+                    Title = parentId != null && item.EventType.HasValue
+                        ? $"[{item.EventType.Value.ToDescription()}]{item.EventName}"
+                        : item.EventName,
                     Items = items
                 }
             };
@@ -360,7 +369,7 @@ public class TrackStorageService : QueryServiceBase<Track>, ITrackStorageService
                 ParentId = trackParentId,
                 BusinessId = parentId == null ? track.BusinessId : null,
                 TraceId = track.TraceId,
-                EventType = track.EventType ?? p.EventType,
+                EventType = p.EventType,
                 EventName = p.EventName,
                 EventTypeFullName = p.EventTypeFullName,
                 TrackStatus = isMatch ? track.TrackStatus : TrackStatus.NotExecute,
@@ -371,7 +380,8 @@ public class TrackStorageService : QueryServiceBase<Track>, ITrackStorageService
                 ExceptionMessage = isMatch ? track.ExceptionMessage : null,
                 ExceptionInnerMessage = isMatch ? track.ExceptionInnerMessage : null,
                 ExceptionInnerType = isMatch ? track.ExceptionInnerType : null,
-                ExceptionStackTrace = isMatch ? track.ExceptionStackTrace : null
+                ExceptionStackTrace = isMatch ? track.ExceptionStackTrace : null,
+                ExecuteAppName = track.ExecuteAppName
             };
             if (entities.Any(c => c.ParentId == p.Id))
             {

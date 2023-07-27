@@ -4,9 +4,11 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <PackageVersion>6.1.19</PackageVersion>
+        <PackageVersion>6.1.20-preview.20230715.4</PackageVersion>
         <IsPackable>true</IsPackable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageIcon>e-athena.png</PackageIcon>
+        <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -19,6 +21,12 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Athena.Infrastructure.Logger\Athena.Infrastructure.Logger.csproj" />
-        <ProjectReference Include="..\Athena.Infrastructure\Athena.Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="e-athena.png">
+            <Pack>True</Pack>
+            <PackagePath></PackagePath>
+        </None>
     </ItemGroup>
 </Project>

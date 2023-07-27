@@ -9,3 +9,4 @@ global using CSRedis;
 global using Microsoft.Extensions.Caching.Redis;
 global using Athena.Infrastructure;
 global using Athena.Infrastructure.CSRedis;
+global using Athena.Infrastructure.Helpers;

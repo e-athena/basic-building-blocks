@@ -145,7 +145,13 @@ public class LockResource : ILockResource
                 timeSpan.TotalMilliseconds + string.Empty
             )
             .ConfigureAwait(false);
-        return result?.ToString() == "0" ? this : null;
+        var res = result?.ToString() == "0" ? this : null;
+        if (EnvironmentHelper.IsDevelopment)
+        {
+            Console.WriteLine(res == null ? "获取锁失败，{0}" : "获取锁成功，{0}", k);
+        }
+
+        return res;
     }
 
     /// <summary>
@@ -155,6 +161,10 @@ public class LockResource : ILockResource
     {
         var k = GetPersistentKey(_resourceName, _key);
         await RedisHelper.EvalAsync(UnlockCommand, k, _requestId).ConfigureAwait(false);
+        if (EnvironmentHelper.IsDevelopment)
+        {
+            Console.WriteLine("释放锁成功，{0}", k);
+        }
     }
 
     private static string GetPersistentKey(string resourceName, string key)

@@ -246,6 +246,357 @@ public static class QueryableExtensions
         return query.WithTempQuery(selector.AutomaticConverter());
     }
 
+    #region List
+
+    /// <summary>
+    /// 读取列表
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="query"></param>
+    /// <param name="userId"></param>
+    /// <param name="request"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public static async Task<List<T>> ToListAsync<T>(
+        this ISelect<T> query,
+        string? userId,
+        GetRequestBase request,
+        CancellationToken cancellationToken = default) where T : class
+    {
+        if (string.IsNullOrEmpty(userId))
+        {
+            return await query.ToListAsync(request, cancellationToken);
+        }
+
+        IList<QueryFilterGroup>? filterGroups = null;
+        var queryFilterService = AthenaProvider.GetService<IQueryFilterService>();
+        if (queryFilterService != null)
+        {
+            filterGroups = await queryFilterService.GetAsync(userId, typeof(T));
+        }
+
+        if (filterGroups == null)
+        {
+            return await query.ToListAsync(request, cancellationToken);
+        }
+
+        var lambda = filterGroups.MakeFilterWhere<T>();
+        return await query
+            .HasWhere(lambda, lambda!)
+            .ToListAsync(request, cancellationToken);
+    }
+
+    /// <summary>
+    /// 读取列表
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="query"></param>
+    /// <param name="request"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public static async Task<List<T>> ToListAsync<T>(this ISelect<T> query, GetRequestBase request,
+        CancellationToken cancellationToken = default) where T : class
+    {
+        return await query.ToListAsync<T, T>(
+            request,
+            null,
+            cancellationToken
+        );
+    }
+
+    /// <summary>
+    /// 读取列表
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TResult"></typeparam>
+    /// <param name="query"></param>
+    /// <param name="userId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public static async Task<List<TResult>> ToListAsync<T, TResult>(this ISelect<T> query,
+        string? userId, CancellationToken cancellationToken = default)
+        where T : class where TResult : new()
+    {
+        if (string.IsNullOrEmpty(userId))
+        {
+            return await query.ToListAsync<TResult>(cancellationToken);
+        }
+
+        IList<QueryFilterGroup>? filterGroups = null;
+        var queryFilterService = AthenaProvider.GetService<IQueryFilterService>();
+        if (queryFilterService != null)
+        {
+            filterGroups = await queryFilterService.GetAsync(userId, typeof(TResult));
+        }
+
+        if (filterGroups == null)
+        {
+            return await query.ToListAsync<TResult>(cancellationToken);
+        }
+
+        var extraLambda = filterGroups.MakeFilterWhere<TResult>();
+        if (extraLambda == null)
+        {
+            return await query.ToListAsync<TResult>(cancellationToken);
+        }
+
+        Expression<Func<T, TResult>> funcExpression = p => new TResult();
+        return await query
+            .Select(funcExpression)
+            .Where(extraLambda)
+            .ToListAsync<TResult, TResult>(
+                null,
+                null,
+                cancellationToken
+            );
+    }
+
+    /// <summary>
+    /// 读取列表
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TResult"></typeparam>
+    /// <param name="query"></param>
+    /// <param name="request"></param>
+    /// <param name="userId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public static async Task<List<TResult>> ToListAsync<T, TResult>(this ISelect<T> query,
+        string? userId, GetRequestBase request, CancellationToken cancellationToken = default)
+        where T : class where TResult : new()
+    {
+        if (string.IsNullOrEmpty(userId))
+        {
+            return await query.ToListAsync<T, TResult>(request, cancellationToken);
+        }
+
+        IList<QueryFilterGroup>? filterGroups = null;
+        var queryFilterService = AthenaProvider.GetService<IQueryFilterService>();
+        if (queryFilterService != null)
+        {
+            filterGroups = await queryFilterService.GetAsync(userId, typeof(TResult));
+        }
+
+        if (filterGroups == null)
+        {
+            return await query.ToListAsync<T, TResult>(request, cancellationToken);
+        }
+
+        var extraLambda = filterGroups.MakeFilterWhere<TResult>();
+        if (extraLambda == null)
+        {
+            return await query.ToListAsync<T, TResult>(request, cancellationToken);
+        }
+
+        var customLambda = request.FilterGroups.MakeFilterWhere<TResult>();
+        Expression<Func<T, TResult>> funcExpression = p => new TResult();
+        return await query
+            .Select(funcExpression)
+            .Where(extraLambda)
+            .WhereIf(customLambda != null, customLambda)
+            .ToListAsync<TResult, TResult>(
+                request.Sorter,
+                null,
+                cancellationToken
+            );
+    }
+
+    /// <summary>
+    /// 读取列表
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TResult"></typeparam>
+    /// <param name="query"></param>
+    /// <param name="request"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public static async Task<List<TResult>> ToListAsync<T, TResult>(this ISelect<T> query,
+        GetRequestBase request, CancellationToken cancellationToken = default) where T : class
+    {
+        var lambda = request.FilterGroups.MakeFilterWhere<T>();
+
+        return await query
+            .HasWhere(lambda, lambda!)
+            .ToListAsync<T, TResult>(
+                request.Sorter,
+                null,
+                cancellationToken
+            );
+    }
+
+    /// <summary>
+    /// 读取列表
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TResult"></typeparam>
+    /// <param name="query"></param>
+    /// <param name="userId"></param>
+    /// <param name="funcExpression"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public static async Task<List<TResult>> ToListAsync<T, TResult>(this ISelect<T> query,
+        Expression<Func<T, TResult>> funcExpression, string? userId,
+        CancellationToken cancellationToken = default) where T : class
+    {
+        if (string.IsNullOrEmpty(userId))
+        {
+            return await query.ToListAsync(funcExpression, cancellationToken);
+        }
+
+        IList<QueryFilterGroup>? filterGroups = null;
+        var queryFilterService = AthenaProvider.GetService<IQueryFilterService>();
+        if (queryFilterService != null)
+        {
+            filterGroups = await queryFilterService.GetAsync(userId, typeof(TResult));
+        }
+
+        var extraLambda = filterGroups.MakeFilterWhere<TResult>();
+
+        return await query
+            .Select(funcExpression)
+            .WhereIf(extraLambda != null, extraLambda)
+            .ToListAsync<TResult, TResult>(
+                null,
+                null,
+                cancellationToken
+            );
+    }
+
+    /// <summary>
+    /// 读取列表
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TResult"></typeparam>
+    /// <param name="query"></param>
+    /// <param name="userId"></param>
+    /// <param name="request"></param>
+    /// <param name="funcExpression"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public static async Task<List<TResult>> ToListAsync<T, TResult>(this ISelect<T> query,
+        string? userId,
+        GetRequestBase request, Expression<Func<T, TResult>>? funcExpression,
+        CancellationToken cancellationToken = default) where T : class
+    {
+        if (funcExpression == null)
+        {
+            return await query.ToListAsync<T, TResult>(request, cancellationToken);
+        }
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return await query.ToListAsync<T, TResult>(request, cancellationToken);
+        }
+
+        IList<QueryFilterGroup>? filterGroups = null;
+        var queryFilterService = AthenaProvider.GetService<IQueryFilterService>();
+        if (queryFilterService != null)
+        {
+            filterGroups = await queryFilterService.GetAsync(userId, typeof(TResult));
+        }
+
+        var customLambda = request.FilterGroups.MakeFilterWhere<TResult>();
+        var extraLambda = filterGroups.MakeFilterWhere<TResult>();
+
+        if (customLambda == null && extraLambda == null)
+        {
+            return await query.ToListAsync(
+                request,
+                funcExpression,
+                cancellationToken
+            );
+        }
+
+        return await query
+            .Select(funcExpression)
+            .WhereIf(customLambda != null, customLambda)
+            .WhereIf(extraLambda != null, extraLambda)
+            .ToListAsync<TResult, TResult>(
+                request.Sorter,
+                null,
+                cancellationToken
+            );
+    }
+
+    /// <summary>
+    /// 读取列表
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TResult"></typeparam>
+    /// <param name="query"></param>
+    /// <param name="request"></param>
+    /// <param name="funcExpression"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public static async Task<List<TResult>> ToListAsync<T, TResult>(this ISelect<T> query,
+        GetRequestBase request, Expression<Func<T, TResult>>? funcExpression,
+        CancellationToken cancellationToken = default) where T : class
+    {
+        if (funcExpression == null)
+        {
+            return await query.ToListAsync<T, TResult>(request, cancellationToken);
+        }
+
+        var lambda = request.FilterGroups.MakeFilterWhere<TResult>();
+        if (lambda == null)
+        {
+            return await query.ToListAsync(
+                request.Sorter,
+                funcExpression,
+                cancellationToken
+            );
+        }
+
+        return await query
+            .Select(funcExpression)
+            .Where(lambda)
+            .ToListAsync<TResult, TResult>(
+                request.Sorter,
+                null,
+                cancellationToken
+            );
+    }
+
+    /// <summary>
+    /// 读取列表
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TResult"></typeparam>
+    /// <param name="query"></param>
+    /// <param name="sorter"></param>
+    /// <param name="funcExpression"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    private static async Task<List<TResult>> ToListAsync<T, TResult>(
+        this ISelect<T> query,
+        string? sorter,
+        Expression<Func<T, TResult>>? funcExpression,
+        CancellationToken cancellationToken = default
+    )
+    {
+        using var activity = FreeSqlOTelActivityManager.Instance.StartActivity("数据列表查询");
+        if (!string.IsNullOrEmpty(sorter))
+        {
+            activity?.SetTag("query.sorter", sorter);
+        }
+
+        var hasLambda = funcExpression != null;
+        if (sorter != null)
+        {
+            query = query.OrderBy(sorter);
+        }
+
+        using var listActivity = FreeSqlOTelActivityManager.Instance.StartActivity("读取列表数据");
+        listActivity?.SetTag("query.sql.text", query.ToSql());
+        var result = hasLambda
+            ? await query.ToListAsync(funcExpression, cancellationToken)
+            : await query.ToListAsync<TResult>(cancellationToken);
+
+        return result;
+    }
+
+    #endregion
+
     #region Paging
 
     /// <summary>
@@ -327,7 +678,7 @@ public static class QueryableExtensions
             return await query.ToPagingAsync(request, cancellationToken);
         }
 
-        var lambda = MakeFilterWhere<T>(filterGroups);
+        var lambda = filterGroups.MakeFilterWhere<T>();
         return await query
             .HasWhere(lambda, lambda!)
             .ToPagingAsync(request, cancellationToken);
@@ -382,13 +733,13 @@ public static class QueryableExtensions
             return await query.ToPagingAsync<T, TResult>(request, cancellationToken);
         }
 
-        var extraLambda = MakeFilterWhere<TResult>(filterGroups);
+        var extraLambda = filterGroups.MakeFilterWhere<TResult>();
         if (extraLambda == null)
         {
             return await query.ToPagingAsync<T, TResult>(request, cancellationToken);
         }
 
-        var customLambda = MakeFilterWhere<TResult>(request.FilterGroups);
+        var customLambda = request.FilterGroups.MakeFilterWhere<TResult>();
         Expression<Func<T, TResult>> funcExpression = p => new TResult();
         return await query
             .Select(funcExpression)
@@ -415,7 +766,7 @@ public static class QueryableExtensions
     public static async Task<Paging<TResult>> ToPagingAsync<T, TResult>(this ISelect<T> query,
         GetPagingRequestBase request, CancellationToken cancellationToken = default) where T : class
     {
-        var lambda = MakeFilterWhere<T>(request.FilterGroups);
+        var lambda = request.FilterGroups.MakeFilterWhere<T>();
 
         return await query
             .HasWhere(lambda, lambda!)
@@ -461,8 +812,8 @@ public static class QueryableExtensions
             filterGroups = await queryFilterService.GetAsync(userId, typeof(TResult));
         }
 
-        var customLambda = MakeFilterWhere<TResult>(request.FilterGroups);
-        var extraLambda = MakeFilterWhere<TResult>(filterGroups);
+        var customLambda = request.FilterGroups.MakeFilterWhere<TResult>();
+        var extraLambda = filterGroups.MakeFilterWhere<TResult>();
 
         if (customLambda == null && extraLambda == null)
         {
@@ -505,7 +856,7 @@ public static class QueryableExtensions
             return await query.ToPagingAsync<T, TResult>(request, cancellationToken);
         }
 
-        var lambda = MakeFilterWhere<TResult>(request.FilterGroups);
+        var lambda = request.FilterGroups.MakeFilterWhere<TResult>();
         if (lambda == null)
         {
             return await query.ToPagingAsync(
@@ -607,11 +958,24 @@ public static class QueryableExtensions
     /// 生成自定义查询表达式树
     /// </summary>
     /// <param name="filterGroups"></param>
+    /// <typeparam name="TResult"></typeparam>
+    /// <returns></returns>
+    public static Expression<Func<TResult, bool>>? MakeFilterWhere<TResult>(
+        this IList<QueryFilterGroup>? filterGroups
+    )
+    {
+        return filterGroups.MakeFilterWhere<TResult>(true);
+    }
+
+    /// <summary>
+    /// 生成自定义查询表达式树
+    /// </summary>
+    /// <param name="filterGroups"></param>
     /// <param name="isTrace"></param>
     /// <typeparam name="TResult"></typeparam>
     /// <returns></returns>
     public static Expression<Func<TResult, bool>>? MakeFilterWhere<TResult>(
-        IList<QueryFilterGroup>? filterGroups, bool isTrace = true
+        this IList<QueryFilterGroup>? filterGroups, bool isTrace
     )
     {
         if (filterGroups == null || filterGroups.Count == 0)
@@ -672,11 +1036,24 @@ public static class QueryableExtensions
     /// 生成自定义查询表达式树
     /// </summary>
     /// <param name="filters"></param>
+    /// <typeparam name="TResult"></typeparam>
+    /// <returns></returns>
+    public static Expression<Func<TResult, bool>>? MakeFilterWhere<TResult>(
+        this IList<QueryFilter>? filters
+    )
+    {
+        return filters.MakeFilterWhere<TResult>(true);
+    }
+
+    /// <summary>
+    /// 生成自定义查询表达式树
+    /// </summary>
+    /// <param name="filters"></param>
     /// <param name="isTrace"></param>
     /// <typeparam name="TResult"></typeparam>
     /// <returns></returns>
     public static Expression<Func<TResult, bool>>? MakeFilterWhere<TResult>(
-        IList<QueryFilter>? filters, bool isTrace = true
+        this IList<QueryFilter>? filters, bool isTrace
     )
     {
         if (filters == null || filters.Count == 0)

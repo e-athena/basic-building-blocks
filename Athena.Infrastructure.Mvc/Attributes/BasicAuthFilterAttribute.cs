@@ -1,5 +1,4 @@
 using System.Net.Http.Headers;
-using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 
