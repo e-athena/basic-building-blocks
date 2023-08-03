@@ -1,5 +1,3 @@
-using Athena.Infrastructure.Providers;
-
 namespace Athena.Infrastructure.FreeSql.Helpers;
 
 /// <summary>

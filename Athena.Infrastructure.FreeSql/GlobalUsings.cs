@@ -22,5 +22,6 @@ global using Athena.Infrastructure.Expressions;
 global using Athena.Infrastructure.FreeSql.Helpers;
 global using Athena.Infrastructure.FreeSql.Tenants;
 global using Athena.Infrastructure.FreeSql.OTel;
+global using Athena.Infrastructure.Providers;
 global using Athena.Infrastructure.QueryFilters;
 global using Athena.Infrastructure.Tenants;

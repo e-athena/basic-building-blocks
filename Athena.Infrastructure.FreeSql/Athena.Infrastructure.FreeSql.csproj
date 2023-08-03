@@ -4,7 +4,7 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <PackageVersion>6.5.5-preview.20230722.2</PackageVersion>
+        <PackageVersion>6.5.5</PackageVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
         <PackageIcon>e-athena.png</PackageIcon>
@@ -20,8 +20,7 @@
 
     <ItemGroup>
         <PackageReference Include="FreeSql.Cloud" Version="1.6.4" />
-        <PackageReference Include="FreeSql.DbContext" Version="3.2.697" />
-        <PackageReference Include="FreeSql.Repository" Version="3.2.697" />
+        <PackageReference Include="FreeSql.Repository" Version="3.2.698" />
         <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     </ItemGroup>
 

@@ -5,7 +5,9 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>6.0.4</Version>
+        <Version>6.0.5</Version>
+        <PackageIcon>e-athena.png</PackageIcon>
+        <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
     </PropertyGroup>
 
     <ItemGroup>
@@ -13,7 +15,14 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="FreeSql" Version="3.2.697" />
+        <PackageReference Include="FreeSql" Version="3.2.698" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="e-athena.png">
+        <Pack>True</Pack>
+        <PackagePath></PackagePath>
+      </None>
     </ItemGroup>
 
 </Project>

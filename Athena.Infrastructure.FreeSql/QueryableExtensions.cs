@@ -1,6 +1,5 @@
 using System.Reflection;
 using System.Text.Json;
-using Athena.Infrastructure.Providers;
 
 namespace Athena.Infrastructure.FreeSql;
 

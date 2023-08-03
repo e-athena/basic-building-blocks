@@ -1,3 +1,5 @@
+// ReSharper disable once CheckNamespace
+
 namespace Microsoft.Extensions.DependencyInjection;
 
 public static class Extensions
@@ -17,7 +19,7 @@ public static class Extensions
         return services.AddCustomSwaggerGen(configuration, new OpenApiContact
         {
             Email = "zheng_jinfan@126.com",
-            Name = "VanZ",
+            Name = "Mango",
         }, configAction);
     }
 
@@ -75,7 +77,11 @@ public static class Extensions
                 {
                     new OpenApiSecurityScheme
                     {
-                        Reference = new OpenApiReference {Type = ReferenceType.SecurityScheme, Id = "Bearer"}
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
                     },
                     new List<string>()
                 }
