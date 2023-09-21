@@ -3,6 +3,8 @@
 global using Athena.Infrastructure.Event.DomainEvents;
 global using System.Linq.Expressions;
 global using System.Collections.Concurrent;
+global using System.Reflection;
+global using System.Text.Json;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;

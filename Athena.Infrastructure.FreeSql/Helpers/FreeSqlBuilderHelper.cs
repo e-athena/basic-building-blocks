@@ -1,3 +1,5 @@
+using Athena.Infrastructure.FreeSql.CAPs.Extends;
+
 namespace Athena.Infrastructure.FreeSql.Helpers;
 
 /// <summary>
@@ -32,6 +34,13 @@ public static class FreeSqlBuilderHelper
             .UseMonitorCommand(null, (cmd, traceLog) =>
             {
                 if (AthenaProvider.DefaultLog == null || !AthenaProvider.DefaultLog.IsEnabled(LogLevel.Debug))
+                {
+                    return;
+                }
+
+                // cap的表不处理
+                if (cmd.CommandText.Contains(CapConstant.PublishedTableName) ||
+                    cmd.CommandText.Contains(CapConstant.ReceivedTableName))
                 {
                     return;
                 }

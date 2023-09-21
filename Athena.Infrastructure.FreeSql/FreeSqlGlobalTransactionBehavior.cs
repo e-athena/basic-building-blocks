@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Text.Json;
 using Athena.Infrastructure.Event.IntegrationEvents;
 using Microsoft.AspNetCore.Http;
 

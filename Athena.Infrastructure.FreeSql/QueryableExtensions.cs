@@ -1,5 +1,5 @@
-using System.Reflection;
-using System.Text.Json;
+using Athena.Infrastructure.ColumnPermissions;
+using Athena.Infrastructure.ColumnPermissions.Models;
 
 namespace Athena.Infrastructure.FreeSql;
 
@@ -276,13 +276,26 @@ public static class QueryableExtensions
 
         if (filterGroups == null)
         {
-            return await query.ToListAsync(request, cancellationToken);
+            // return await query.ToListAsync(request, cancellationToken);
+            return await query
+                .ToListAsync<T, T>(
+                    userId,
+                    sorter: request.Sorter,
+                    funcExpression: null,
+                    cancellationToken
+                );
         }
 
         var lambda = filterGroups.MakeFilterWhere<T>();
         return await query
             .HasWhere(lambda, lambda!)
-            .ToListAsync(request, cancellationToken);
+            .ToListAsync<T, T>(
+                userId,
+                sorter: request.Sorter,
+                funcExpression: null,
+                cancellationToken
+            );
+        // .ToListAsync(request, cancellationToken);
     }
 
     /// <summary>
@@ -330,13 +343,13 @@ public static class QueryableExtensions
 
         if (filterGroups == null)
         {
-            return await query.ToListAsync<TResult>(cancellationToken);
+            return await query.ToListAsync<T, TResult>(userId, sorter: null, funcExpression: null, cancellationToken);
         }
 
         var extraLambda = filterGroups.MakeFilterWhere<TResult>();
         if (extraLambda == null)
         {
-            return await query.ToListAsync<TResult>(cancellationToken);
+            return await query.ToListAsync<T, TResult>(userId, sorter: null, funcExpression: null, cancellationToken);
         }
 
         Expression<Func<T, TResult>> funcExpression = p => new TResult();
@@ -344,6 +357,7 @@ public static class QueryableExtensions
             .Select(funcExpression)
             .Where(extraLambda)
             .ToListAsync<TResult, TResult>(
+                userId,
                 null,
                 null,
                 cancellationToken
@@ -378,13 +392,23 @@ public static class QueryableExtensions
 
         if (filterGroups == null)
         {
-            return await query.ToListAsync<T, TResult>(request, cancellationToken);
+            return await query.ToListAsync<T, TResult>(
+                userId,
+                request.Sorter,
+                null,
+                cancellationToken
+            );
         }
 
         var extraLambda = filterGroups.MakeFilterWhere<TResult>();
         if (extraLambda == null)
         {
-            return await query.ToListAsync<T, TResult>(request, cancellationToken);
+            return await query.ToListAsync<T, TResult>(
+                userId,
+                request.Sorter,
+                null,
+                cancellationToken
+            );
         }
 
         var customLambda = request.FilterGroups.MakeFilterWhere<TResult>();
@@ -394,6 +418,7 @@ public static class QueryableExtensions
             .Where(extraLambda)
             .WhereIf(customLambda != null, customLambda)
             .ToListAsync<TResult, TResult>(
+                userId,
                 request.Sorter,
                 null,
                 cancellationToken
@@ -455,6 +480,7 @@ public static class QueryableExtensions
             .Select(funcExpression)
             .WhereIf(extraLambda != null, extraLambda)
             .ToListAsync<TResult, TResult>(
+                userId,
                 null,
                 null,
                 cancellationToken
@@ -479,7 +505,7 @@ public static class QueryableExtensions
     {
         if (funcExpression == null)
         {
-            return await query.ToListAsync<T, TResult>(request, cancellationToken);
+            return await query.ToListAsync<T, TResult>(userId, request.Sorter, null, cancellationToken);
         }
 
         if (string.IsNullOrEmpty(userId))
@@ -499,9 +525,10 @@ public static class QueryableExtensions
 
         if (customLambda == null && extraLambda == null)
         {
-            return await query.ToListAsync(
-                request,
-                funcExpression,
+            return await query.ToListAsync<T, TResult>(
+                userId,
+                request.Sorter,
+                null,
                 cancellationToken
             );
         }
@@ -594,6 +621,34 @@ public static class QueryableExtensions
         return result;
     }
 
+    /// <summary>
+    /// 读取列表
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TResult"></typeparam>
+    /// <param name="query"></param>
+    /// <param name="userId"></param>
+    /// <param name="sorter"></param>
+    /// <param name="funcExpression"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    private static async Task<List<TResult>> ToListAsync<T, TResult>(
+        this ISelect<T> query,
+        string? userId,
+        string? sorter,
+        Expression<Func<T, TResult>>? funcExpression,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var result = await query.ToListAsync(sorter, funcExpression, cancellationToken);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return result;
+        }
+
+        return await DataMaskHandleAsync(userId, result);
+    }
+
     #endregion
 
     #region Paging
@@ -674,13 +729,27 @@ public static class QueryableExtensions
 
         if (filterGroups == null)
         {
-            return await query.ToPagingAsync(request, cancellationToken);
+            return await query.ToPagingAsync<T, T>(
+                userId,
+                request.PageIndex,
+                request.PageSize,
+                request.Sorter,
+                null,
+                cancellationToken
+            );
         }
 
         var lambda = filterGroups.MakeFilterWhere<T>();
         return await query
             .HasWhere(lambda, lambda!)
-            .ToPagingAsync(request, cancellationToken);
+            .ToPagingAsync<T, T>(
+                userId,
+                request.PageIndex,
+                request.PageSize,
+                request.Sorter,
+                null,
+                cancellationToken
+            );
     }
 
     /// <summary>
@@ -729,13 +798,27 @@ public static class QueryableExtensions
 
         if (filterGroups == null)
         {
-            return await query.ToPagingAsync<T, TResult>(request, cancellationToken);
+            return await query.ToPagingAsync<T, TResult>(
+                userId,
+                request.PageIndex,
+                request.PageSize,
+                request.Sorter,
+                null,
+                cancellationToken
+            );
         }
 
         var extraLambda = filterGroups.MakeFilterWhere<TResult>();
         if (extraLambda == null)
         {
-            return await query.ToPagingAsync<T, TResult>(request, cancellationToken);
+            return await query.ToPagingAsync<T, TResult>(
+                userId,
+                request.PageIndex,
+                request.PageSize,
+                request.Sorter,
+                null,
+                cancellationToken
+            );
         }
 
         var customLambda = request.FilterGroups.MakeFilterWhere<TResult>();
@@ -745,6 +828,7 @@ public static class QueryableExtensions
             .Where(extraLambda)
             .WhereIf(customLambda != null, customLambda)
             .ToPagingAsync<TResult, TResult>(
+                userId,
                 request.PageIndex,
                 request.PageSize,
                 request.Sorter,
@@ -796,7 +880,14 @@ public static class QueryableExtensions
     {
         if (funcExpression == null)
         {
-            return await query.ToPagingAsync<T, TResult>(request, cancellationToken);
+            return await query.ToPagingAsync<T, TResult>(
+                userId,
+                request.PageIndex,
+                request.PageSize,
+                request.Sorter,
+                null,
+                cancellationToken
+            );
         }
 
         if (string.IsNullOrEmpty(userId))
@@ -817,7 +908,10 @@ public static class QueryableExtensions
         if (customLambda == null && extraLambda == null)
         {
             return await query.ToPagingAsync(
-                request,
+                userId,
+                request.PageIndex,
+                request.PageSize,
+                request.Sorter,
                 funcExpression,
                 cancellationToken
             );
@@ -828,6 +922,7 @@ public static class QueryableExtensions
             .WhereIf(customLambda != null, customLambda)
             .WhereIf(extraLambda != null, extraLambda)
             .ToPagingAsync<TResult, TResult>(
+                userId,
                 request.PageIndex,
                 request.PageSize,
                 request.Sorter,
@@ -951,6 +1046,150 @@ public static class QueryableExtensions
         }
 
         return page;
+    }
+
+    /// <summary>
+    /// 读取列表
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TResult"></typeparam>
+    /// <param name="query"></param>
+    /// <param name="sorter"></param>
+    /// <param name="userId"></param>
+    /// <param name="pageIndex"></param>
+    /// <param name="pageSize"></param>
+    /// <param name="funcExpression"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    private static async Task<Paging<TResult>> ToPagingAsync<T, TResult>(
+        this ISelect<T> query,
+        string? userId,
+        int pageIndex,
+        int pageSize,
+        string? sorter,
+        Expression<Func<T, TResult>>? funcExpression,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var result = await query.ToPagingAsync(pageIndex, pageSize, sorter, funcExpression, cancellationToken);
+        if (!result.HasItems() || string.IsNullOrEmpty(userId))
+        {
+            return result;
+        }
+
+        // 脱敏和数据处理。
+        result.Items = await DataMaskHandleAsync(userId, result.Items!);
+        return result;
+    }
+
+    /// <summary>
+    /// 脱敏处理
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="sources"></param>
+    /// <typeparam name="TResult"></typeparam>
+    /// <returns></returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    private static async Task<List<TResult>> DataMaskHandleAsync<TResult>(string userId, List<TResult> sources)
+    {
+        IList<ColumnPermission>? columnPermissions = null;
+        var columnPermissionQueryService = AthenaProvider.GetService<IColumnPermissionService>();
+        if (columnPermissionQueryService != null)
+        {
+            columnPermissions = await columnPermissionQueryService.GetAsync(userId, typeof(TResult));
+        }
+
+        if (columnPermissions == null)
+        {
+            return sources;
+        }
+
+        foreach (var item in sources)
+        {
+            // 读取属性
+            var properties = item!.GetType().GetProperties();
+            foreach (var property in properties)
+            {
+                var propertyName = property.Name;
+                // 读取配置
+                var single = columnPermissions.FirstOrDefault(p => p.ColumnKey == propertyName);
+                if (single == null)
+                {
+                    // 跳过
+                    continue;
+                }
+
+                // 读取值
+                var propertyValue = property.GetValue(item);
+                // 如果值为空，则跳过
+                if (propertyValue == null)
+                {
+                    continue;
+                }
+
+                // 如果禁用，则代表没有权限，直接替换为***
+                if (!single.Enabled)
+                {
+                    var propertyType = property.PropertyType;
+                    if (propertyType == typeof(string))
+                    {
+                        property.SetValue(item, "***");
+                    }
+
+                    continue;
+                }
+
+                // 脱敏处理
+                if (!single.IsEnableDataMask)
+                {
+                    continue;
+                }
+
+                // 根据长度和位置进行替换
+                var value = propertyValue.ToString();
+                var length = single.MaskLength;
+                var maskChar = single.MaskChar;
+                var maskPosition = single.MaskPosition;
+                var maskLength = value!.Length - length;
+                var mask = string.Empty;
+                // 如果长度大于等于原始长度，则全部替换
+                if (maskLength <= 0)
+                {
+                    for (var i = 0; i < value.Length; i++)
+                    {
+                        mask += maskChar;
+                    }
+
+                    property.SetValue(item, mask);
+                    continue;
+                }
+
+                // 如果长度小于原始长度，则根据位置进行替换
+                for (var i = 0; i < maskLength; i++)
+                {
+                    mask += maskChar;
+                }
+
+                // 根据位置进行替换
+                switch (maskPosition)
+                {
+                    case MaskPosition.Front:
+                        property.SetValue(item, mask + value[maskLength..]);
+                        break;
+                    case MaskPosition.Middle:
+                        var middle = maskLength / 2;
+                        property.SetValue(item, value[..middle] + mask + value[(middle + length)..]);
+                        break;
+                    case MaskPosition.Back:
+                        property.SetValue(item, value[..maskLength] + mask);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
+
+        return sources;
     }
 
     /// <summary>
