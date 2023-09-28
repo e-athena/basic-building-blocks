@@ -4,8 +4,10 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>6.2.0-pre1.4</Version>
+        <Version>6.2.1-preview.20230928.1</Version>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageIcon>e-athena.png</PackageIcon>
+        <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -21,9 +23,16 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="OpenTelemetry.Exporter.Zipkin" Version="1.5.1" />
-        <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.5.1" />
+        <PackageReference Include="OpenTelemetry.Exporter.Zipkin" Version="1.6.0" />
+        <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.6.0" />
         <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9.14" />
         <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9.14" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="e-athena.png">
+        <Pack>True</Pack>
+        <PackagePath></PackagePath>
+      </None>
     </ItemGroup>
 </Project>

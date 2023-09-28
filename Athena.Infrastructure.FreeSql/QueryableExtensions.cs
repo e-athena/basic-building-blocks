@@ -1127,14 +1127,13 @@ public static class QueryableExtensions
                     continue;
                 }
 
-                // 如果禁用，则代表没有权限，直接替换为***
+                // 如果禁用，则代表没有权限，直接替换处理
                 if (!single.Enabled)
                 {
                     var propertyType = property.PropertyType;
-                    if (propertyType == typeof(string))
-                    {
-                        property.SetValue(item, "***");
-                    }
+                    property.SetValue(item,
+                        // 如果是字符串，则将数据替换为***， 其他数据类型，使用默认值
+                        propertyType == typeof(string) ? "***" : Activator.CreateInstance(propertyType));
 
                     continue;
                 }
@@ -1147,13 +1146,13 @@ public static class QueryableExtensions
 
                 // 根据长度和位置进行替换
                 var value = propertyValue.ToString();
-                var length = single.MaskLength;
+                var maskLength = single.MaskLength;
                 var maskChar = single.MaskChar;
                 var maskPosition = single.MaskPosition;
-                var maskLength = value!.Length - length;
+                var otherLength = value!.Length - maskLength;
                 var mask = string.Empty;
                 // 如果长度大于等于原始长度，则全部替换
-                if (maskLength <= 0)
+                if (otherLength <= 0)
                 {
                     for (var i = 0; i < value.Length; i++)
                     {
@@ -1174,14 +1173,15 @@ public static class QueryableExtensions
                 switch (maskPosition)
                 {
                     case MaskPosition.Front:
-                        property.SetValue(item, mask + value[maskLength..]);
+                        property.SetValue(item, mask + value[otherLength..]);
                         break;
                     case MaskPosition.Middle:
-                        var middle = maskLength / 2;
-                        property.SetValue(item, value[..middle] + mask + value[(middle + length)..]);
+                        var middle = otherLength / 2;
+                        // 将中间部分替换为掩码字符，长度要等于掩码长度
+                        property.SetValue(item, value[..middle] + mask + value[(maskLength + middle)..]);
                         break;
                     case MaskPosition.Back:
-                        property.SetValue(item, value[..maskLength] + mask);
+                        property.SetValue(item, value[..otherLength] + mask);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

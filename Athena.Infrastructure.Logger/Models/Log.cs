@@ -1,5 +1,3 @@
-using UAParser;
-
 namespace Athena.Infrastructure.Logger.Models;
 
 /// <summary>

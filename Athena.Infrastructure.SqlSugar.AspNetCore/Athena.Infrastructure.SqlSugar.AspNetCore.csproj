@@ -5,7 +5,9 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>6.0.2</Version>
+        <Version>6.0.3</Version>
+        <PackageIcon>e-athena.png</PackageIcon>
+        <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -23,6 +25,13 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Athena.Infrastructure.SqlSugar\Athena.Infrastructure.SqlSugar.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="e-athena.png">
+        <Pack>True</Pack>
+        <PackagePath></PackagePath>
+      </None>
     </ItemGroup>
 
 </Project>
