@@ -46,7 +46,8 @@ public class DefaultTenantService : ITenantService
         {
             ConnectionString = connectionString,
             DbKey = tenantCode,
-            DataType = (int) dbType
+            DataType = (int) dbType,
+            IsolationLevel = TenantIsolationLevel.Independent
         });
     }
 }

@@ -30,7 +30,7 @@ public class MultiTenancyMiddleware
     /// <param name="context"></param>
     public async Task Invoke(HttpContext context)
     {
-        if (!context.Request.Path.Value.StartsWith("/api/"))
+        if (!context.Request.Path.HasValue || !context.Request.Path.Value.StartsWith("/api/"))
         {
             await _next(context);
             return;
@@ -75,7 +75,8 @@ public class MultiTenancyMiddleware
 
             // 读取租户信息
             var tenant = await tenantService.GetAsync(tenantKey, GetAppId(context));
-            if (tenant == null)
+            // 租户不存在或者为共享租户
+            if (tenant == null || tenant.IsolationLevel == TenantIsolationLevel.Shared)
             {
                 // 切换为主租户
                 FreeSqlMultiTenancyManager.Instance.Change(Constant.DefaultMainTenant);

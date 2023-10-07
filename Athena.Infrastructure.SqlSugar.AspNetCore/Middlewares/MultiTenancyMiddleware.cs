@@ -68,7 +68,8 @@ public class MultiTenancyMiddleware
 
             // 读取租户信息
             var tenant = await tenantService.GetAsync(tenantKey, GetAppId(context));
-            if (tenant == null)
+            // 租户不存在或者为共享租户
+            if (tenant == null || tenant.IsolationLevel == TenantIsolationLevel.Shared)
             {
                 _sqlSugarClient.AsTenant().ChangeDatabase(Constant.DefaultMainTenant);
                 await _next(context);

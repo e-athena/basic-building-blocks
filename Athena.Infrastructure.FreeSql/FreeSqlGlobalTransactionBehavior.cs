@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using Athena.Infrastructure.Event.IntegrationEvents;
 using Microsoft.AspNetCore.Http;
 
 namespace Athena.Infrastructure.FreeSql;

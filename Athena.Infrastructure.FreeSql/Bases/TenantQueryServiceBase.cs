@@ -22,6 +22,23 @@ public class TenantQueryServiceBase<T> : QueryServiceBase<T> where T : class
     }
 
     /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="multiTenancy"></param>
+    /// <param name="tenantService"></param>
+    /// <param name="accessor"></param>
+    public TenantQueryServiceBase(
+        FreeSqlMultiTenancy multiTenancy,
+        ITenantService tenantService,
+        ISecurityContextAccessor accessor
+    )
+        : base(multiTenancy.Change(Constant.DefaultMainTenant), accessor)
+    {
+        _multiTenancy = multiTenancy;
+        _tenantService = tenantService;
+    }
+
+    /// <summary>
     /// 切换租户
     /// </summary>
     /// <param name="tenantId">租户ID</param>

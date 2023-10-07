@@ -299,7 +299,7 @@ public class SecurityContextAccessor : ISecurityContextAccessor
             new(JwtRegisteredClaimNames.Nbf, $"{new DateTimeOffset(DateTime.Now).ToUnixTimeSeconds()}"),
             new(JwtRegisteredClaimNames.Iat, $"{new DateTimeOffset(DateTime.Now).ToUnixTimeSeconds()}"),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")),
-            new("AppId", config.AppId ?? string.Empty),
+            new("AppId", config.AppId ?? string.Empty)
         });
         //sign the token using a secret key.This secret will be shared between your API and anything that needs to check that the token is legit.
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.SecurityKey));

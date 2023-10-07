@@ -1,5 +1,3 @@
-using Athena.Infrastructure.Event.IntegrationEvents;
-
 namespace Athena.Infrastructure.FreeSql.Bases;
 
 /// <summary>
@@ -10,7 +8,6 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
 {
     private const string DomainEventKey = "DomainEvent";
     private const string IntegrationEventKey = "IntegrationEvent";
-    private readonly IFreeSql _freeSql;
     private ConcurrentDictionary<string, object?>? _repositories;
     private UnitOfWorkManager? _unitOfWorkManager;
 
@@ -21,7 +18,17 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
     public ServiceBase(UnitOfWorkManager unitOfWorkManager) : base(unitOfWorkManager.Orm)
     {
         _unitOfWorkManager = unitOfWorkManager;
-        _freeSql = unitOfWorkManager.Orm;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="unitOfWorkManager"></param>
+    /// <param name="accessor"></param>
+    public ServiceBase(UnitOfWorkManager unitOfWorkManager, ISecurityContextAccessor accessor) :
+        base(unitOfWorkManager.Orm, accessor)
+    {
+        _unitOfWorkManager = unitOfWorkManager;
     }
 
     /// <summary>
@@ -139,7 +146,10 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
     /// <returns></returns>
     protected override ISelect<T1> Query<T1>()
     {
-        return GetOtherRepository<T1, string>().Select;
+        // 如果T1是ValueObject,，则使用long
+        return typeof(ValueObject).IsAssignableFrom(typeof(T1))
+            ? GetOtherRepository<T1, long>().Select
+            : GetOtherRepository<T1, string>().Select;
     }
 
     #endregion
@@ -156,12 +166,17 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
         }
 
         _repositories ??= new ConcurrentDictionary<string, object?>();
-
-        if (_repositories.GetOrAdd(typeof(TEntity).Name,
-                new DefaultRepository<TEntity, TEntityKey>(_unitOfWorkManager?.Orm, _unitOfWorkManager)) is not
+        var entityKey = typeof(TEntity).Name;
+        if (_repositories.GetOrAdd(entityKey,
+                new DefaultRepository<TEntity, TEntityKey>(FreeSqlDbContext, _unitOfWorkManager)) is not
             DefaultRepository<TEntity, TEntityKey> repository)
         {
             throw new ArgumentNullException(nameof(repository), "获取[DefaultRepository]失败");
+        }
+
+        if (!typeof(ITenant).IsAssignableFrom(typeof(TEntity)))
+        {
+            repository.DataFilter.Disable(DefaultTenant, OtherTenant);
         }
 
         return repository;
@@ -177,11 +192,17 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
 
         _repositories ??= new ConcurrentDictionary<string, object?>();
 
-        if (_repositories.GetOrAdd(typeof(TEntity).Name,
-                new DefaultRepository<TEntity, TEntityKey>(_unitOfWorkManager?.Orm, _unitOfWorkManager)) is not
+        var entityKey = typeof(TEntity).Name;
+        if (_repositories.GetOrAdd(entityKey,
+                new DefaultRepository<TEntity, TEntityKey>(FreeSqlDbContext, _unitOfWorkManager)) is not
             DefaultRepository<TEntity, TEntityKey> repository)
         {
             throw new ArgumentNullException(nameof(repository), "获取[DefaultRepository]失败");
+        }
+
+        if (!typeof(ITenant).IsAssignableFrom(typeof(TEntity)))
+        {
+            repository.DataFilter.Disable(DefaultTenant, OtherTenant);
         }
 
         return repository;
@@ -200,12 +221,13 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
         _repositories ??= new ConcurrentDictionary<string, object?>();
 
         if (_repositories.GetOrAdd(typeof(TValueObject).Name,
-                new DefaultRepository<TValueObject, long>(_unitOfWorkManager?.Orm, _unitOfWorkManager)) is not
+                new DefaultRepository<TValueObject, long>(FreeSqlDbContext, _unitOfWorkManager)) is not
             DefaultRepository<TValueObject, long> repository)
         {
             throw new ArgumentNullException(nameof(repository), "获取[DefaultRepository]失败");
         }
 
+        repository.DataFilter.Disable(DefaultTenant, OtherTenant);
         return repository;
     }
 
@@ -413,6 +435,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
             throw new ArgumentNullException(nameof(entity));
         }
 
+        SetOtherValues(entity);
         TryAddEvent(entity);
 
         return GetDefaultRepository<T, TEntityKey>().Insert(entity);
@@ -432,6 +455,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
             throw new ArgumentNullException(nameof(entity));
         }
 
+        SetOtherValues(entity);
         TryAddEvent(entity);
 
         return GetDefaultRepository<TEntity, TEntityKey>().Insert(entity);
@@ -451,6 +475,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
             throw new ArgumentNullException(nameof(entity));
         }
 
+        SetOtherValues(entity);
         TryAddEvent(entity);
 
         return GetDefaultRepository<T, TEntityKey>().InsertAsync(entity, cancellationToken);
@@ -472,6 +497,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
             throw new ArgumentNullException(nameof(entity));
         }
 
+        SetOtherValues(entity);
         TryAddEvent(entity);
 
         return GetDefaultRepository<TEntity, TEntityKey>().InsertAsync(entity, cancellationToken);
@@ -541,6 +567,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
 
         foreach (var entity in entities)
         {
+            SetOtherValues(entity);
             TryAddEvent(entity);
         }
 
@@ -564,6 +591,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
 
         foreach (var entity in entities)
         {
+            SetOtherValues(entity);
             TryAddEvent(entity);
         }
 
@@ -587,6 +615,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
 
         foreach (var entity in entities)
         {
+            SetOtherValues(entity);
             TryAddEvent(entity);
         }
 
@@ -611,6 +640,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
 
         foreach (var entity in entities)
         {
+            SetOtherValues(entity);
             TryAddEvent(entity);
         }
 
@@ -967,14 +997,14 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
     /// <summary>
     /// Repository
     /// </summary>
-    protected IBaseRepository<T, string> Repository => _freeSql.GetRepository<T, string>();
+    protected IBaseRepository<T, string> Repository => FreeSqlDbContext.GetRepository<T, string>();
 
     /// <summary>
     /// Repository
     /// </summary>
     protected IBaseRepository<T1, string> GetRepository<T1>() where T1 : class
     {
-        return _freeSql.GetRepository<T1, string>();
+        return FreeSqlDbContext.GetRepository<T1, string>();
     }
 
     /// <summary>
@@ -982,7 +1012,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
     /// </summary>
     protected IBaseRepository<T1, TKey> GetRepository<T1, TKey>() where T1 : class
     {
-        return _freeSql.GetRepository<T1, TKey>();
+        return FreeSqlDbContext.GetRepository<T1, TKey>();
     }
 
     /// <summary>
@@ -1003,5 +1033,38 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
     private static string GetIntegrationEventKey(string id)
     {
         return $"{IntegrationEventKey},{id}";
+    }
+
+
+    /// <summary>
+    /// 动态设置其他值
+    /// </summary>
+    /// <param name="entity"></param>
+    /// <typeparam name="TEntity"></typeparam>
+    private void SetOtherValues<TEntity>(TEntity entity)
+        where TEntity : EntityCore, new()
+    {
+        // 租户ID
+        // 如果实体实现了ITenant接口并且当前环境为租户环境，则设置租户ID
+        if (typeof(ITenant).IsAssignableFrom(typeof(TEntity)) && IsTenantEnvironment)
+        {
+            // 动态设置租户ID
+            typeof(TEntity).GetProperty(nameof(ITenant.TenantId))?.SetValue(entity, TenantId);
+        }
+
+        // 创建人
+        if (typeof(ICreator).IsAssignableFrom(typeof(TEntity)))
+        {
+            // 动态设置创建人
+            typeof(TEntity).GetProperty(nameof(ICreator.CreatedUserId))?.SetValue(entity, UserId);
+        }
+
+        // 组织架构
+        if (typeof(IOrganization).IsAssignableFrom(typeof(TEntity)))
+        {
+            // 动态设置组织架构
+            typeof(TEntity).GetProperty(nameof(IOrganization.OrganizationalUnitIds))
+                ?.SetValue(entity, OrganizationalUnitIds);
+        }
     }
 }

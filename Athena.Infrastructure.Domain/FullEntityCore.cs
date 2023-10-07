@@ -40,6 +40,12 @@ public class FullEntityCore : EntityCore, IFullCore
     public string? OrganizationalUnitIds { get; set; }
 
     /// <summary>
+    /// 租户ID
+    /// </summary>
+    [MaxLength(36)]
+    public string? TenantId { get; set; }
+
+    /// <summary>
     /// 
     /// </summary>
     public FullEntityCore()

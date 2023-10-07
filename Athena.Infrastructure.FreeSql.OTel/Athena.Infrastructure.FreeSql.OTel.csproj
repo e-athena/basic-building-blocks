@@ -4,7 +4,7 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>6.2.1-preview.20230928.1</Version>
+        <Version>6.2.1-preview.20231002.1</Version>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageIcon>e-athena.png</PackageIcon>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>

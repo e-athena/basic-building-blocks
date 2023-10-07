@@ -70,6 +70,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Infrastructure.Event
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Infrastructure.NewLifeRedis", "Athena.Infrastructure.NewLifeRedis\Athena.Infrastructure.NewLifeRedis.csproj", "{8C7802FE-F12E-41C3-B65C-07C72813FF0F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Infrastructure.FreeSql.Test", "Athena.Infrastructure.FreeSql.Test\Athena.Infrastructure.FreeSql.Test.csproj", "{91AC01E1-CE9A-479C-926E-9AD543BC60E3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -212,8 +214,13 @@ Global
 		{8C7802FE-F12E-41C3-B65C-07C72813FF0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8C7802FE-F12E-41C3-B65C-07C72813FF0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8C7802FE-F12E-41C3-B65C-07C72813FF0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91AC01E1-CE9A-479C-926E-9AD543BC60E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91AC01E1-CE9A-479C-926E-9AD543BC60E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91AC01E1-CE9A-479C-926E-9AD543BC60E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91AC01E1-CE9A-479C-926E-9AD543BC60E3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{8487FB7B-8DBB-414E-B707-CF8FFC285C75} = {E5B19187-0A21-4BC1-9690-2727240C2158}
+		{91AC01E1-CE9A-479C-926E-9AD543BC60E3} = {E5B19187-0A21-4BC1-9690-2727240C2158}
 	EndGlobalSection
 EndGlobal

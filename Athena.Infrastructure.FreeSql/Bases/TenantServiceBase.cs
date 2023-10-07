@@ -30,6 +30,25 @@ public class TenantServiceBase<T> : ServiceBase<T> where T : EntityCore, new()
     }
 
     /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="cloud"></param>
+    /// <param name="tenantService"></param>
+    /// <param name="factory"></param>
+    /// <param name="accessor"></param>
+    public TenantServiceBase(
+        UnitOfWorkManagerCloud cloud,
+        ITenantService tenantService,
+        ILoggerFactory factory,
+        ISecurityContextAccessor accessor
+    ) : base(cloud.GetUnitOfWorkManager(Constant.DefaultMainTenant), accessor)
+    {
+        _cloud = cloud;
+        _tenantService = tenantService;
+        _logger = factory.CreateLogger(GetType());
+    }
+
+    /// <summary>
     /// 切换租户
     /// </summary>
     /// <param name="tenantId">租户ID</param>
