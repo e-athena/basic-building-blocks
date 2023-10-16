@@ -246,7 +246,7 @@ public class DataPermissionQueryServiceBase<T> : QueryServiceBase<T> where T : F
 
         if (organizationIds.Count <= 0)
         {
-            return QueryableExtensions.MakeFilterWhere<TResult>(filters, false);
+            return filters.MakeFilterWhere<TResult>(false);
         }
 
         // 去重

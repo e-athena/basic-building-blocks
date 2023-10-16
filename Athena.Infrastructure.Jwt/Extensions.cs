@@ -1,4 +1,5 @@
 // ReSharper disable once CheckNamespace
+
 namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
@@ -15,14 +16,34 @@ public static class Extensions
             .AddJwtBearer(options =>
             {
                 config.Bind("JwtBearer", options);
+                options.ForwardDefaultSelector = context =>
+                {
+                    if (context.Request.Path.StartsWithSegments("/cap"))
+                    {
+                        return CapCookieAuthenticationDefaults.AuthenticationScheme;
+                    }
+
+                    return JwtBearerDefaults.AuthenticationScheme;
+                };
                 configureOptions?.Invoke(options);
-            });
+            })
+            .AddCookie(CapCookieAuthenticationDefaults.AuthenticationScheme,
+                options =>
+                {
+                    // 
+                    options.LoginPath = "/cap/login";
+                });
 
         services.AddAuthorization(options =>
         {
             options.AddPolicy(JwtBearerDefaults.AuthenticationScheme, policy =>
             {
                 policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
+                policy.RequireClaim(ClaimTypes.Name);
+            });
+            options.AddPolicy(CapCookieAuthenticationDefaults.AuthenticationScheme, policy =>
+            {
+                policy.AddAuthenticationSchemes(CapCookieAuthenticationDefaults.AuthenticationScheme);
                 policy.RequireClaim(ClaimTypes.Name);
             });
         });

@@ -1,38 +1,39 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>6.5.5</Version>
+        <Version>7.0.0-preview.20231013.1</Version>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
         <PackageIcon>e-athena.png</PackageIcon>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <DocumentationFile>bin\Debug\net6.0\Athena.Infrastructure.Event.xml</DocumentationFile>
+        <DocumentationFile>bin\Debug\Athena.Infrastructure.Event.xml</DocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <DocumentationFile>bin\Release\net6.0\Athena.Infrastructure.Event.xml</DocumentationFile>
+        <DocumentationFile>bin\Release\Athena.Infrastructure.Event.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Athena.Infrastructure\Athena.Infrastructure.csproj" />
+        <ProjectReference Include="..\Athena.Infrastructure\Athena.Infrastructure.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="DotNetCore.CAP" Version="6.2.1" />
-        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
-        <PackageReference Include="Rougamo.Fody" Version="1.4.1" />
+        <PackageReference Include="DotNetCore.CAP" Version="7.2.1"/>
+        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0"/>
+        <PackageReference Include="Rougamo.Fody" Version="2.0.0"/>
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="e-athena.png">
-        <Pack>True</Pack>
-        <PackagePath></PackagePath>
-      </None>
+        <Resource Include="e-athena.png">
+            <Pack>True</Pack>
+            <PackagePath/>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Resource>
     </ItemGroup>
 
 </Project>

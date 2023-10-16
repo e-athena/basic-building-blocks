@@ -152,16 +152,36 @@ public class SecurityContextAccessor : ISecurityContextAccessor
         get
         {
             var jwtToken = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"];
-            if (!string.IsNullOrEmpty(jwtToken))
+            if (jwtToken?.Count > 0)
             {
-                return jwtToken;
+                return jwtToken.Value.ToString();
             }
 
             jwtToken = _httpContextAccessor.HttpContext?.Request.Query["access_token"].ToString();
-            return (string.IsNullOrEmpty(jwtToken)
-                ? _httpContextAccessor.HttpContext?.Request.Query["AccessToken"]
-                : jwtToken) ?? string.Empty;
+
+            if (jwtToken?.Count > 0)
+            {
+                return jwtToken.Value.ToString();
+            }
+
+            jwtToken = _httpContextAccessor.HttpContext?.Request.Query["AccessToken"];
+
+            return jwtToken?.Count > 0 ? jwtToken.Value.ToString() : string.Empty;
         }
+
+        // get
+        // {
+        //     var jwtToken = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"];
+        //     if (!string.IsNullOrEmpty(jwtToken))
+        //     {
+        //         return jwtToken;
+        //     }
+        //
+        //     jwtToken = _httpContextAccessor.HttpContext?.Request.Query["access_token"].ToString();
+        //     return (string.IsNullOrEmpty(jwtToken)
+        //         ? _httpContextAccessor.HttpContext?.Request.Query["AccessToken"]
+        //         : jwtToken) ?? string.Empty;
+        // }
     }
 
     /// <summary>
@@ -180,15 +200,39 @@ public class SecurityContextAccessor : ISecurityContextAccessor
         }
     }
 
+    // /// <summary>
+    // /// 浏览器信息
+    // /// </summary>
+    // public string UserAgent => _httpContextAccessor.HttpContext?.Request.Headers["User-Agent"] ?? string.Empty;
+
     /// <summary>
     /// 浏览器信息
     /// </summary>
-    public string UserAgent => _httpContextAccessor.HttpContext?.Request.Headers["User-Agent"] ?? string.Empty;
+    public string UserAgent
+    {
+        get
+        {
+            var value = _httpContextAccessor.HttpContext?.Request.Headers["User-Agent"];
+            return value?.Count > 0 ? value.Value.ToString() : string.Empty;
+        }
+    }
+
+    // /// <summary>
+    // /// Ip地址
+    // /// </summary>
+    // public string IpAddress => _httpContextAccessor.HttpContext?.Request.Headers["X-Real-IP"] ?? string.Empty;
 
     /// <summary>
     /// Ip地址
     /// </summary>
-    public string IpAddress => _httpContextAccessor.HttpContext?.Request.Headers["X-Real-IP"] ?? string.Empty;
+    public string IpAddress
+    {
+        get
+        {
+            var value = _httpContextAccessor.HttpContext?.Request.Headers["X-Real-IP"];
+            return value?.Count > 0 ? value.Value.ToString() : string.Empty;
+        }
+    }
 
     /// <summary>
     /// 是否已授权

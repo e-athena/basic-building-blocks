@@ -1,5 +1,3 @@
-using System.Collections.Concurrent;
-
 namespace Athena.Infrastructure.ApiPermission.Helpers;
 
 /// <summary>
@@ -12,7 +10,7 @@ public static class ApiPermissionHelper
     /// </summary>
     /// <param name="assembly">默认读取当前的程序集</param>
     /// <returns></returns>
-    public static List<ResourceTreeInfo> GetResources<TType>(Assembly? assembly = null)
+    public static IEnumerable<ResourceTreeInfo> GetResources<TType>(Assembly? assembly = null)
     {
         if (assembly == null)
         {

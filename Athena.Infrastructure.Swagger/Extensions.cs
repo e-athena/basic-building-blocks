@@ -1,5 +1,7 @@
 // ReSharper disable once CheckNamespace
 
+using Athena.Infrastructure.Swagger;
+
 namespace Microsoft.Extensions.DependencyInjection;
 
 public static class Extensions
@@ -58,16 +60,27 @@ public static class Extensions
         OpenApiInfo openApiInfo,
         Action<SwaggerGenOptions>? configAction = null)
     {
+        services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(config =>
         {
-            config.SwaggerDoc("v1", openApiInfo);
+            // config.SwaggerDoc("v1", openApiInfo);
+            typeof(ApiVersions).GetEnumNames().ToList().ForEach(version =>
+            {
+                config.SwaggerDoc(version.ToLower(), new OpenApiInfo
+                {
+                    Title = $"{openApiInfo.Title} {version.ToLower()}",
+                    Version = version.ToLower(),
+                    Contact = openApiInfo.Contact
+                });
+            });
+
             // 添加HTTP Header参数
             config.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
-                Description = "JWT Authorization header using the Bearer scheme.",
+                Description = "请输入JWT Token，不需要输入Bearer",
                 Name = "Authorization",
                 In = ParameterLocation.Header,
-                Scheme = "bearer",
+                Scheme = "Bearer",
                 Type = SecuritySchemeType.Http,
                 BearerFormat = "JWT"
             });
@@ -105,28 +118,43 @@ public static class Extensions
     /// Register the Swagger middleware with optional setup action for DI-injected options
     /// </summary>
     public static IApplicationBuilder UseCustomSwagger(
-        this IApplicationBuilder app,
+        this WebApplication app,
+        // 开发环境下启用Swagger
+        bool isDevelopment = true,
         Action<SwaggerOptions>? setupAction = null,
         Action<SwaggerUIOptions>? setupAction1 = null,
         Action<ReDocOptions>? setupAction2 = null)
     {
+        // 开发环境下启用Swagger
+        if (isDevelopment && !app.Environment.IsDevelopment())
+        {
+            return app;
+        }
+
         app.UseSwagger(opts => { setupAction?.Invoke(opts); });
         app.UseSwaggerUI(options =>
         {
-            options.SwaggerEndpoint("/swagger/v1/swagger.json", "Swagger APIs");
+            // options.SwaggerEndpoint("/swagger/v1/swagger.json", "Swagger APIs");
+
+            typeof(ApiVersions).GetEnumNames().ToList().ForEach(version =>
+            {
+                options.SwaggerEndpoint($"/swagger/{version.ToLower()}/swagger.json", $"{version} APIs");
+            });
+
+
             setupAction1?.Invoke(options);
         });
-        app.UseReDoc(options =>
-        {
-            options.RoutePrefix = "api-docs";
-            options.SpecUrl = "/swagger/v1/swagger.json";
-            options.ConfigObject = new Swashbuckle.AspNetCore.ReDoc.ConfigObject
-            {
-                HideDownloadButton = true,
-                HideLoading = true
-            };
-            setupAction2?.Invoke(options);
-        });
+        // app.UseReDoc(options =>
+        // {
+        //     options.RoutePrefix = "api-docs";
+        //     options.SpecUrl = "/swagger/v1/swagger.json";
+        //     options.ConfigObject = new Swashbuckle.AspNetCore.ReDoc.ConfigObject
+        //     {
+        //         HideDownloadButton = true,
+        //         HideLoading = true
+        //     };
+        //     setupAction2?.Invoke(options);
+        // });
         return app;
     }
 }

@@ -9,9 +9,14 @@ public static class CapConstant
     /// 发布表名
     /// </summary>
     public const string PublishedTableName = "cap_published";
-    
+
     /// <summary>
     /// 接收表名
     /// </summary>
     public const string ReceivedTableName = "cap_received";
+
+    /// <summary>
+    /// 锁表名
+    /// </summary>
+    public const string LockTableName = "cap_lock";
 }

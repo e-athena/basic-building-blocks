@@ -36,7 +36,7 @@ public static class Extensions
 
         foreach (var env in config.GetChildren())
         {
-            model.Environments.Add(env.Key, env.Value);
+            if (env.Value != null) model.Environments.Add(env.Key, env.Value);
         }
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

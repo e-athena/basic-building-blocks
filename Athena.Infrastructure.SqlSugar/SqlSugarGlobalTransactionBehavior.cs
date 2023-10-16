@@ -1,5 +1,5 @@
 ﻿using System.Data;
-using Athena.Infrastructure.Event.IntegrationEvents;
+using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
 
 namespace Athena.Infrastructure.SqlSugar;
@@ -15,7 +15,7 @@ public class SqlSugarGlobalTransactionBehavior<TRequest, TResponse> : IPipelineB
     private readonly ISqlSugarClient _sqlSugarClient;
     private readonly IDomainEventContext _domainEventContext;
     private readonly IIntegrationEventContext _integrationEventContext;
-    private readonly IMediator _mediator;
+    private readonly IPublisher _publisher;
     private readonly ILogger<SqlSugarGlobalTransactionBehavior<TRequest, TResponse>> _logger;
     private readonly ICapPublisher? _capPublisher;
     private readonly IHttpContextAccessor? _httpContextAccessor;
@@ -23,7 +23,7 @@ public class SqlSugarGlobalTransactionBehavior<TRequest, TResponse> : IPipelineB
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="mediator"></param>
+    /// <param name="publisher"></param>
     /// <param name="loggerFactory"></param>
     /// <param name="sqlSugarClient"></param>
     /// <param name="domainEventContext"></param>
@@ -32,14 +32,14 @@ public class SqlSugarGlobalTransactionBehavior<TRequest, TResponse> : IPipelineB
     /// <param name="httpContextAccessor"></param>
     /// <exception cref="ArgumentNullException"></exception>
     public SqlSugarGlobalTransactionBehavior(
-        IMediator mediator,
+        IPublisher publisher,
         ILoggerFactory loggerFactory,
         ISqlSugarClient sqlSugarClient,
         IDomainEventContext domainEventContext,
         IIntegrationEventContext integrationEventContext,
         IServiceProvider serviceProvider, IHttpContextAccessor? httpContextAccessor)
     {
-        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+        _publisher = publisher ?? throw new ArgumentNullException(nameof(publisher));
         _logger = loggerFactory.CreateLogger<SqlSugarGlobalTransactionBehavior<TRequest, TResponse>>();
         _sqlSugarClient = sqlSugarClient;
         _domainEventContext = domainEventContext;
@@ -61,10 +61,17 @@ public class SqlSugarGlobalTransactionBehavior<TRequest, TResponse> : IPipelineB
         CancellationToken cancellationToken = default
     )
     {
-        if (request is not ITransactionRequest)
+        if (
+            request is not ITxTraceRequest<TResponse> &&
+            request is not ITxRequest<TResponse> &&
+            request is not ITransactionRequest
+        )
         {
             return await next();
         }
+
+        var txRequest = request as ITxTraceRequest<TResponse>;
+        var rootTraceId = txRequest?.RootTraceId ?? Activity.Current?.TraceId.ToString();
 
         IDbConnection? dbConnection = null;
         IDbTransaction? dbTransaction = null;
@@ -78,9 +85,17 @@ public class SqlSugarGlobalTransactionBehavior<TRequest, TResponse> : IPipelineB
             }
             else
             {
-                var scope = _sqlSugarClient.AsTenant().GetConnectionScope(TenantId);
-                scope.CurrentConnectionConfig.IsAutoCloseConnection = false;
-                dbConnection = scope.Ado.Connection;
+                if (_sqlSugarClient.AsTenant().IsAnyConnection(TenantId))
+                {
+                    var scope = _sqlSugarClient.AsTenant().GetConnectionScope(TenantId);
+                    scope.CurrentConnectionConfig.IsAutoCloseConnection = false;
+                    dbConnection = scope.Ado.Connection;
+                }
+                else
+                {
+                    _sqlSugarClient.CurrentConnectionConfig.IsAutoCloseConnection = false;
+                    dbConnection = _sqlSugarClient.Ado.Connection;
+                }
             }
 
             if (dbConnection.State != ConnectionState.Open)
@@ -102,9 +117,9 @@ public class SqlSugarGlobalTransactionBehavior<TRequest, TResponse> : IPipelineB
             // 执行方法
             var response = await next();
             // 领域事件发布处理
-            await DomainEventHandleAsync(cancellationToken);
+            await DomainEventHandleAsync(rootTraceId, cancellationToken);
             // 集成事件发布处理
-            await IntegrationEventHandleAsync(cancellationToken);
+            await IntegrationEventHandleAsync(rootTraceId, cancellationToken);
             // 提交事务
             Commit(capTransaction, dbTransaction);
             return response;
@@ -159,8 +174,9 @@ public class SqlSugarGlobalTransactionBehavior<TRequest, TResponse> : IPipelineB
     /// <summary>
     /// 领域事件处理
     /// </summary>
+    /// <param name="rootTraceId"></param>
     /// <param name="cancellationToken"></param>
-    private async Task DomainEventHandleAsync(CancellationToken cancellationToken)
+    private async Task DomainEventHandleAsync(string? rootTraceId, CancellationToken cancellationToken)
     {
         // 多层领域事件发布处理
         do
@@ -174,7 +190,9 @@ public class SqlSugarGlobalTransactionBehavior<TRequest, TResponse> : IPipelineB
             foreach (var @event in events)
             {
                 // publish
-                await _mediator.Publish(@event, cancellationToken);
+                @event.RootTraceId ??= rootTraceId;
+                @event.RootTraceId ??= Guid.NewGuid().ToString("N");
+                await _publisher.Publish(@event, cancellationToken);
             }
         } while (true);
     }
@@ -183,8 +201,9 @@ public class SqlSugarGlobalTransactionBehavior<TRequest, TResponse> : IPipelineB
     /// 集成事件处理
     /// <remarks>集成事件依赖CAP</remarks>
     /// </summary>
+    /// <param name="rootTraceId"></param>
     /// <param name="cancellationToken"></param>
-    private async Task IntegrationEventHandleAsync(CancellationToken cancellationToken)
+    private async Task IntegrationEventHandleAsync(string? rootTraceId, CancellationToken cancellationToken)
     {
         if (_capPublisher == null)
         {
@@ -207,6 +226,21 @@ public class SqlSugarGlobalTransactionBehavior<TRequest, TResponse> : IPipelineB
             {
                 @event.TenantId = tenantId;
                 @event.AppId = appId;
+                @event.RootTraceId ??= rootTraceId;
+                @event.RootTraceId ??= Guid.NewGuid().ToString("N");
+
+                if (@event is {IsDelayMessage: true, DelayTime: not null})
+                {
+                    await _capPublisher.PublishDelayAsync(
+                        @event.DelayTime.Value,
+                        @event.EventName,
+                        @event,
+                        @event.CallbackName,
+                        cancellationToken
+                    );
+                    continue;
+                }
+
                 await _capPublisher.PublishAsync(
                     @event.EventName,
                     @event,

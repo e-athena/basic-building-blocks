@@ -105,12 +105,13 @@ public class RedisCacheAdapter : ICacheManager
 
     public byte[] Get(string key)
     {
-        return _redisService.Get(key);
+        return _redisService.Get(key) ?? throw new Exception($"Redis缓存中不存在Key为{key}的数据");
     }
 
     public async Task<byte[]> GetAsync(string key, CancellationToken cancellationToken = default)
     {
-        return await _redisService.GetAsync(key, cancellationToken);
+        return (await _redisService.GetAsync(key, cancellationToken)) ??
+               throw new Exception($"Redis缓存中不存在Key为{key}的数据");
     }
 
     public TItem? GetOrCreate<TItem>(string key, Func<TItem> factory, TimeSpan timeSpan)
@@ -207,12 +208,13 @@ public class RedisCacheAdapter : ICacheManager
 
     public string GetString(string key)
     {
-        return _redisService.GetString(key);
+        return _redisService.GetString(key) ?? throw new Exception($"Redis缓存中不存在Key为{key}的数据");
     }
 
     public async Task<string> GetStringAsync(string key, CancellationToken cancellationToken = default)
     {
-        return await _redisService.GetStringAsync(key, token: cancellationToken);
+        return (await _redisService.GetStringAsync(key, token: cancellationToken)) ??
+               throw new Exception($"Redis缓存中不存在Key为{key}的数据");
     }
 
     public void Remove(string key)

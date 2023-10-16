@@ -40,7 +40,7 @@ public interface IIntegrationEvent
     /// 租户Id
     /// </summary>
     string? TenantId { get; set; }
-    
+
     /// <summary>
     /// 应用ID
     /// </summary>
@@ -50,4 +50,14 @@ public interface IIntegrationEvent
     /// CAP CallbackName
     /// </summary>
     string? CallbackName { get; set; }
+
+    /// <summary>
+    /// 是否为延迟消息
+    /// </summary>
+    bool IsDelayMessage { get; set; }
+
+    /// <summary>
+    /// 延迟时间
+    /// </summary>
+    TimeSpan? DelayTime { get; set; }
 }

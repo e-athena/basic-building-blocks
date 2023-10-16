@@ -1,8 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Reflection;
 using System.Text.Json.Serialization;
-using Athena.Infrastructure.Providers;
 
 namespace Athena.Infrastructure.SqlSugar.Helpers;
 
@@ -29,7 +27,7 @@ public static class SqlSugarBuilderHelper
         tenant.AddConnection(GetConnectionConfig(tenantId, connectionString, dataType));
         return tenant.GetConnectionScope(tenantId);
     }
-    
+
     /// <summary>
     /// 读取链接配置
     /// </summary>
@@ -108,6 +106,13 @@ public static class SqlSugarBuilderHelper
                         column.IsEnableUpdateVersionValidation = true;
                     }
 
+                    if (attributes.Any(it => it is FieldSortAttribute))
+                    {
+                        column.CreateTableFieldSort =
+                            ((FieldSortAttribute) attributes.First(it => it is FieldSortAttribute))
+                            .Value;
+                    }
+
                     if (column.IsPrimarykey == false && property.PropertyType.IsGenericType &&
                         property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
                     {
@@ -130,6 +135,11 @@ public static class SqlSugarBuilderHelper
                             .Name;
                     }
                 }
+            },
+            MoreSettings = new ConnMoreSettings()
+            {
+                SqliteCodeFirstEnableDefaultValue = true,
+                SqliteCodeFirstEnableDescription = true
             }
         };
     }

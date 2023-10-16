@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Athena.Infrastructure.Logger.Models;
 
 /// <summary>
@@ -143,16 +145,19 @@ public class Log
     /// <summary>
     /// 浏览器
     /// </summary>
+    [JsonIgnore]
     public string? Browser => UserAgentInfo?.UA.ToString();
 
     /// <summary>
     /// 操作系统
     /// </summary>
+    [JsonIgnore]
     public string? Os => UserAgentInfo?.OS.ToString();
 
     /// <summary>
     /// 设备
     /// </summary>
+    [JsonIgnore]
     public string? Device => UserAgentInfo?.Device.ToString();
 
     #endregion

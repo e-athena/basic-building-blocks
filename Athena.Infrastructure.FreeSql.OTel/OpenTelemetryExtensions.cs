@@ -25,7 +25,7 @@ public static class OpenTelemetryExtensions
         services.AddOpenTelemetry()
             // Build a resource configuration action to set service information.
             .ConfigureResource(r => r.AddService(
-                serviceName: configuration.GetValue<string>("ServiceName"),
+                serviceName: configuration.GetValue<string>("ServiceName") ?? "unknown",
                 serviceVersion: typeof(T).Assembly.GetName().Version?.ToString() ?? "unknown",
                 serviceInstanceId: Environment.MachineName)
             )

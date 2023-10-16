@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Version>7.0.0-preview.20231014.4</Version>
+        <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
+        <PackageIcon>e-athena.png</PackageIcon>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="FreeSql.Provider.MySqlConnector" Version="3.2.801"/>
+        <PackageReference Include="FreeSql.Provider.SqliteCore" Version="3.2.801"/>
+        <PackageReference Include="SQLitePCLRaw.bundle_e_sqlcipher" Version="2.1.6"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Athena.All\Athena.All.csproj"/>
+        <ProjectReference Include="..\Athena.Infrastructure.EventTracking.FreeSql\Athena.Infrastructure.EventTracking.FreeSql.csproj"/>
+        <ProjectReference Include="..\Athena.Infrastructure.FreeSql.AspNetCore\Athena.Infrastructure.FreeSql.AspNetCore.csproj"/>
+        <ProjectReference Include="..\Athena.Infrastructure.Logger.FreeSql\Athena.Infrastructure.Logger.FreeSql.csproj"/>
+        <ProjectReference Include="..\Athena.Infrastructure.DataPermission.FreeSql\Athena.Infrastructure.DataPermission.FreeSql.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Resource Include="e-athena.png">
+            <Pack>True</Pack>
+            <PackagePath/>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Resource>
+    </ItemGroup>
+</Project>

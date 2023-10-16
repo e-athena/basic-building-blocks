@@ -1,4 +1,4 @@
-using Athena.Infrastructure.Event.IntegrationEvents;
+using ITenant = Athena.Infrastructure.Domain.ITenant;
 
 namespace Athena.Infrastructure.SqlSugar.Bases;
 
@@ -18,6 +18,17 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
     /// </summary>
     /// <param name="sqlSugarClient"></param>
     public ServiceBase(ISqlSugarClient sqlSugarClient) : base(sqlSugarClient)
+    {
+        _sqlSugarClient = sqlSugarClient;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="sqlSugarClient"></param>
+    /// <param name="accessor"></param>
+    public ServiceBase(ISqlSugarClient sqlSugarClient, ISecurityContextAccessor accessor) :
+        base(sqlSugarClient, accessor)
     {
         _sqlSugarClient = sqlSugarClient;
     }
@@ -104,8 +115,58 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
         return entity;
     }
 
+    #region Query
+
+    /// <summary>
+    /// 查询对象
+    /// </summary>
+    protected override ISugarQueryable<T> Queryable => GetDefaultRepository<T>().AsQueryable();
+
+    /// <summary>
+    /// 查询对象
+    /// </summary>
+    /// <returns></returns>
+    protected override ISugarQueryable<T> Query()
+    {
+        return Queryable;
+    }
+
+    /// <summary>
+    /// 查询对象
+    /// </summary>
+    /// <typeparam name="T1"></typeparam>
+    /// <returns></returns>
+    protected override ISugarQueryable<T1> Query<T1>()
+    {
+        return GetOtherRepository<T1>().AsQueryable();
+    }
+
+    #endregion
 
     #region 工作单元
+
+    private SimpleClient<TEntity> GetOtherRepository<TEntity>()
+        where TEntity : class, new()
+    {
+        if (_sqlSugarClient == null)
+        {
+            throw new ArgumentNullException(nameof(ISqlSugarClient), "未注入[ISqlSugarClient]实例");
+        }
+
+        _repositories ??= new ConcurrentDictionary<string, object?>();
+        if (_repositories.GetOrAdd(typeof(TEntity).Name, _sqlSugarClient.GetSimpleClient<TEntity>()) is not
+            SimpleClient<TEntity> repository)
+        {
+            throw new ArgumentNullException(nameof(repository), "获取[DefaultRepository]失败");
+        }
+
+        if (!typeof(ITenant).IsAssignableFrom(typeof(TEntity)))
+        {
+            repository.AsSugarClient().QueryFilter.Clear<ITenant>();
+        }
+
+        return repository;
+    }
 
     private SimpleClient<TEntity> GetDefaultRepository<TEntity>()
         where TEntity : EntityCore, new()
@@ -120,6 +181,11 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
             SimpleClient<TEntity> repository)
         {
             throw new ArgumentNullException(nameof(repository), "获取[DefaultRepository]失败");
+        }
+
+        if (!typeof(ITenant).IsAssignableFrom(typeof(TEntity)))
+        {
+            repository.AsSugarClient().QueryFilter.Clear<ITenant>();
         }
 
         return repository;
@@ -142,6 +208,8 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
         {
             throw new ArgumentNullException(nameof(repository), "获取[DefaultRepository]失败");
         }
+
+        repository.AsSugarClient().QueryFilter.Clear<ITenant>();
 
         return repository;
     }
@@ -310,6 +378,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
             throw new ArgumentNullException(nameof(entity));
         }
 
+        SetOtherValues(entity);
         TryAddEvent(entity);
 
         return GetDefaultRepository<TEntity>().Insert(entity);
@@ -341,6 +410,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
             throw new ArgumentNullException(nameof(entity));
         }
 
+        SetOtherValues(entity);
         TryAddEvent(entity);
 
         return GetDefaultRepository<TEntity>().InsertAsync(entity, cancellationToken);
@@ -372,6 +442,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
 
         foreach (var entity in entities)
         {
+            SetOtherValues(entity);
             TryAddEvent(entity);
         }
 
@@ -407,6 +478,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
 
         foreach (var entity in entities)
         {
+            SetOtherValues(entity);
             TryAddEvent(entity);
         }
 
@@ -749,5 +821,37 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
     private static string GetIntegrationEventKey(string id)
     {
         return $"{IntegrationEventKey},{id}";
+    }
+
+    /// <summary>
+    /// 动态设置其他值
+    /// </summary>
+    /// <param name="entity"></param>
+    /// <typeparam name="TEntity"></typeparam>
+    private void SetOtherValues<TEntity>(TEntity entity)
+        where TEntity : EntityCore, new()
+    {
+        // 租户ID
+        // 如果实体实现了ITenant接口并且当前环境为租户环境，则设置租户ID
+        if (typeof(ITenant).IsAssignableFrom(typeof(TEntity)) && IsTenantEnvironment)
+        {
+            // 动态设置租户ID
+            typeof(TEntity).GetProperty(nameof(ITenant.TenantId))?.SetValue(entity, TenantId);
+        }
+
+        // 创建人
+        if (typeof(ICreator).IsAssignableFrom(typeof(TEntity)))
+        {
+            // 动态设置创建人
+            typeof(TEntity).GetProperty(nameof(ICreator.CreatedUserId))?.SetValue(entity, UserId);
+        }
+
+        // 组织架构
+        if (typeof(IOrganization).IsAssignableFrom(typeof(TEntity)))
+        {
+            // 动态设置组织架构
+            typeof(TEntity).GetProperty(nameof(IOrganization.OrganizationalUnitIds))
+                ?.SetValue(entity, OrganizationalUnitIds);
+        }
     }
 }

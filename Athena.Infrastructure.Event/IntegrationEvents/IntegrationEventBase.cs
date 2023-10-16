@@ -28,6 +28,16 @@ public abstract class IntegrationEventBase : IIntegrationEvent
     public string? CallbackName { get; set; }
 
     /// <summary>
+    /// 是否为延迟消息
+    /// </summary>
+    public bool IsDelayMessage { get; set; }
+
+    /// <summary>
+    /// 延迟时间
+    /// </summary>
+    public TimeSpan? DelayTime { get; set; }
+
+    /// <summary>
     /// 创建时间
     /// </summary>
     public DateTime CreatedOn { get; set; } = DateTime.Now;

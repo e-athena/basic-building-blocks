@@ -1,12 +1,4 @@
-﻿using Athena.Infrastructure.Event.DomainEvents;
-using Athena.Infrastructure.Event.IntegrationEvents;
-using Athena.Infrastructure.FreeSql.CAPs.Extends.Models;
-using Athena.Infrastructure.FreeSql.Helpers;
-using Athena.Infrastructure.FreeSql.Tenants;
-using StackExchange.Redis;
-
-
-// ReSharper disable once CheckNamespace
+﻿// ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
@@ -33,15 +25,20 @@ public static class Extensions
     /// 同步表结构
     /// </summary>
     /// <param name="freeSql"></param>
-    /// <param name="assembly"></param>
-    public static void SyncStructure(this IFreeSql freeSql, Assembly assembly)
+    /// <param name="assemblyKeyword"></param>
+    public static void SyncStructure(this IFreeSql freeSql, string? assemblyKeyword = null)
     {
+        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword);
         var tableAssemblies = new List<Type>();
-        foreach (var type in assembly.GetExportedTypes())
+        foreach (var assembly in assemblies)
         {
-            tableAssemblies.AddRange(type.GetCustomAttributes()
-                .Where(p => p.GetType() == typeof(TableAttribute))
-                .Select(_ => type));
+            foreach (var type in assembly.GetExportedTypes())
+            {
+                tableAssemblies.AddRange(type.GetCustomAttributes()
+                    .Where(p => p.GetType() == typeof(TableAttribute) ||
+                                p.GetType() == typeof(FreeSql.DataAnnotations.TableAttribute))
+                    .Select(_ => type));
+            }
         }
 
         freeSql.SyncStructure(tableAssemblies.ToArray());
@@ -51,11 +48,42 @@ public static class Extensions
     /// 同步表结构
     /// </summary>
     /// <param name="freeSql"></param>
-    /// <param name="assemblyString"></param>
-    public static void SyncStructure(this IFreeSql freeSql, string assemblyString)
+    /// <param name="assemblyKeywords"></param>
+    public static void SyncStructure(this IFreeSql freeSql, params string[] assemblyKeywords)
     {
-        var assembly = Assembly.Load(assemblyString);
-        freeSql.SyncStructure(assembly);
+        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords);
+        var tableAssemblies = new List<Type>();
+        foreach (var assembly in assemblies)
+        {
+            foreach (var type in assembly.GetExportedTypes())
+            {
+                tableAssemblies.AddRange(type.GetCustomAttributes()
+                    .Where(p => p.GetType() == typeof(TableAttribute) ||
+                                p.GetType() == typeof(FreeSql.DataAnnotations.TableAttribute))
+                    .Select(_ => type));
+            }
+        }
+
+        freeSql.SyncStructure(tableAssemblies.ToArray());
+    }
+
+    /// <summary>
+    /// 同步表结构
+    /// </summary>
+    /// <param name="freeSql"></param>
+    /// <param name="assembly"></param>
+    public static void SyncStructure(this IFreeSql freeSql, Assembly assembly)
+    {
+        var tableAssemblies = new List<Type>();
+        foreach (var type in assembly.GetExportedTypes())
+        {
+            tableAssemblies.AddRange(type.GetCustomAttributes()
+                .Where(p => p.GetType() == typeof(TableAttribute) ||
+                            p.GetType() == typeof(FreeSql.DataAnnotations.TableAttribute))
+                .Select(_ => type));
+        }
+
+        freeSql.SyncStructure(tableAssemblies.ToArray());
     }
 
     /// <summary>
@@ -238,6 +266,38 @@ public static class Extensions
     /// </summary>
     /// <param name="services"></param>
     /// <param name="capOptions">CAP配置</param>
+    /// <param name="assemblyKeyword">程序集关键字</param>
+    /// <returns></returns>
+    public static IServiceCollection AddCustomIntegrationEvent(
+        this IServiceCollection services,
+        Action<CapOptions> capOptions,
+        string? assemblyKeyword = null)
+    {
+        return services.AddCustomIntegrationEvent(capOptions,
+            AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword));
+    }
+
+    /// <summary>
+    /// 添加集成事件
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="capOptions">CAP配置</param>
+    /// <param name="assemblyKeywords">程序集关键字</param>
+    /// <returns></returns>
+    public static IServiceCollection AddCustomIntegrationEvent(
+        this IServiceCollection services,
+        Action<CapOptions> capOptions,
+        params string[] assemblyKeywords)
+    {
+        return services.AddCustomIntegrationEvent(capOptions,
+            AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords));
+    }
+
+    /// <summary>
+    /// 添加集成事件
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="capOptions">CAP配置</param>
     /// <param name="capSubscribeAssemblies">订阅端程序集</param>
     /// <returns></returns>
     public static IServiceCollection AddCustomIntegrationEvent(
@@ -256,6 +316,44 @@ public static class Extensions
         }
 
         return services;
+    }
+
+    /// <summary>
+    /// 添加集成事件
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="capRedisOptions">Redis配置</param>
+    /// <param name="capOptions">CAP配置</param>
+    /// <param name="assemblyKeyword">订阅端程序集</param>
+    /// <remarks>默认使用Mysql和Redis</remarks>
+    /// <returns></returns>
+    public static IServiceCollection AddCustomIntegrationEvent(
+        this IServiceCollection services,
+        Action<CapRedisOptions> capRedisOptions,
+        Action<CapOptions>? capOptions = null,
+        string? assemblyKeyword = null)
+    {
+        return services.AddCustomIntegrationEvent(capRedisOptions, capOptions,
+            AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword));
+    }
+
+    /// <summary>
+    /// 添加集成事件
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="capRedisOptions">Redis配置</param>
+    /// <param name="capOptions">CAP配置</param>
+    /// <param name="assemblyKeywords">订阅端程序集</param>
+    /// <remarks>默认使用Mysql和Redis</remarks>
+    /// <returns></returns>
+    public static IServiceCollection AddCustomIntegrationEvent(
+        this IServiceCollection services,
+        Action<CapRedisOptions> capRedisOptions,
+        Action<CapOptions>? capOptions = null,
+        params string[] assemblyKeywords)
+    {
+        return services.AddCustomIntegrationEvent(capRedisOptions, capOptions,
+            AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords));
     }
 
     /// <summary>
@@ -293,6 +391,42 @@ public static class Extensions
     /// </summary>
     /// <param name="services"></param>
     /// <param name="configuration"></param>
+    /// <param name="assemblyKeyword">订阅端程序集</param>
+    /// <remarks>默认使用Mysql和Redis</remarks>
+    /// <returns></returns>
+    public static IServiceCollection AddCustomIntegrationEvent(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        string? assemblyKeyword = null
+    )
+    {
+        return services.AddCustomIntegrationEvent(configuration,
+            AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword));
+    }
+
+    /// <summary>
+    /// 添加集成事件
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configuration"></param>
+    /// <param name="assemblyKeywords">订阅端程序集</param>
+    /// <remarks>默认使用Mysql和Redis</remarks>
+    /// <returns></returns>
+    public static IServiceCollection AddCustomIntegrationEvent(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        params string[] assemblyKeywords
+    )
+    {
+        return services.AddCustomIntegrationEvent(configuration,
+            AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords));
+    }
+
+    /// <summary>
+    /// 添加集成事件
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configuration"></param>
     /// <param name="capSubscribeAssemblies">订阅端程序集</param>
     /// <remarks>默认使用Mysql和Redis</remarks>
     /// <returns></returns>
@@ -318,6 +452,46 @@ public static class Extensions
     /// <param name="services"></param>
     /// <param name="configuration"></param>
     /// <param name="capOptions">CAP配置</param>
+    /// <param name="assemblyKeyword">订阅端程序集</param>
+    /// <remarks>默认使用Mysql和Redis</remarks>
+    /// <returns></returns>
+    public static IServiceCollection AddCustomIntegrationEvent(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        Action<CapOptions> capOptions,
+        string? assemblyKeyword = null
+    )
+    {
+        return services.AddCustomIntegrationEvent(configuration, capOptions,
+            AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword));
+    }
+
+    /// <summary>
+    /// 添加集成事件
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configuration"></param>
+    /// <param name="capOptions">CAP配置</param>
+    /// <param name="assemblyKeywords">订阅端程序集</param>
+    /// <remarks>默认使用Mysql和Redis</remarks>
+    /// <returns></returns>
+    public static IServiceCollection AddCustomIntegrationEvent(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        Action<CapOptions> capOptions,
+        params string[] assemblyKeywords
+    )
+    {
+        return services.AddCustomIntegrationEvent(configuration, capOptions,
+            AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords));
+    }
+
+    /// <summary>
+    /// 添加集成事件
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configuration"></param>
+    /// <param name="capOptions">CAP配置</param>
     /// <param name="capSubscribeAssemblies">订阅端程序集</param>
     /// <remarks>默认使用Mysql和Redis</remarks>
     /// <returns></returns>
@@ -325,7 +499,7 @@ public static class Extensions
         this IServiceCollection services,
         IConfiguration configuration,
         Action<CapOptions> capOptions,
-        Assembly[]? capSubscribeAssemblies = null
+        Assembly[] capSubscribeAssemblies
     )
     {
         return services.AddCustomIntegrationEvent(options =>

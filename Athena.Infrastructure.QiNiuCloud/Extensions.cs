@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Athena.Infrastructure.QiNiuCloud;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
@@ -62,13 +61,5 @@ public static class Extensions
         }
 
         return config;
-    }
-
-    [DebuggerStepThrough]
-    private static TModel GetOptions<TModel>(this IConfiguration configuration, string section) where TModel : new()
-    {
-        var model = new TModel();
-        configuration.GetSection(section).Bind(model);
-        return model;
     }
 }

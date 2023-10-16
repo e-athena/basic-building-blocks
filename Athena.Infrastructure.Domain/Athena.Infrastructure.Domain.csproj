@@ -4,19 +4,19 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>6.5.5</PackageVersion>
+        <PackageVersion>7.0.0-preview.20231013.1</PackageVersion>
         <LangVersion>11</LangVersion>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
         <PackageIcon>e-athena.png</PackageIcon>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-        <DocumentationFile>bin\Debug\net6.0\Athena.Infrastructure.Domain.xml</DocumentationFile>
+        <DocumentationFile>bin\Debug\Athena.Infrastructure.Domain.xml</DocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-        <DocumentationFile>bin\Release\net6.0\Athena.Infrastructure.Domain.xml</DocumentationFile>
+        <DocumentationFile>bin\Release\Athena.Infrastructure.Domain.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -24,9 +24,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="e-athena.png">
-        <Pack>True</Pack>
-        <PackagePath></PackagePath>
-      </None>
+        <Resource Include="e-athena.png">
+            <Pack>True</Pack>
+            <PackagePath></PackagePath>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Resource>
     </ItemGroup>
 </Project>

@@ -1,5 +1,3 @@
-using Athena.Infrastructure;
-using Athena.Infrastructure.DataPermission;
 using Athena.Infrastructure.DataPermission.SqlSugar;
 using Microsoft.Extensions.Configuration;
 

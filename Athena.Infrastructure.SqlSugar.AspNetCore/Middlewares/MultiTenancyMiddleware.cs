@@ -32,7 +32,7 @@ public class MultiTenancyMiddleware
     /// <param name="context"></param>
     public async Task Invoke(HttpContext context)
     {
-        if (!context.Request.Path.Value.StartsWith("/api/"))
+        if (!context.Request.Path.HasValue || !context.Request.Path.Value.StartsWith("/api/"))
         {
             await _next(context);
             return;

@@ -1,5 +1,3 @@
-using System.Collections.Concurrent;
-
 namespace Athena.Infrastructure.ApiPermission.Helpers;
 
 /// <summary>

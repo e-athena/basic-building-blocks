@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>6.0.2</Version>
+        <Version>7.0.0-preview.20231013.1</Version>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -16,7 +16,7 @@
         <DocumentationFile>bin\Release\net6.0\Athena.Infrastructure.Hangfire.xml</DocumentationFile>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Hangfire.AspNetCore" Version="1.7.35" />
+        <PackageReference Include="Hangfire.AspNetCore" Version="1.8.5" />
         <PackageReference Include="Hangfire.Dashboard.BasicAuthorization" Version="1.0.2" />
         <PackageReference Include="Hangfire.Redis.CSRedisCore" Version="0.0.2" />
     </ItemGroup>

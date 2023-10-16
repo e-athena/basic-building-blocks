@@ -1,3 +1,5 @@
+using Athena.Infrastructure.Helpers;
+
 namespace Athena.Infrastructure.DataPermission;
 
 /// <summary>
@@ -99,6 +101,27 @@ public static class DataPermissionHelper
                 };
             })
             .ToList();
+    }
+
+    /// <summary>
+    /// 读取数据权限配置树列表
+    /// </summary>
+    /// <param name="appId">应用ID</param>
+    /// <param name="permissions">拥有的权限</param>
+    /// <returns></returns>
+    public static IList<DataPermissionGroup> GetGroupList(
+        string appId,
+        IList<Models.DataPermission>? permissions = null)
+    {
+        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies();
+        var result = new List<DataPermissionGroup>();
+        foreach (var assembly in assemblies)
+        {
+            var list = GetGroupList(assembly, appId, permissions);
+            result.AddRange(list);
+        }
+
+        return result;
     }
 
     /// <summary>

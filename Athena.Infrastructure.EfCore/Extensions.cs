@@ -46,6 +46,7 @@ public static class Extensions
     /// <param name="configuration"></param>
     /// <param name="configVariable"></param>
     /// <param name="envVariable"></param>
+    /// <exception cref="ArgumentNullException"></exception>
     /// <returns></returns>
     private static string GetConnectionStringByEnv(
         this IConfiguration configuration,
@@ -57,6 +58,11 @@ public static class Extensions
         if (!string.IsNullOrEmpty(env))
         {
             connectionString = env;
+        }
+
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            throw new ArgumentNullException(nameof(connectionString));
         }
 
         return connectionString;

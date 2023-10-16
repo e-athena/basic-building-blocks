@@ -1,5 +1,3 @@
-using Athena.Infrastructure.Event.IntegrationEvents;
-
 namespace Athena.Infrastructure.SqlSugar.EventContexts;
 
 /// <summary>

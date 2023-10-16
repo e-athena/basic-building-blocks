@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>6.1.1</PackageVersion>
+        <PackageVersion>7.0.0-preview.20231013.1</PackageVersion>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
         <PackageIcon>e-athena.png</PackageIcon>
     </PropertyGroup>
@@ -19,8 +19,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FreeRedis" Version="1.1.5" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.1" />
+        <PackageReference Include="FreeRedis" Version="1.1.10" />
     </ItemGroup>
 
     <ItemGroup>
@@ -28,9 +27,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="e-athena.png">
-        <Pack>True</Pack>
-        <PackagePath></PackagePath>
-      </None>
+        <Resource Include="e-athena.png">
+            <Pack>True</Pack>
+            <PackagePath></PackagePath>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Resource>
     </ItemGroup>
 </Project>

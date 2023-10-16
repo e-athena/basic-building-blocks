@@ -14,7 +14,7 @@ public class FreeSqlGlobalTransactionBehavior<TRequest, TResponse> : IPipelineBe
     private readonly UnitOfWorkManager _unitOfWorkManager;
     private readonly IDomainEventContext _domainEventContext;
     private readonly IIntegrationEventContext _integrationEventContext;
-    private readonly IMediator _mediator;
+    private readonly IPublisher _publisher;
     private readonly ILogger<FreeSqlGlobalTransactionBehavior<TRequest, TResponse>> _logger;
     private readonly ICapPublisher? _capPublisher;
     private readonly IHttpContextAccessor? _httpContextAccessor;
@@ -22,7 +22,7 @@ public class FreeSqlGlobalTransactionBehavior<TRequest, TResponse> : IPipelineBe
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="mediator"></param>
+    /// <param name="publisher"></param>
     /// <param name="loggerFactory"></param>
     /// <param name="unitOfWorkManager"></param>
     /// <param name="domainEventContext"></param>
@@ -31,14 +31,14 @@ public class FreeSqlGlobalTransactionBehavior<TRequest, TResponse> : IPipelineBe
     /// <param name="httpContextAccessor"></param>
     /// <exception cref="ArgumentNullException"></exception>
     public FreeSqlGlobalTransactionBehavior(
-        IMediator mediator,
+        IPublisher publisher,
         ILoggerFactory loggerFactory,
         UnitOfWorkManager unitOfWorkManager,
         IDomainEventContext domainEventContext,
         IIntegrationEventContext integrationEventContext,
         IServiceProvider serviceProvider, IHttpContextAccessor? httpContextAccessor)
     {
-        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+        _publisher = publisher ?? throw new ArgumentNullException(nameof(publisher));
         _logger = loggerFactory.CreateLogger<FreeSqlGlobalTransactionBehavior<TRequest, TResponse>>();
         _unitOfWorkManager = unitOfWorkManager;
         _domainEventContext = domainEventContext;
@@ -181,7 +181,7 @@ public class FreeSqlGlobalTransactionBehavior<TRequest, TResponse> : IPipelineBe
                 // publish
                 @event.RootTraceId ??= rootTraceId;
                 @event.RootTraceId ??= Guid.NewGuid().ToString("N");
-                await _mediator.Publish(@event, cancellationToken);
+                await _publisher.Publish(@event, cancellationToken);
             }
         } while (true);
     }

@@ -11,7 +11,7 @@ internal class FreeSqlCapOptionsExtension : ICapOptionsExtension
 {
     public void AddServices(IServiceCollection services)
     {
-        services.AddSingleton(new CapStorageMarkerService());
+        services.AddSingleton(new CapStorageMarkerService("FreeSql"));
         services.AddSingleton<IDataStorage, FreeSqlDataStorage>();
         services.AddSingleton<IStorageInitializer, FreeSqlStorageInitializer>();
         // services.TryAddSingleton(new CapStorageMarkerService());

@@ -23,7 +23,7 @@ public class DefaultTenantService : ITenantService
     /// <param name="appId"></param>
     /// <returns></returns>
     /// <exception cref="NotImplementedException"></exception>
-    public async Task<TenantInfo?> GetAsync(string tenantCode,string? appId)
+    public async Task<TenantInfo?> GetAsync(string tenantCode, string? appId)
     {
         if (string.IsNullOrEmpty(tenantCode))
         {
@@ -36,7 +36,7 @@ public class DefaultTenantService : ITenantService
         var single = connectionStringsChildren
             .FirstOrDefault(p => string.Equals(p.Key, tenantCode, StringComparison.CurrentCultureIgnoreCase));
 
-        if (single == null)
+        if (single?.Value == null)
         {
             return null;
         }

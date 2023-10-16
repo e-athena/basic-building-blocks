@@ -32,7 +32,7 @@ public static class HangfireExtensions
     {
         // Add Hangfire services.
         services.AddHangfire(configuration => configuration
-            .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
             .UseSimpleAssemblyNameTypeSerializer()
             .UseRecommendedSerializerSettings()
             .UseRedisStorage(connectionString, redisStorageOptions)
@@ -195,12 +195,15 @@ public static class HangfireExtensions
             }
 
             var queue = worker.Queue ?? "default";
-            
-            RecurringJob.AddOrUpdate(jobId,
+            RecurringJob.AddOrUpdate(
+                jobId,
+                queue,
                 () => worker.DoWorkAsync(),
                 worker.CronExpression,
-                TimeZoneInfo.Local,
-                queue
+                new RecurringJobOptions
+                {
+                    TimeZone = TimeZoneInfo.Local
+                }
             );
         }
 

@@ -27,40 +27,36 @@ internal class SqlSugarMonitoringApi : IMonitoringApi
         _recName = initializer.GetReceivedTableName();
     }
 
-    IDictionary<DateTime, int> IMonitoringApi.HourlySucceededJobs(MessageType type)
+    Task<IDictionary<DateTime, int>> IMonitoringApi.HourlySucceededJobs(MessageType type)
     {
         var tableName = type == MessageType.Publish ? _pubName : _recName;
         return GetHourlyTimelineStats(tableName, nameof(StatusName.Succeeded));
     }
 
-    IDictionary<DateTime, int> IMonitoringApi.HourlyFailedJobs(MessageType type)
+    Task<IDictionary<DateTime, int>> IMonitoringApi.HourlyFailedJobs(MessageType type)
     {
         var tableName = type == MessageType.Publish ? _pubName : _recName;
         return GetHourlyTimelineStats(tableName, nameof(StatusName.Failed));
     }
 
-    int IMonitoringApi.ReceivedSucceededCount()
+    ValueTask<int> IMonitoringApi.ReceivedSucceededCount()
     {
         return GetNumberOfMessage(_recName, nameof(StatusName.Succeeded));
     }
 
-    public PagedQueryResult<MessageDto> Messages(MessageQueryDto queryDto)
+    public async Task<PagedQueryResult<MessageDto>> GetMessagesAsync(MessageQueryDto queryDto)
     {
-        var query = _sqlSugarClient.Queryable<Published>()
+        var result = await _sqlSugarClient.Queryable<Published>()
             .AS(queryDto.MessageType == MessageType.Publish ? _pubName : _recName)
             .WhereIF(!string.IsNullOrEmpty(queryDto.StatusName),
                 p => p.StatusName.ToLower() == queryDto.StatusName!.ToLower())
             .WhereIF(!string.IsNullOrEmpty(queryDto.Name), p => p.Name == queryDto.Name)
             .WhereIF(!string.IsNullOrEmpty(queryDto.Group), p => p.Group == queryDto.Group)
-            .WhereIF(!string.IsNullOrEmpty(queryDto.Content), p => p.Content.Contains(queryDto.Content!));
-        // var count = query.Count();
-        var count = 0;
-        var result = query
-            .ToPageList(queryDto.CurrentPage, queryDto.PageSize, totalNumber: ref count)
-            .ToList();
+            .WhereIF(!string.IsNullOrEmpty(queryDto.Content), p => p.Content.Contains(queryDto.Content!))
+            .ToPagingAsync(queryDto.CurrentPage + 1, queryDto.PageSize);
         return new PagedQueryResult<MessageDto>
         {
-            Items = result.Select(p => new MessageDto
+            Items = result.Items?.Select(p => new MessageDto
             {
                 Id = p.Id.ToString(),
                 Name = p.Name,
@@ -74,21 +70,21 @@ internal class SqlSugarMonitoringApi : IMonitoringApi
             }).ToList(),
             PageIndex = queryDto.CurrentPage,
             PageSize = queryDto.PageSize,
-            Totals = count
+            Totals = result.TotalItems
         };
     }
 
-    int IMonitoringApi.PublishedFailedCount()
+    ValueTask<int> IMonitoringApi.PublishedFailedCount()
     {
         return GetNumberOfMessage(_pubName, nameof(StatusName.Failed));
     }
 
-    int IMonitoringApi.PublishedSucceededCount()
+    ValueTask<int> IMonitoringApi.PublishedSucceededCount()
     {
         return GetNumberOfMessage(_pubName, nameof(StatusName.Succeeded));
     }
 
-    int IMonitoringApi.ReceivedFailedCount()
+    ValueTask<int> IMonitoringApi.ReceivedFailedCount()
     {
         return GetNumberOfMessage(_recName, nameof(StatusName.Failed));
     }
@@ -101,6 +97,39 @@ internal class SqlSugarMonitoringApi : IMonitoringApi
     public async Task<MediumMessage?> GetReceivedMessageAsync(long id)
     {
         return await GetMessageAsync(_recName, id).ConfigureAwait(false);
+    }
+
+    public async Task<StatisticsDto> GetStatisticsAsync()
+    {
+        var pubCount = await _sqlSugarClient.Queryable<Published>()
+            .AS(_pubName)
+            .GroupBy(p => p.StatusName)
+            .Select(p => new
+            {
+                Key = p.StatusName,
+                Count = SqlFunc.AggregateCount(p.StatusName)
+            })
+            .ToListAsync();
+        var recCount = await _sqlSugarClient.Queryable<Received>()
+            .AS(_recName)
+            .GroupBy(p => p.StatusName)
+            .Select(p => new
+            {
+                Key = p.StatusName,
+                Count = SqlFunc.AggregateCount(p.StatusName)
+            })
+            .ToListAsync();
+
+        // 统计数据
+
+        return new StatisticsDto
+        {
+            PublishedSucceeded = pubCount.FirstOrDefault(p => p.Key == nameof(StatusName.Succeeded))?.Count ?? 0,
+            ReceivedSucceeded = recCount.FirstOrDefault(p => p.Key == nameof(StatusName.Succeeded))?.Count ?? 0,
+            PublishedFailed = pubCount.FirstOrDefault(p => p.Key == nameof(StatusName.Failed))?.Count ?? 0,
+            ReceivedFailed = recCount.FirstOrDefault(p => p.Key == nameof(StatusName.Failed))?.Count ?? 0,
+            PublishedDelayed = pubCount.FirstOrDefault(p => p.Key == nameof(StatusName.Delayed))?.Count ?? 0
+        };
     }
 
     public StatisticsDto GetStatistics()
@@ -135,17 +164,17 @@ internal class SqlSugarMonitoringApi : IMonitoringApi
         };
     }
 
-    private int GetNumberOfMessage(string tableName, string statusName)
+    private async ValueTask<int> GetNumberOfMessage(string tableName, string statusName)
     {
-        var count = _sqlSugarClient.Queryable<MessageDto>()
+        var count = await _sqlSugarClient.Queryable<MessageDto>()
             .AS(tableName)
             .Where(p => p.StatusName == statusName)
-            .Count();
+            .CountAsync();
 
         return count;
     }
 
-    private Dictionary<DateTime, int> GetHourlyTimelineStats(string tableName, string statusName)
+    private Task<IDictionary<DateTime, int>> GetHourlyTimelineStats(string tableName, string statusName)
     {
         var endDate = DateTime.Now;
         var dates = new List<DateTime>();
@@ -160,13 +189,13 @@ internal class SqlSugarMonitoringApi : IMonitoringApi
         return GetTimelineStats(tableName, statusName, keyMaps);
     }
 
-    private Dictionary<DateTime, int> GetTimelineStats(
+    private async Task<IDictionary<DateTime, int>> GetTimelineStats(
         string tableName,
         string statusName,
         IDictionary<string, DateTime> keyMaps)
     {
         // 翻译上面的SQL转成_sqlSugarClient的写法
-        var res = _sqlSugarClient.Queryable<Published>()
+        var res = await _sqlSugarClient.Queryable<Published>()
             .AS(tableName)
             .Where(p => p.StatusName == statusName)
             .GroupBy(p => p.Added.ToString("yyyy-MM-dd-HH"))
@@ -178,7 +207,7 @@ internal class SqlSugarMonitoringApi : IMonitoringApi
             .MergeTable()
             .Where(p => Convert.ToDateTime(p.Key) >= Convert.ToDateTime(keyMaps.Keys.Min()))
             .Where(p => Convert.ToDateTime(p.Key) <= Convert.ToDateTime(keyMaps.Keys.Max()))
-            .ToList(p => new
+            .ToListAsync(p => new
             {
                 p.Key,
                 p.Count

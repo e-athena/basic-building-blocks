@@ -72,6 +72,24 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Infrastructure.NewLi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Infrastructure.FreeSql.Test", "Athena.Infrastructure.FreeSql.Test\Athena.Infrastructure.FreeSql.Test.csproj", "{91AC01E1-CE9A-479C-926E-9AD543BC60E3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Infrastructure.SqlSugar.AspNetCore.Test", "Athena.Infrastructure.SqlSugar.AspNetCore.Test\Athena.Infrastructure.SqlSugar.AspNetCore.Test.csproj", "{018B93B7-4B67-4C48-B92B-66954A1E9750}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlSugarWebApiTest", "SqlSugarWebApiTest\SqlSugarWebApiTest.csproj", "{B51A458C-EA0A-4E63-977A-9683F4DA1F23}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.All.SqlSugar", "Athena.All.SqlSugar\Athena.All.SqlSugar.csproj", "{96AAB94A-C6E2-412B-984D-0ACEA0B2C749}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Infrastructure.Serilog", "Athena.Infrastructure.Serilog\Athena.Infrastructure.Serilog.csproj", "{B3F04E27-95E3-43FD-B56B-AD8303966AC2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.All.FreeSql", "Athena.All.FreeSql\Athena.All.FreeSql.csproj", "{A5B7D4F2-5638-400C-BD2B-1059FBB64115}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Infrastructure.Logger.SqlSugar", "Athena.Infrastructure.Logger.SqlSugar\Athena.Infrastructure.Logger.SqlSugar.csproj", "{AC722700-A1A9-4553-B27E-CDF154FDC986}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Infrastructure.EventTracking.SqlSugar", "Athena.Infrastructure.EventTracking.SqlSugar\Athena.Infrastructure.EventTracking.SqlSugar.csproj", "{B2512A13-DD90-46E5-9446-1321EEE41466}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.All", "Athena.All\Athena.All.csproj", "{10873CD4-2318-43CE-AF70-72161E8C951A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreeSqlWebApiTest", "FreeSqlWebApiTest\FreeSqlWebApiTest.csproj", "{AF160161-466F-4C29-86E6-AC71C33121C6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -218,9 +236,48 @@ Global
 		{91AC01E1-CE9A-479C-926E-9AD543BC60E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91AC01E1-CE9A-479C-926E-9AD543BC60E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91AC01E1-CE9A-479C-926E-9AD543BC60E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{018B93B7-4B67-4C48-B92B-66954A1E9750}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{018B93B7-4B67-4C48-B92B-66954A1E9750}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{018B93B7-4B67-4C48-B92B-66954A1E9750}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{018B93B7-4B67-4C48-B92B-66954A1E9750}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B51A458C-EA0A-4E63-977A-9683F4DA1F23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B51A458C-EA0A-4E63-977A-9683F4DA1F23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B51A458C-EA0A-4E63-977A-9683F4DA1F23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B51A458C-EA0A-4E63-977A-9683F4DA1F23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{96AAB94A-C6E2-412B-984D-0ACEA0B2C749}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96AAB94A-C6E2-412B-984D-0ACEA0B2C749}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96AAB94A-C6E2-412B-984D-0ACEA0B2C749}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96AAB94A-C6E2-412B-984D-0ACEA0B2C749}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3F04E27-95E3-43FD-B56B-AD8303966AC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3F04E27-95E3-43FD-B56B-AD8303966AC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3F04E27-95E3-43FD-B56B-AD8303966AC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3F04E27-95E3-43FD-B56B-AD8303966AC2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5B7D4F2-5638-400C-BD2B-1059FBB64115}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5B7D4F2-5638-400C-BD2B-1059FBB64115}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5B7D4F2-5638-400C-BD2B-1059FBB64115}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5B7D4F2-5638-400C-BD2B-1059FBB64115}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC722700-A1A9-4553-B27E-CDF154FDC986}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC722700-A1A9-4553-B27E-CDF154FDC986}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC722700-A1A9-4553-B27E-CDF154FDC986}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC722700-A1A9-4553-B27E-CDF154FDC986}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2512A13-DD90-46E5-9446-1321EEE41466}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2512A13-DD90-46E5-9446-1321EEE41466}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2512A13-DD90-46E5-9446-1321EEE41466}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2512A13-DD90-46E5-9446-1321EEE41466}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10873CD4-2318-43CE-AF70-72161E8C951A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10873CD4-2318-43CE-AF70-72161E8C951A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10873CD4-2318-43CE-AF70-72161E8C951A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10873CD4-2318-43CE-AF70-72161E8C951A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF160161-466F-4C29-86E6-AC71C33121C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF160161-466F-4C29-86E6-AC71C33121C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF160161-466F-4C29-86E6-AC71C33121C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF160161-466F-4C29-86E6-AC71C33121C6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{8487FB7B-8DBB-414E-B707-CF8FFC285C75} = {E5B19187-0A21-4BC1-9690-2727240C2158}
 		{91AC01E1-CE9A-479C-926E-9AD543BC60E3} = {E5B19187-0A21-4BC1-9690-2727240C2158}
+		{018B93B7-4B67-4C48-B92B-66954A1E9750} = {E5B19187-0A21-4BC1-9690-2727240C2158}
+		{B51A458C-EA0A-4E63-977A-9683F4DA1F23} = {E5B19187-0A21-4BC1-9690-2727240C2158}
+		{AF160161-466F-4C29-86E6-AC71C33121C6} = {E5B19187-0A21-4BC1-9690-2727240C2158}
 	EndGlobalSection
 EndGlobal

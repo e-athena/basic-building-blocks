@@ -1,3 +1,5 @@
+// ReSharper disable once CheckNamespace
+
 namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
@@ -84,6 +86,12 @@ public static class Extensions
         if (!string.IsNullOrEmpty(env))
         {
             connectionString = env;
+        }
+
+        if (connectionString == null)
+        {
+            throw new ArgumentNullException(nameof(connectionString),
+                "日志存储的数据库连接字符串不能为空, 请在 appsettings.json 或环境变量中配置 LoggerCenter");
         }
 
         return connectionString;

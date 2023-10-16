@@ -1,5 +1,3 @@
-using Athena.Infrastructure.FreeSql.Helpers;
-using Athena.Infrastructure.FreeSql.Tenants;
 using Microsoft.Extensions.Hosting;
 
 namespace Athena.Infrastructure.FreeSql.AspNetCore.Middlewares;

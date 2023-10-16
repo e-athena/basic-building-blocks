@@ -86,6 +86,17 @@ public static class FreeSqlBuilderHelper
             {
                 e.ModifyResult.IsVersion = true;
             }
+
+            if (e.Property
+                    .GetCustomAttributes(typeof(FieldSortAttribute), false)
+                    .FirstOrDefault() is FieldSortAttribute)
+            {
+                e.ModifyResult.Position =
+                    (short) -((FieldSortAttribute) e.Property
+                            .GetCustomAttributes(typeof(FieldSortAttribute), false)
+                            .First(it => it is FieldSortAttribute))
+                        .Value;
+            }
         };
         actionAop?.Invoke(freeSql.Aop);
 

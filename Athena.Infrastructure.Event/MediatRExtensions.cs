@@ -1,4 +1,5 @@
 // ReSharper disable once CheckNamespace
+
 namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
@@ -6,6 +7,34 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// </summary>
 public static class MediatRExtensions
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configuration"></param>
+    /// <param name="types"></param>
+    /// <typeparam name="TType"></typeparam>
+    /// <returns></returns>
+    // ReSharper disable once IdentifierTypo
+    public static IServiceCollection AddCustomMediatR<TType>(
+        this IServiceCollection services,
+        Action<MediatRServiceConfiguration>? configuration,
+        IList<Type>? types = null)
+    {
+        var list = new List<Type>
+        {
+            typeof(TType)
+        };
+        if (types is {Count: > 0})
+        {
+            list.AddRange(types);
+        }
+
+        services.AddMediatR(configuration, list.ToArray());
+
+        return services;
+    }
+
     /// <summary>
     /// 
     /// </summary>
@@ -36,15 +65,58 @@ public static class MediatRExtensions
     /// 
     /// </summary>
     /// <param name="services"></param>
+    /// <param name="assemblyKeyword"></param>
     /// <returns></returns>
     // ReSharper disable once IdentifierTypo
-    public static IServiceCollection AddCustomMediatR(this IServiceCollection services)
+    public static IServiceCollection AddCustomMediatR(this IServiceCollection services, string? assemblyKeyword = null)
     {
-        var assemblies = new[]
-        {
-            Assembly.GetExecutingAssembly(),
-        };
-        services.AddMediatR(assemblies);
+        services.AddMediatR(AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword));
+        return services;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configuration"></param>
+    /// <param name="assemblyKeyword"></param>
+    /// <returns></returns>
+    // ReSharper disable once IdentifierTypo
+    public static IServiceCollection AddCustomMediatR(this IServiceCollection services,
+        Action<MediatRServiceConfiguration>? configuration,
+        string? assemblyKeyword = null)
+    {
+        services.AddMediatR(configuration, AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword));
+        return services;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="assemblyKeywords"></param>
+    /// <returns></returns>
+    // ReSharper disable once IdentifierTypo
+    public static IServiceCollection AddCustomMediatR(this IServiceCollection services,
+        params string[] assemblyKeywords)
+    {
+        services.AddMediatR(AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords));
+        return services;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configuration"></param>
+    /// <param name="assemblyKeywords"></param>
+    /// <returns></returns>
+    // ReSharper disable once IdentifierTypo
+    public static IServiceCollection AddCustomMediatR(this IServiceCollection services,
+        Action<MediatRServiceConfiguration>? configuration,
+        params string[] assemblyKeywords)
+    {
+        services.AddMediatR(configuration, AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords));
         return services;
     }
 

@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+// ReSharper disable UnassignedGetOnlyAutoProperty
+
 namespace Athena.Infrastructure.FreeSql.Test;
 
 public class TestBase
@@ -39,13 +41,11 @@ public class TestBase
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", false)
             .Build();
-        services.AddCustomMediatR(
-            Assembly.GetExecutingAssembly()
-        );
+        services.AddCustomMediatR();
+        services.AddCustomServiceComponent();
         services.AddHttpContextAccessor();
         services.AddLogging();
         services.AddCustomFreeSql(Configuration, false);
-        services.AddScoped<ISecurityContextAccessor, SecurityContextAccessor>();
         RegistryServices(services);
         Provider = services.BuildServiceProvider();
     }

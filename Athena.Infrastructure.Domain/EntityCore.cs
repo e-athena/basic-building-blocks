@@ -21,22 +21,25 @@ public abstract class EntityCore : IAggregateRoot
     public string Id { get; set; } = ObjectId.GenerateNewStringId();
 
     /// <summary>
+    /// 版本号
+    /// </summary>
+    [Required]
+    [RowVersion]
+    [FieldSort(999)]
+    public long Version { get; set; }
+
+    /// <summary>
     /// 创建时间
     /// </summary>
     [Required]
+    [FieldSort(999)]
     public DateTime CreatedOn { get; set; } = DateTime.Now;
 
     /// <summary>
     /// 更新时间
     /// </summary>
+    [FieldSort(999)]
     public DateTime? UpdatedOn { get; set; } = DateTime.Now;
-
-    /// <summary>
-    /// 版本号
-    /// </summary>
-    [Required]
-    [RowVersion]
-    public long Version { get; set; }
 
     /// <summary>
     /// 领域事件

@@ -1,4 +1,6 @@
-namespace Athena.Infrastructure;
+// ReSharper disable once CheckNamespace
+
+namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
 /// 
@@ -124,6 +126,28 @@ public static class Extensions
     }
 
     /// <summary>
+    /// 读取连接字符串
+    /// </summary>
+    /// <param name="configuration"></param>
+    /// <param name="configVariable"></param>
+    /// <param name="envVariable"></param>
+    /// <returns></returns>
+    public static string? GetConnectionStringByEnv(
+        this IConfiguration configuration,
+        string configVariable,
+        string envVariable)
+    {
+        var connectionString = configuration.GetConnectionString(configVariable);
+        var env = Environment.GetEnvironmentVariable(envVariable);
+        if (!string.IsNullOrEmpty(env))
+        {
+            connectionString = env;
+        }
+
+        return connectionString;
+    }
+
+    /// <summary>
     /// 
     /// </summary>
     /// <param name="task"></param>
@@ -164,5 +188,21 @@ public static class Extensions
 
         timeoutCancellationTokenSource.Cancel();
         return task.Result;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="source"></param>
+    /// <param name="condition"></param>
+    /// <param name="predicate"></param>
+    /// <typeparam name="TSource"></typeparam>
+    /// <returns></returns>
+    public static IEnumerable<TSource> HasWhere<TSource>(
+        this IEnumerable<TSource> source,
+        bool condition,
+        Func<TSource, bool> predicate)
+    {
+        return condition ? source.Where(predicate) : source;
     }
 }

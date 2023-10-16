@@ -1,4 +1,5 @@
 // ReSharper disable once CheckNamespace
+
 namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
@@ -17,7 +18,7 @@ public static class Extensions
         IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionStringByEnv();
-        return services.AddCustomEventTracking(connectionString);
+        return string.IsNullOrEmpty(connectionString) ? services : services.AddCustomEventTracking(connectionString);
     }
 
     /// <summary>
@@ -83,7 +84,7 @@ public static class Extensions
     /// <param name="configVariable"></param>
     /// <param name="envVariable"></param>
     /// <returns></returns>
-    private static string GetConnectionStringByEnv(
+    private static string? GetConnectionStringByEnv(
         this IConfiguration configuration,
         string configVariable = "EventTracking",
         string envVariable = "EVENT_TRACKING_CONNECTION_STRING")

@@ -27,41 +27,35 @@ internal class FreeSqlMonitoringApi : IMonitoringApi
         _recName = initializer.GetReceivedTableName();
     }
 
-    IDictionary<DateTime, int> IMonitoringApi.HourlySucceededJobs(MessageType type)
+    Task<IDictionary<DateTime, int>> IMonitoringApi.HourlySucceededJobs(MessageType type)
     {
         var tableName = type == MessageType.Publish ? _pubName : _recName;
         return GetHourlyTimelineStats(tableName, nameof(StatusName.Succeeded));
     }
 
-    IDictionary<DateTime, int> IMonitoringApi.HourlyFailedJobs(MessageType type)
+    Task<IDictionary<DateTime, int>> IMonitoringApi.HourlyFailedJobs(MessageType type)
     {
         var tableName = type == MessageType.Publish ? _pubName : _recName;
         return GetHourlyTimelineStats(tableName, nameof(StatusName.Failed));
     }
 
-    int IMonitoringApi.ReceivedSucceededCount()
+    ValueTask<int> IMonitoringApi.ReceivedSucceededCount()
     {
         return GetNumberOfMessage(_recName, nameof(StatusName.Succeeded));
     }
 
-    public PagedQueryResult<MessageDto> Messages(MessageQueryDto queryDto)
+    public async Task<PagedQueryResult<MessageDto>> GetMessagesAsync(MessageQueryDto queryDto)
     {
-        var query = _freeSql.Select<Published>()
+        var result = await _freeSql.Select<Published>()
             .AsTable((_, _) => queryDto.MessageType == MessageType.Publish ? _pubName : _recName)
             .WhereIf(!string.IsNullOrEmpty(queryDto.StatusName),
                 p => p.StatusName.ToLower() == queryDto.StatusName!.ToLower())
             .WhereIf(!string.IsNullOrEmpty(queryDto.Name), p => p.Name == queryDto.Name)
             .WhereIf(!string.IsNullOrEmpty(queryDto.Group), p => p.Group == queryDto.Group)
             .WhereIf(!string.IsNullOrEmpty(queryDto.Content),
-                p => p.Content.Contains(queryDto.Content!));
-        // var count = query.Count();
-        var result = query
-            // .Page(queryDto.CurrentPage, queryDto.PageSize)
-            .ToPageAsync(new GetPageRequestBase(queryDto.CurrentPage, queryDto.PageSize))
-            .ConfigureAwait(false)
-            .GetAwaiter()
-            .GetResult();
-        // .ToList();
+                p => p.Content.Contains(queryDto.Content!))
+            .ToPagingAsync(new GetPagingRequestBase(queryDto.CurrentPage + 1, queryDto.PageSize))
+            .ConfigureAwait(false);
         return new PagedQueryResult<MessageDto>
         {
             Items = (result.Items ?? new List<Published>()).Select(p => new MessageDto
@@ -82,17 +76,17 @@ internal class FreeSqlMonitoringApi : IMonitoringApi
         };
     }
 
-    int IMonitoringApi.PublishedFailedCount()
+    ValueTask<int> IMonitoringApi.PublishedFailedCount()
     {
         return GetNumberOfMessage(_pubName, nameof(StatusName.Failed));
     }
 
-    int IMonitoringApi.PublishedSucceededCount()
+    ValueTask<int> IMonitoringApi.PublishedSucceededCount()
     {
         return GetNumberOfMessage(_pubName, nameof(StatusName.Succeeded));
     }
 
-    int IMonitoringApi.ReceivedFailedCount()
+    ValueTask<int> IMonitoringApi.ReceivedFailedCount()
     {
         return GetNumberOfMessage(_recName, nameof(StatusName.Failed));
     }
@@ -105,6 +99,35 @@ internal class FreeSqlMonitoringApi : IMonitoringApi
     public async Task<MediumMessage?> GetReceivedMessageAsync(long id)
     {
         return await GetMessageAsync(_recName, id).ConfigureAwait(false);
+    }
+
+    public async Task<StatisticsDto> GetStatisticsAsync()
+    {
+        var statistics = new StatisticsDto
+        {
+            PublishedSucceeded = (int) await _freeSql.Queryable<Published>()
+                .AsTable((_, _) => _pubName)
+                .Where(p => p.StatusName == "Succeeded")
+                .CountAsync(),
+            ReceivedSucceeded = (int) await _freeSql.Queryable<Received>()
+                .AsTable((_, _) => _recName)
+                .Where(p => p.StatusName == "Succeeded")
+                .CountAsync(),
+            PublishedFailed = (int) await _freeSql.Queryable<Published>()
+                .AsTable((_, _) => _pubName)
+                .Where(p => p.StatusName == "Failed")
+                .CountAsync(),
+            ReceivedFailed = (int) await _freeSql.Queryable<Received>()
+                .AsTable((_, _) => _recName)
+                .Where(p => p.StatusName == "Failed")
+                .CountAsync(),
+            PublishedDelayed = (int) await _freeSql.Queryable<Published>()
+                .AsTable((_, _) => _pubName)
+                .Where(p => p.StatusName == "Delayed")
+                .CountAsync()
+        };
+
+        return statistics;
     }
 
     public StatisticsDto GetStatistics()
@@ -137,17 +160,17 @@ internal class FreeSqlMonitoringApi : IMonitoringApi
         };
     }
 
-    private int GetNumberOfMessage(string tableName, string statusName)
+    private async ValueTask<int> GetNumberOfMessage(string tableName, string statusName)
     {
-        var count = _freeSql.Select<MessageDto>()
+        var count = await _freeSql.Select<MessageDto>()
             .AsTable((_, _) => tableName)
             .Where(p => p.StatusName == statusName)
-            .Count();
+            .CountAsync();
 
         return (int) count;
     }
 
-    private Dictionary<DateTime, int> GetHourlyTimelineStats(string tableName, string statusName)
+    private Task<IDictionary<DateTime, int>> GetHourlyTimelineStats(string tableName, string statusName)
     {
         var endDate = DateTime.Now;
         var dates = new List<DateTime>();
@@ -162,13 +185,13 @@ internal class FreeSqlMonitoringApi : IMonitoringApi
         return GetTimelineStats(tableName, statusName, keyMaps);
     }
 
-    private Dictionary<DateTime, int> GetTimelineStats(
+    private async Task<IDictionary<DateTime, int>> GetTimelineStats(
         string tableName,
         string statusName,
         IDictionary<string, DateTime> keyMaps)
     {
         // 翻译上面的SQL转成_freeSql的写法
-        var res = _freeSql.Select<Published>()
+        var res = await _freeSql.Select<Published>()
             .AsTable((_, _) => tableName)
             .Where(p => p.StatusName == statusName)
             .GroupBy(p => p.Added.ToString("yyyy-MM-dd-HH"))
@@ -179,7 +202,7 @@ internal class FreeSqlMonitoringApi : IMonitoringApi
             })
             .Where(p => Convert.ToDateTime(p.Key) >= Convert.ToDateTime(keyMaps.Keys.Min()))
             .Where(p => Convert.ToDateTime(p.Key) <= Convert.ToDateTime(keyMaps.Keys.Max()))
-            .ToList(p => new
+            .ToListAsync(p => new
             {
                 p.Key,
                 p.Count
