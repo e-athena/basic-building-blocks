@@ -1,4 +1,4 @@
-namespace Athena.Infrastructure.FreeSql.Tenants;
+namespace Athena.Infrastructure.Tenants;
 
 /// <summary>
 /// 默认的租户实现
@@ -22,6 +22,7 @@ public class DefaultTenantService : ITenantService
     /// <param name="tenantCode"></param>
     /// <param name="appId"></param>
     /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
     public async Task<TenantInfo?> GetAsync(string tenantCode, string? appId)
     {
         if (string.IsNullOrEmpty(tenantCode))
@@ -40,13 +41,11 @@ public class DefaultTenantService : ITenantService
             return null;
         }
 
-        var (dbType, connectionString) = DbTypeHelper.GetDataTypeAndConnectionString(single.Value);
-
         return await Task.FromResult(new TenantInfo
         {
-            ConnectionString = connectionString,
+            ConnectionString = single.Value,
             DbKey = tenantCode,
-            DataType = (int) dbType,
+            DataType = null,
             IsolationLevel = TenantIsolationLevel.Independent
         });
     }

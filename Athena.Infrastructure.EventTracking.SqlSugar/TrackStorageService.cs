@@ -50,6 +50,7 @@ public class TrackStorageService : ITrackStorageService
             // 根据事件类型全名读取追踪配置上级ID为空的配置
             var config = await QueryableNoTracking
                 .Where(p => p.EventTypeFullName == track.EventTypeFullName)
+                .OrderBy(p => p.EventType)
                 .Select(p => new
                 {
                     p.Id,

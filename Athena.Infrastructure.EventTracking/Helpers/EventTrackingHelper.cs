@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Xml;
 using System.Xml.XPath;
 using Athena.Infrastructure.Event;
+using Athena.Infrastructure.Helpers;
 using Athena.Infrastructure.Summaries;
 using Athena.Infrastructure.ViewModels;
 using DotNetCore.CAP;
@@ -25,6 +26,40 @@ public static class EventTrackingHelper
     /// </summary>
     private static readonly ConcurrentDictionary<string, IList<SelectViewModel>>
         EventSelectListCache = new();
+
+    #region GetEventTrackingInfos
+
+    /// <summary>
+    /// 读取事件跟踪信息列表
+    /// </summary>
+    /// <param name="assemblyKeyword">程序集</param>
+    /// <returns></returns>
+    public static IList<EventTrackingInfo> GetEventTrackingInfos(string? assemblyKeyword = null)
+    {
+        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword);
+        return GetEventTrackingInfos(assemblies);
+    }
+
+    /// <summary>
+    /// 读取事件跟踪信息列表
+    /// </summary>
+    /// <param name="assemblyKeywords">程序集</param>
+    /// <returns></returns>
+    public static IList<EventTrackingInfo> GetEventTrackingInfos(params string[] assemblyKeywords)
+    {
+        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords);
+        return GetEventTrackingInfos(assemblies);
+    }
+
+    /// <summary>
+    /// 读取事件跟踪信息列表
+    /// </summary>
+    /// <param name="assemblies">程序集</param>
+    /// <returns></returns>
+    public static IList<EventTrackingInfo> GetEventTrackingInfos(IEnumerable<Assembly> assemblies)
+    {
+        return GetEventTrackingInfos(assemblies.ToList());
+    }
 
     /// <summary>
     /// 读取事件跟踪信息列表
@@ -123,6 +158,42 @@ public static class EventTrackingHelper
         return list;
     }
 
+    #endregion
+
+    #region GetEventTrackingTreeInfos
+
+    /// <summary>
+    /// 读取事件跟踪信息树形列表
+    /// </summary>
+    /// <param name="assemblyKeyword">程序集</param>
+    /// <returns></returns>
+    public static IList<EventTrackingTreeInfo> GetEventTrackingTreeInfos(string? assemblyKeyword = null)
+    {
+        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword);
+        return GetEventTrackingTreeInfos(assemblies);
+    }
+
+    /// <summary>
+    /// 读取事件跟踪信息树形列表
+    /// </summary>
+    /// <param name="assemblyKeywords">程序集</param>
+    /// <returns></returns>
+    public static IList<EventTrackingTreeInfo> GetEventTrackingTreeInfos(params string[] assemblyKeywords)
+    {
+        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords);
+        return GetEventTrackingTreeInfos(assemblies);
+    }
+
+    /// <summary>
+    /// 读取事件跟踪信息树形列表
+    /// </summary>
+    /// <param name="assemblies">程序集</param>
+    /// <returns></returns>
+    public static IList<EventTrackingTreeInfo> GetEventTrackingTreeInfos(IEnumerable<Assembly> assemblies)
+    {
+        return GetEventTrackingTreeInfos(assemblies.ToList());
+    }
+
     /// <summary>
     /// 读取事件跟踪信息树形列表
     /// </summary>
@@ -163,6 +234,42 @@ public static class EventTrackingHelper
         return treeList;
     }
 
+    #endregion
+
+    #region GetEventSelectList
+    
+    /// <summary>
+    /// 读取事件下拉列表
+    /// </summary>
+    /// <param name="assemblyKeyword">程序集</param>
+    /// <returns></returns>
+    public static IList<SelectViewModel> GetEventSelectList(string? assemblyKeyword = null)
+    {
+        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword);
+        return GetEventSelectList(assemblies);
+    }
+
+    /// <summary>
+    /// 读取事件下拉列表
+    /// </summary>
+    /// <param name="assemblyKeywords">程序集</param>
+    /// <returns></returns>
+    public static IList<SelectViewModel> GetEventSelectList(params string[] assemblyKeywords)
+    {
+        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords);
+        return GetEventSelectList(assemblies);
+    }
+
+    /// <summary>
+    /// 读取事件下拉列表
+    /// </summary>
+    /// <param name="assemblies">程序集</param>
+    /// <returns></returns>
+    public static IList<SelectViewModel> GetEventSelectList(IEnumerable<Assembly> assemblies)
+    {
+        return GetEventSelectList(assemblies.ToList());
+    }
+    
     /// <summary>
     /// 读取事件下拉列表
     /// </summary>
@@ -227,6 +334,8 @@ public static class EventTrackingHelper
             .ToList();
         return list;
     }
+
+    #endregion
 
     /// <summary>
     /// 读取方法注释

@@ -48,6 +48,7 @@ public class TrackStorageService : ITrackStorageService
             // 根据事件类型全名读取追踪配置上级ID为空的配置
             var config = await _freeSql.Queryable<TrackConfig>()
                 .Where(p => p.EventTypeFullName == track.EventTypeFullName)
+                .OrderBy(p => p.EventType)
                 .FirstAsync(p => new
                 {
                     p.Id,
@@ -88,7 +89,7 @@ public class TrackStorageService : ITrackStorageService
                     Id = rootConfig.ParentId!,
                     EventName = rootConfig.EventName,
                     EventTypeName = rootConfig.EventTypeName,
-                    EventTypeFullName = rootConfig.EventTypeFullName,
+                    EventTypeFullName = rootConfig.EventTypeFullName
                 });
             }
 

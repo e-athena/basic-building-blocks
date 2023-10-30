@@ -18,4 +18,5 @@ global using Athena.Infrastructure.FreeSql.Tenants;
 global using Athena.Infrastructure.Helpers;
 global using DotNetCore.CAP;
 global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.Hosting;
 global using StackExchange.Redis;

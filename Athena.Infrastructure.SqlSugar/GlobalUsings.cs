@@ -9,7 +9,6 @@ global using Athena.Infrastructure.ColumnPermissions;
 global using Athena.Infrastructure.ColumnPermissions.Models;
 global using Athena.Infrastructure.DataPermission;
 global using Microsoft.Extensions.Logging;
-global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Athena.Infrastructure.Messaging.Requests;
 global using Athena.Infrastructure.Messaging.Responses;

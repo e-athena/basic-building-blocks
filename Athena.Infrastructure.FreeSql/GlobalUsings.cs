@@ -6,6 +6,7 @@ global using System.Collections.Concurrent;
 global using System.Diagnostics;
 global using System.Reflection;
 global using System.Text.Json;
+global using Athena.Infrastructure.Attributes;
 global using Athena.Infrastructure.Auths;
 global using Athena.Infrastructure.DataPermission;
 global using Microsoft.Extensions.Logging;

@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Hosting;
-
 namespace Athena.Infrastructure.FreeSql.AspNetCore.Middlewares;
 
 /// <summary>
@@ -54,13 +52,10 @@ public class MultiTenancyMiddleware
             }
 
             var tenantService = context.RequestServices.GetService<ITenantService>();
-            if (tenantService == null)
+            var configuration = context.RequestServices.GetService<IConfiguration>();
+            if (tenantService == null && configuration != null)
             {
-                var configuration = context.RequestServices.GetService<IConfiguration>();
-                if (configuration != null)
-                {
-                    tenantService = new DefaultTenantService(configuration);
-                }
+                tenantService = new DefaultTenantService(configuration);
             }
 
             if (tenantService == null)
@@ -84,14 +79,16 @@ public class MultiTenancyMiddleware
 
             // 设置当前租户
             var currentTenant = tenant.DbKey;
+            // 是否自动同步结构
+            var isAutoSyncStructure = configuration != null &&
+                                      configuration.GetValue<bool>("Module:DbContext:IsAutoSyncStructure");
             // 注册租户
             // 只会首次注册，如果已经注册过则不生效
             FreeSqlMultiTenancyManager.Instance.Register(currentTenant, () =>
                 FreeSqlBuilderHelper.Build(
                     tenant.ConnectionString,
                     tenant.DataType.HasValue ? (DataType) tenant.DataType.Value : null,
-                    // 开发环境默认自动同步结构
-                    isAutoSyncStructure: IsDevelopment()
+                    isAutoSyncStructure
                 )
             );
 
@@ -142,14 +139,5 @@ public class MultiTenancyMiddleware
         return (!string.IsNullOrEmpty(appId)
             ? appId.ToString()
             : context.User.FindFirst("AppId")?.Value) ?? null;
-    }
-
-    /// <summary>
-    /// 当前是否为开发环境
-    /// </summary>
-    /// <returns></returns>
-    private static bool IsDevelopment()
-    {
-        return Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == Environments.Development;
     }
 }
