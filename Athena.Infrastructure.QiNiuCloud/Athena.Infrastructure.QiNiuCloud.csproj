@@ -4,24 +4,39 @@
         <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>7.0.0-preview.20231013.1</Version>
+        <Version>7.0.0-preview.20231020.1</Version>
+        <PackageIcon>e-athena.png</PackageIcon>
+        <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
+        <Title>Athena.Infrastructure.QiNiuCloud</Title>
+        <Authors>VanZheng</Authors>
+        <Description>七牛云存储</Description>
+        <Copyright>Copyright (c) 2023 e-athena</Copyright>
+        <PackageProjectUrl>https://github.com/e-athena/basic-building-blocks</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <DocumentationFile>bin\Debug\net6.0\Athena.Infrastructure.QiNiuCloud.xml</DocumentationFile>
+        <DocumentationFile>bin\Debug\Athena.Infrastructure.QiNiuCloud.xml</DocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <DocumentationFile>bin\Release\net6.0\Athena.Infrastructure.QiNiuCloud.xml</DocumentationFile>
+        <DocumentationFile>bin\Release\Athena.Infrastructure.QiNiuCloud.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Athena.Infrastructure\Athena.Infrastructure.csproj" />
+        <ProjectReference Include="..\Athena.Infrastructure\Athena.Infrastructure.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="SKIT.FlurlHttpClient.Common" Version="2.6.0" />
-        <PackageReference Include="QiniuCore.SDK" Version="7.3.1.2" />
+        <PackageReference Include="SKIT.FlurlHttpClient.Common" Version="2.6.0"/>
+        <PackageReference Include="QiniuCore.SDK" Version="7.3.1.2"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Resource Include="e-athena.png">
+        <Pack>True</Pack>
+        <PackagePath/>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Resource>
     </ItemGroup>
 </Project>

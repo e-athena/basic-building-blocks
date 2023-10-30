@@ -22,18 +22,23 @@ public static class AthenaServiceCollectionExtensions
 
             if (!configuration.GetValue<bool>("Module:DbContext:Disabled"))
             {
+                var isAutoSyncStructure = configuration.GetValue<bool>("Module:DbContext:IsAutoSyncStructure");
                 // 添加ORM
-                services.AddCustomFreeSql(configuration, builder.Environment.IsDevelopment());
+                services.AddCustomFreeSql(configuration, isAutoSyncStructure);
                 // 添加集成事件支持
                 services.AddCustomIntegrationEvent(configuration, capOptions =>
                 {
-                    // Dashboard
-                    capOptions.UseDashboard(options =>
+                    // 启用仪表盘
+                    if (!configuration.GetValue<bool>("Module:DbContext:Dashboard:Disabled"))
                     {
-                        options.UseAuth = true;
-                        options.DefaultAuthenticationScheme = CapCookieAuthenticationDefaults.AuthenticationScheme;
-                        options.AuthorizationPolicy = CapCookieAuthenticationDefaults.AuthenticationScheme;
-                    });
+                        // Dashboard
+                        capOptions.UseDashboard(options =>
+                        {
+                            options.UseAuth = !configuration.GetValue<bool>("Module:DbContext:Dashboard:DisabledAuth");
+                            options.DefaultAuthenticationScheme = CapCookieAuthenticationDefaults.AuthenticationScheme;
+                            options.AuthorizationPolicy = CapCookieAuthenticationDefaults.AuthenticationScheme;
+                        });
+                    }
                 });
             }
 

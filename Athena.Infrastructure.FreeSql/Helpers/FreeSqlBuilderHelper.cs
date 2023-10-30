@@ -40,7 +40,8 @@ public static class FreeSqlBuilderHelper
 
                 // cap的表不处理
                 if (cmd.CommandText.Contains(CapConstant.PublishedTableName) ||
-                    cmd.CommandText.Contains(CapConstant.ReceivedTableName))
+                    cmd.CommandText.Contains(CapConstant.ReceivedTableName) ||
+                    cmd.CommandText.Contains(CapConstant.LockTableName))
                 {
                     return;
                 }

@@ -1,4 +1,4 @@
-namespace Athena.Infrastructure.CSRedis;
+namespace Athena.Infrastructure.Caching;
 
 /// <summary>
 /// Redis配置

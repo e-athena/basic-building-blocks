@@ -1,8 +1,3 @@
-using Athena.Infrastructure.Caching;
-using Athena.Infrastructure.Providers;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-
 namespace Athena.Infrastructure.DataPermission.FreeSql;
 
 /// <summary>
@@ -25,8 +20,7 @@ public class FreeSqlQueryFilterService : QueryFilterServiceBase, IQueryFilterSer
     {
         _cacheManager = cacheManager;
         _logger = loggerFactory.CreateLogger<FreeSqlQueryFilterService>();
-        _config = AthenaProvider.GetService<IOptions<DataPermissionConfig>>()?.Value ??
-                  new DataPermissionConfig();
+        _config = AthenaProvider.GetService<IOptions<DataPermissionConfig>>()?.Value ?? new DataPermissionConfig();
     }
 
     /// <summary>
@@ -47,6 +41,14 @@ public class FreeSqlQueryFilterService : QueryFilterServiceBase, IQueryFilterSer
 
         // 缓存Key
         var cacheKey = string.Format(_config.CacheKeyFormat, userId, resourceKey);
+
+        // // 刷新缓存
+        // if (_accessor is {IsRefreshCache: true})
+        // {
+        //     // 刷新缓存
+        //     await _cacheManager.RemoveAsync(cacheKey);
+        // }
+
         // 缓存过期时间
         var expireTime = TimeSpan.FromSeconds(_config.CacheExpireSeconds);
         // 读取缓存，如果缓存中存在，则直接返回，否则从数据库中读取，并写入缓存

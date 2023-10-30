@@ -1,12 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+        <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>7.0.0-preview.20231014.2</PackageVersion>
+        <Version>7.0.0-preview.20231020.1</Version>
         <PackageIcon>e-athena.png</PackageIcon>
+        <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
+        <Title>Athena.Infrastructure.ApiPermission</Title>
+        <Authors>VanZheng</Authors>
+        <Description>API资源权限</Description>
+        <Copyright>Copyright (c) 2023 e-athena</Copyright>
+        <PackageProjectUrl>https://github.com/e-athena/basic-building-blocks</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -18,7 +24,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Athena.Infrastructure.Jwt\Athena.Infrastructure.Jwt.csproj"/>
+        <ProjectReference Include="..\Athena.Infrastructure.Auth\Athena.Infrastructure.Auth.csproj"/>
     </ItemGroup>
 
     <ItemGroup>

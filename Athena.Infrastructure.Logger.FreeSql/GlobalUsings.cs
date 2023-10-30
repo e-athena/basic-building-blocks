@@ -1,6 +1,9 @@
+// Global using directives
+
+global using Athena.Infrastructure.Providers;
+global using Microsoft.Extensions.Logging;
 global using System.Collections.Concurrent;
 global using FreeSql;
-global using Microsoft.Extensions.DependencyInjection;
 global using Athena.Infrastructure.Logger.Models;
 global using Athena.Infrastructure.Logger.Messaging.Requests;
 global using Athena.Infrastructure.Logger.Messaging.Responses;

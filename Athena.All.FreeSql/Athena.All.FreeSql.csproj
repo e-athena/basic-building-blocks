@@ -5,13 +5,19 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>7.0.0-preview.20231014.4</Version>
+        <Version>7.0.0-preview.20231030.1</Version>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
         <PackageIcon>e-athena.png</PackageIcon>
+        <Title>Athena.All.FreeSql</Title>
+        <Authors>VanZheng</Authors>
+        <Description>管理系统应用开发包(FreeSql)</Description>
+        <Copyright>Copyright (c) 2023 e-athena</Copyright>
+        <PackageProjectUrl>https://github.com/e-athena/basic-building-blocks</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FreeSql.Provider.MySqlConnector" Version="3.2.801"/>
+        <PackageReference Include="FreeSql.Provider.MySql" Version="3.2.801"/>
         <PackageReference Include="FreeSql.Provider.SqliteCore" Version="3.2.801"/>
         <PackageReference Include="SQLitePCLRaw.bundle_e_sqlcipher" Version="2.1.6"/>
     </ItemGroup>

@@ -4,24 +4,27 @@
         <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>7.0.0-preview.20231013.1</PackageVersion>
+        <Version>7.0.0-preview.20231021.1</Version>
         <PackageIcon>e-athena.png</PackageIcon>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
+        <Title>Athena.Infrastructure.Logger.FreeSql</Title>
+        <Authors>VanZheng</Authors>
+        <Description>日志记录(FreeSql实现)</Description>
+        <Copyright>Copyright (c) 2023 e-athena</Copyright>
+        <PackageProjectUrl>https://github.com/e-athena/basic-building-blocks</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-        <DocumentationFile>bin\Debug\net6.0\Athena.Infrastructure.Logger.FreeSql.xml</DocumentationFile>
+        <DocumentationFile>bin\Debug\Athena.Infrastructure.Logger.FreeSql.xml</DocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-        <DocumentationFile>bin\Release\net6.0\Athena.Infrastructure.Logger.FreeSql.xml</DocumentationFile>
+        <DocumentationFile>bin\Release\Athena.Infrastructure.Logger.FreeSql.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FreeSql.Cloud" Version="1.6.6"/>
         <PackageReference Include="FreeSql.Repository" Version="3.2.801"/>
-        <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0"/>
     </ItemGroup>
 
     <ItemGroup>

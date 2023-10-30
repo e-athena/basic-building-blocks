@@ -1,6 +1,4 @@
-using Athena.InstantMessaging.SignalR.Events;
-using Athena.InstantMessaging.SignalR.Notices;
-
+// ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Builder;
 
 /// <summary>

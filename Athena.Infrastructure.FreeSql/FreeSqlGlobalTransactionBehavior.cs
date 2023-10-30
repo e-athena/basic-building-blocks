@@ -1,7 +1,4 @@
-﻿using System.Diagnostics;
-using Microsoft.AspNetCore.Http;
-
-namespace Athena.Infrastructure.FreeSql;
+﻿namespace Athena.Infrastructure.FreeSql;
 
 /// <summary>
 /// FreeSqlGlobalTransactionBehavior
@@ -17,7 +14,7 @@ public class FreeSqlGlobalTransactionBehavior<TRequest, TResponse> : IPipelineBe
     private readonly IPublisher _publisher;
     private readonly ILogger<FreeSqlGlobalTransactionBehavior<TRequest, TResponse>> _logger;
     private readonly ICapPublisher? _capPublisher;
-    private readonly IHttpContextAccessor? _httpContextAccessor;
+    private readonly ISecurityContextAccessor? _securityContextAccessor;
 
     /// <summary>
     /// 
@@ -28,7 +25,7 @@ public class FreeSqlGlobalTransactionBehavior<TRequest, TResponse> : IPipelineBe
     /// <param name="domainEventContext"></param>
     /// <param name="integrationEventContext"></param>
     /// <param name="serviceProvider"></param>
-    /// <param name="httpContextAccessor"></param>
+    /// <param name="securityContextAccessor"></param>
     /// <exception cref="ArgumentNullException"></exception>
     public FreeSqlGlobalTransactionBehavior(
         IPublisher publisher,
@@ -36,14 +33,14 @@ public class FreeSqlGlobalTransactionBehavior<TRequest, TResponse> : IPipelineBe
         UnitOfWorkManager unitOfWorkManager,
         IDomainEventContext domainEventContext,
         IIntegrationEventContext integrationEventContext,
-        IServiceProvider serviceProvider, IHttpContextAccessor? httpContextAccessor)
+        IServiceProvider serviceProvider, ISecurityContextAccessor? securityContextAccessor)
     {
         _publisher = publisher ?? throw new ArgumentNullException(nameof(publisher));
         _logger = loggerFactory.CreateLogger<FreeSqlGlobalTransactionBehavior<TRequest, TResponse>>();
         _unitOfWorkManager = unitOfWorkManager;
         _domainEventContext = domainEventContext;
         _integrationEventContext = integrationEventContext;
-        _httpContextAccessor = httpContextAccessor;
+        _securityContextAccessor = securityContextAccessor;
         _capPublisher = serviceProvider.GetService<ICapPublisher>();
     }
 
@@ -230,54 +227,12 @@ public class FreeSqlGlobalTransactionBehavior<TRequest, TResponse> : IPipelineBe
     /// <summary>
     /// 租户ID
     /// </summary>
-    private string? TenantId
-    {
-        get
-        {
-            var context = _httpContextAccessor?.HttpContext;
-            if (context == null)
-            {
-                return null;
-            }
-
-            var tenantId = context.Request.Headers["TenantId"];
-            if (!string.IsNullOrEmpty(tenantId))
-            {
-                return tenantId;
-            }
-
-            tenantId = context.Request.Query["tenant_id"].ToString();
-            return (!string.IsNullOrEmpty(tenantId)
-                ? tenantId.ToString()
-                : context.User.FindFirst("TenantId")?.Value) ?? null;
-        }
-    }
+    private string? TenantId => _securityContextAccessor?.TenantId;
 
     /// <summary>
     /// 读取应用ID
     /// </summary>
-    private string? AppId
-    {
-        get
-        {
-            var context = _httpContextAccessor?.HttpContext;
-            if (context == null)
-            {
-                return null;
-            }
-
-            var appId = context.Request.Headers["AppId"];
-            if (!string.IsNullOrEmpty(appId))
-            {
-                return appId;
-            }
-
-            appId = context.Request.Query["app_id"].ToString();
-            return (!string.IsNullOrEmpty(appId)
-                ? appId.ToString()
-                : context.User.FindFirst("AppId")?.Value) ?? null;
-        }
-    }
+    private string? AppId => _securityContextAccessor?.AppId;
 
     /// <summary>
     /// Commit

@@ -20,5 +20,4 @@ global using Athena.Infrastructure.ApiPermission.Helpers;
 global using Athena.Infrastructure.ApiPermission.Models;
 global using Athena.Infrastructure.ApiPermission.Services.Impls;
 global using Athena.Infrastructure.Helpers;
-global using Athena.Infrastructure.Jwt;
 global using Microsoft.AspNetCore.Http;

@@ -1,3 +1,6 @@
+using Athena.Infrastructure.Providers;
+using Microsoft.Extensions.Logging;
+
 namespace Athena.Infrastructure.FreeRedis;
 
 /// <summary>
@@ -18,7 +21,9 @@ public static class RedisHelper
     {
         if (Instance != null)
         {
-            throw new Exception("RedisHelper已经初始化");
+            AthenaProvider.DefaultLog?.LogWarning("RedisHelper已初始化");
+            return;
+            // throw new Exception("RedisHelper已经初始化");
         }
 
         Instance = cli;

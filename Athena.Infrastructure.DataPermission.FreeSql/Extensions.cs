@@ -1,4 +1,3 @@
-using Athena.Infrastructure;
 using Athena.Infrastructure.DataPermission;
 using Microsoft.Extensions.Configuration;
 

@@ -1,7 +1,6 @@
 using System.Reflection;
 using System.Security.Claims;
-using Athena.Infrastructure.Jwt;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Athena.Infrastructure.Auths;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -100,8 +99,7 @@ public class DefaultSecurityContextAccessor : ISecurityContextAccessor
         throw new NotImplementedException();
     }
 
-    public string CreateToken(JwtConfig config, List<Claim> claims, bool hasScheme = true,
-        string scheme = JwtBearerDefaults.AuthenticationScheme)
+    public string CreateToken(JwtConfig config, List<Claim> claims, bool hasScheme = true, string scheme = "Bearer")
     {
         throw new NotImplementedException();
     }

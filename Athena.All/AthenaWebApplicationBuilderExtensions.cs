@@ -55,6 +55,7 @@ public static class AthenaWebApplicationBuilderExtensions
             app.UseCapDashboard();
         }
 
+        app.UseCustomMiddlewareInjector();
         useActions?.Invoke(app);
         app.MapControllers();
         app.MapSpaFront<TType>();
@@ -194,7 +195,7 @@ public static class AthenaWebApplicationBuilderExtensions
                 var password = configuration.GetValue<string>("Module:DbContext:Dashboard:Password");
                 userName ??= "admin";
                 password ??= "admin123456";
-                // 如果用户名等于admin，密码等于123456，则登录成功，生成Cookies
+                // 如果用户名和密码正确，则登录成功，生成Cookies，然后重定向到/cap
                 if (loginRequest.UserName == userName && loginRequest.Password == password)
                 {
                     var claims = new List<Claim>

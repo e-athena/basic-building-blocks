@@ -27,18 +27,17 @@ public static class AthenaServiceCollectionExtensions
                 // 添加集成事件支持
                 services.AddCustomIntegrationEvent(configuration, capOptions =>
                 {
-                    if (configuration.GetValue<bool>("Module:DbContext:Dashboard:Disabled"))
+                    // 启用仪表盘
+                    if (!configuration.GetValue<bool>("Module:DbContext:Dashboard:Disabled"))
                     {
-                        return;
+                        // Dashboard
+                        capOptions.UseDashboard(options =>
+                        {
+                            options.UseAuth = !configuration.GetValue<bool>("Module:DbContext:Dashboard:DisabledAuth");
+                            options.DefaultAuthenticationScheme = CapCookieAuthenticationDefaults.AuthenticationScheme;
+                            options.AuthorizationPolicy = CapCookieAuthenticationDefaults.AuthenticationScheme;
+                        });
                     }
-
-                    // Dashboard
-                    capOptions.UseDashboard(options =>
-                    {
-                        options.UseAuth = true;
-                        options.DefaultAuthenticationScheme = CapCookieAuthenticationDefaults.AuthenticationScheme;
-                        options.AuthorizationPolicy = CapCookieAuthenticationDefaults.AuthenticationScheme;
-                    });
                 });
             }
 

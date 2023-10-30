@@ -1,3 +1,5 @@
+using Athena.Infrastructure.Auths;
+
 namespace Athena.Infrastructure.ApiPermission.Attributes;
 
 /// <summary>

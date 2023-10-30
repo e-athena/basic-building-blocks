@@ -151,6 +151,6 @@ public static class Extensions
     {
         var config = configuration.GetConfig<JwtConfig>(configVariable, envVariable);
         config.Check();
-        return configuration.GetConfig<JwtConfig>(configVariable, envVariable);
+        return config;
     }
 }

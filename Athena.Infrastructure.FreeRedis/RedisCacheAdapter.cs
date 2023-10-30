@@ -16,7 +16,8 @@ public class RedisCacheAdapter : ICacheManager
     {
         if (RedisHelper.Instance == null)
         {
-            throw new ArgumentNullException(nameof(RedisHelper.Instance), "Redis实例未初始化");
+            throw new ArgumentNullException(nameof(RedisHelper.Instance),
+                "Redis实例未初始化,请调用RedisHelper.Initialization(client)方法初始化");
         }
 
         _config = config;

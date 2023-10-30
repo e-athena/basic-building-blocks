@@ -1,3 +1,8 @@
+// Global using directives
+
+global using System.Net;
+global using System.Text.RegularExpressions;
+global using Microsoft.Extensions.DependencyInjection;
 global using System.ComponentModel;
 global using System.Diagnostics;
 global using System.Text.Json;

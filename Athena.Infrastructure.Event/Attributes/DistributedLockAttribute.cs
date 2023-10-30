@@ -42,7 +42,7 @@ public class DistributedLockAttribute : Rougamo.MoAttribute
 
         if (_lockResource == null)
         {
-            throw new Exception("该资源有其他进程正在处理，请稍后再试");
+            throw new ResourceProcessedException("该资源有其他进程正在处理，请稍后再试");
         }
 
         base.OnEntry(context);
@@ -57,5 +57,19 @@ public class DistributedLockAttribute : Rougamo.MoAttribute
         // 释放锁
         _lockResource?.ReleaseAsync();
         base.OnExit(context);
+    }
+}
+
+/// <summary>
+/// 资源被处理异常
+/// </summary>
+public class ResourceProcessedException : Exception
+{
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="message"></param>
+    public ResourceProcessedException(string message) : base(message)
+    {
     }
 }

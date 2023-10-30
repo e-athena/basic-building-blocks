@@ -7,6 +7,12 @@ public class ApiPermissionService : IApiPermissionService
 {
     #region FrontEndRouting
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="appId"></param>
+    /// <param name="assemblyKeyword"></param>
+    /// <returns></returns>
     public IList<MenuTreeInfo> GetFrontEndRoutingResources(string appId, string? assemblyKeyword = null)
     {
         var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword);
@@ -19,6 +25,12 @@ public class ApiPermissionService : IApiPermissionService
         return list;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="appId"></param>
+    /// <param name="assemblyKeywords"></param>
+    /// <returns></returns>
     public IList<MenuTreeInfo> GetFrontEndRoutingResources(string appId, params string[] assemblyKeywords)
     {
         var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords);
@@ -42,6 +54,13 @@ public class ApiPermissionService : IApiPermissionService
         return FrontEndRoutingHelper.GetResources(assembly, appId);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="codes"></param>
+    /// <param name="appId"></param>
+    /// <param name="assemblyKeyword"></param>
+    /// <returns></returns>
     public IList<MenuTreeInfo> GetPermissionFrontEndRoutingResources(IList<string> codes, string appId,
         string? assemblyKeyword = null)
     {
@@ -55,6 +74,13 @@ public class ApiPermissionService : IApiPermissionService
         return list;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="codes"></param>
+    /// <param name="appId"></param>
+    /// <param name="assemblyKeywords"></param>
+    /// <returns></returns>
     public IList<MenuTreeInfo> GetPermissionFrontEndRoutingResources(IList<string> codes, string appId,
         params string[] assemblyKeywords)
     {
@@ -103,6 +129,12 @@ public class ApiPermissionService : IApiPermissionService
     #endregion
 
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="appId"></param>
+    /// <param name="assemblyKeyword"></param>
+    /// <returns></returns>
     public IEnumerable<ResourceCodeInfo> GetResourceCodeInfos(string appId, string? assemblyKeyword = null)
     {
         var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword);
@@ -115,6 +147,12 @@ public class ApiPermissionService : IApiPermissionService
         return list;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="appId"></param>
+    /// <param name="assemblyKeywords"></param>
+    /// <returns></returns>
     public IEnumerable<ResourceCodeInfo> GetResourceCodeInfos(string appId, params string[] assemblyKeywords)
     {
         var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords);
@@ -138,6 +176,12 @@ public class ApiPermissionService : IApiPermissionService
         return FrontEndRoutingHelper.GetResourceCodeInfos(assembly, appId);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="appId"></param>
+    /// <param name="assemblyKeyword"></param>
+    /// <returns></returns>
     public IList<string> GetDuplicateResourceCodes(string appId, string? assemblyKeyword = null)
     {
         var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword);
@@ -150,6 +194,12 @@ public class ApiPermissionService : IApiPermissionService
         return list;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="appId"></param>
+    /// <param name="assemblyKeywords"></param>
+    /// <returns></returns>
     public IList<string> GetDuplicateResourceCodes(string appId, params string[] assemblyKeywords)
     {
         var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords);
@@ -181,6 +231,12 @@ public class ApiPermissionService : IApiPermissionService
         return duplicateCodes;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="appId"></param>
+    /// <param name="assemblyKeyword"></param>
+    /// <returns></returns>
     public bool HasDuplicateResourceCodes(string appId, string? assemblyKeyword = null)
     {
         var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword);
@@ -193,6 +249,12 @@ public class ApiPermissionService : IApiPermissionService
         return list.Any(p => p);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="appId"></param>
+    /// <param name="assemblyKeywords"></param>
+    /// <returns></returns>
     public bool HasDuplicateResourceCodes(string appId, params string[] assemblyKeywords)
     {
         var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords);

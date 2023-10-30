@@ -78,6 +78,39 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
             return;
         }
 
+        // 如果是Athena.Infrastructure.FluentValidation验证异常
+        if (ex.Source == "Athena.Infrastructure.FluentValidation")
+        {
+            // 读取ValidationResultModel值
+            var validationResultModelString =
+                ex.GetType().GetProperty("ValidationResultModel")?.GetValue(ex)?.ToString();
+            ValidationResult? validationResult = null;
+            // 反序列化ValidationResult对象
+            if (validationResultModelString != null)
+            {
+                validationResult = JsonSerializer.Deserialize<ValidationResult>(validationResultModelString);
+            }
+
+            // validationResult
+            context.Result = new ObjectResult(new CustomBadRequestResult
+            {
+                Success = false,
+                Message = validationResult?.Message ?? "表单验证失败",
+                StatusCode = validationResult?.StatusCode ?? 400,
+                TraceId = traceId,
+                Errors = validationResult?.Errors.Select(p => new Dictionary<string, string[]>
+                {
+                    {
+                        p.Field ?? string.Empty,
+                        new[] {p.Message}
+                    }
+                }).ToList()
+            });
+            context.HttpContext.Response.StatusCode = validationResult?.StatusCode ?? 400;
+            await base.OnExceptionAsync(context);
+            return;
+        }
+
         // 如果是租户环境下
         if (TenantHelper.IsTenantEnvironment(context.HttpContext))
         {
@@ -175,5 +208,40 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
             TraceId = traceId
         });
         await base.OnExceptionAsync(context);
+    }
+}
+
+//
+class ValidationResult
+{
+    /// <summary>
+    /// 状态码
+    /// </summary>
+    public int StatusCode { get; set; } = (int) HttpStatusCode.BadRequest;
+
+    /// <summary>
+    /// 消息
+    /// </summary>
+    public string Message { get; set; } = "Validation Failed";
+
+    /// <summary>
+    /// 错误信息
+    /// </summary>
+    public List<ValidationError> Errors { get; } = new();
+}
+
+/// <summary>
+/// 
+/// </summary>
+class ValidationError
+{
+    public string? Field { get; }
+
+    public string Message { get; }
+
+    public ValidationError(string field, string message)
+    {
+        Field = field != string.Empty ? field : null;
+        Message = message;
     }
 }

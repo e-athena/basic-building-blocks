@@ -85,6 +85,7 @@ public static class TableColumnReader
                     tableColumnInfo.Title = attribute.Title;
                     tableColumnInfo.Group = attribute.Group;
                     tableColumnInfo.GroupDescription = attribute.GroupDescription;
+                    tableColumnInfo.TableIgnore = attribute.TableIgnore;
                 }
             }
 

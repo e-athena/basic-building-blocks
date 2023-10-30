@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Athena.Infrastructure.Helpers;
@@ -30,7 +29,13 @@ public static class AssemblyHelper
                         !p.FullName.StartsWith("Pipelines") && !p.FullName.StartsWith("FreeScheduler") &&
                         !p.FullName.StartsWith("IdleBus") && !p.FullName.StartsWith("FreeSql,") &&
                         !p.FullName.StartsWith("SqlSugar,") && !p.FullName.StartsWith("MySqlConnector,") &&
-                        !p.FullName.StartsWith("Npgsql,")
+                        !p.FullName.StartsWith("Npgsql,") && !p.FullName.StartsWith("K4os") &&
+                        !p.FullName.StartsWith("UAParser") && !p.FullName.StartsWith("Ubiety.Dns.Core") &&
+                        !p.FullName.StartsWith("Google.Protobuf") && !p.FullName.StartsWith("WorkQueue") &&
+                        !p.FullName.StartsWith("Consul") && !p.FullName.StartsWith("ZstdNet") &&
+                        !p.FullName.StartsWith("K4os.Hash.xxHash") && !p.FullName.StartsWith("Scrutor") &&
+                        !p.FullName.StartsWith("FluentValidation") && !p.FullName.StartsWith("K4os.Compression.LZ4") &&
+                        !p.FullName.StartsWith("BouncyCastle.Crypto") && !p.FullName.StartsWith("MySql.Data")
             )
             .ToArray();
 
@@ -59,7 +64,13 @@ public static class AssemblyHelper
                         !p.FullName.StartsWith("Pipelines") && !p.FullName.StartsWith("FreeScheduler") &&
                         !p.FullName.StartsWith("IdleBus") && !p.FullName.StartsWith("FreeSql,") &&
                         !p.FullName.StartsWith("SqlSugar,") && !p.FullName.StartsWith("MySqlConnector,") &&
-                        !p.FullName.StartsWith("Npgsql,")
+                        !p.FullName.StartsWith("Npgsql,") && !p.FullName.StartsWith("K4os") &&
+                        !p.FullName.StartsWith("UAParser") && !p.FullName.StartsWith("Ubiety.Dns.Core") &&
+                        !p.FullName.StartsWith("Google.Protobuf") && !p.FullName.StartsWith("WorkQueue") &&
+                        !p.FullName.StartsWith("Consul") && !p.FullName.StartsWith("ZstdNet") &&
+                        !p.FullName.StartsWith("K4os.Hash.xxHash") && !p.FullName.StartsWith("Scrutor") &&
+                        !p.FullName.StartsWith("FluentValidation") && !p.FullName.StartsWith("K4os.Compression.LZ4") &&
+                        !p.FullName.StartsWith("BouncyCastle.Crypto") && !p.FullName.StartsWith("MySql.Data")
             )
             .ToArray();
 
@@ -132,7 +143,7 @@ public static class AssemblyHelper
                 var assembly = Assembly.LoadFrom(file);
                 assemblies.Add(assembly);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Handle any exceptions that occur while loading the assembly
             }

@@ -6,14 +6,14 @@ using Athena.Infrastructure.EventTracking.Messaging.Responses;
 
 namespace Athena.Infrastructure.EventTracking.FreeSql;
 
-public class TrackStorageService : QueryServiceBase<Track>, ITrackStorageService
+public class TrackStorageService : ITrackStorageService
 {
     private readonly ILogger<TrackStorageService> _logger;
-    private readonly FreeSqlCloud _freeSql;
+    private readonly IFreeSql<IEventTrackingFreeSql> _freeSql;
     private readonly IDistributedLock _distributedLock;
 
-    public TrackStorageService(FreeSqlCloud freeSql, ILoggerFactory loggerFactory, IDistributedLock distributedLock) :
-        base(freeSql)
+    public TrackStorageService(IFreeSql<IEventTrackingFreeSql> freeSql, ILoggerFactory loggerFactory,
+        IDistributedLock distributedLock)
     {
         _logger = loggerFactory.CreateLogger<TrackStorageService>();
         _freeSql = freeSql;
@@ -24,7 +24,7 @@ public class TrackStorageService : QueryServiceBase<Track>, ITrackStorageService
     {
         // 根据TraceId查询该追踪是否已经初始化
         checkInitStatus:
-        var isInit = await QueryableNoTracking
+        var isInit = await _freeSql.Queryable<Track>()
             .Where(p => p.TraceId == track.TraceId)
             .AnyAsync(cancellationToken);
         // 如果未初始化则初始化追踪配置
@@ -46,7 +46,7 @@ public class TrackStorageService : QueryServiceBase<Track>, ITrackStorageService
             }
 
             // 根据事件类型全名读取追踪配置上级ID为空的配置
-            var config = await QueryNoTracking<TrackConfig>()
+            var config = await _freeSql.Queryable<TrackConfig>()
                 .Where(p => p.EventTypeFullName == track.EventTypeFullName)
                 .FirstAsync(p => new
                 {
@@ -64,7 +64,7 @@ public class TrackStorageService : QueryServiceBase<Track>, ITrackStorageService
             }
 
             // 读取配置
-            var configs = await QueryNoTracking<TrackConfig>()
+            var configs = await _freeSql.Queryable<TrackConfig>()
                 .HasWhere(config.ParentId == null, p => p.ConfigId == config.Id || p.Id == config.Id)
                 .HasWhere(config.ParentId != null, p => p.ParentPath!.Contains(config.Id) || p.Id == config.Id)
                 .ToListAsync(cancellationToken);
@@ -112,7 +112,7 @@ public class TrackStorageService : QueryServiceBase<Track>, ITrackStorageService
         }
 
         // 根据事件类型全名读取已配置的追踪信息
-        var entity = await QueryNoTracking<Track>()
+        var entity = await _freeSql.Queryable<Track>()
             .Where(p => p.EventTypeFullName == track.EventTypeFullName)
             .Where(p => p.ProcessorFullName == track.ProcessorFullName)
             // 同一个TraceId下
@@ -154,7 +154,7 @@ public class TrackStorageService : QueryServiceBase<Track>, ITrackStorageService
 
     public Task<Paging<GetTrackPagingResponse>> GetPagingAsync(GetTrackPagingRequest request)
     {
-        return QueryableNoTracking
+        return _freeSql.Queryable<Track>()
             .Where(p => p.ParentId == null || p.TrackStatus == TrackStatus.Fail)
             .HasWhere(request.Keyword, p =>
                 p.TraceId == request.Keyword ||
@@ -167,7 +167,7 @@ public class TrackStorageService : QueryServiceBase<Track>, ITrackStorageService
 
     public async Task<GetTrackInfoResponse?> GetAsync(string id)
     {
-        var info = await QueryableNoTracking
+        var info = await _freeSql.Queryable<Track>()
             .Where(p => p.Id == id)
             .FirstAsync<GetTrackInfoResponse>();
 
@@ -176,7 +176,7 @@ public class TrackStorageService : QueryServiceBase<Track>, ITrackStorageService
 
     public async Task<DecompositionTreeGraphModel?> GetDecompositionTreeGraphAsync(string traceId)
     {
-        var list = await QueryableNoTracking
+        var list = await _freeSql.Queryable<Track>()
             .Where(p => p.TraceId == traceId)
             .ToListAsync();
 

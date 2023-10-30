@@ -22,11 +22,16 @@ public abstract class EventBase : IDomainEvent, IIntegrationEvent
     /// 读取ID
     /// </summary>
     /// <returns></returns>
-    public string? GetId()
+    public string GetId()
     {
         var id = MetaData.FirstOrDefault(p => p.Key == "id");
-        return id.Value.ToString();
+        return id.Value.ToString() ?? throw new InvalidOperationException("id is null");
     }
+
+    /// <summary>
+    /// Id
+    /// </summary>
+    public string AggregateRootId => GetId();
 
     /// <summary>
     /// 事件ID

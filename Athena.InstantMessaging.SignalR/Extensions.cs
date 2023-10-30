@@ -1,8 +1,3 @@
-using Athena.InstantMessaging;
-using Athena.InstantMessaging.SignalR;
-using Athena.InstantMessaging.SignalR.Events;
-using Athena.InstantMessaging.SignalR.Notices;
-
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -424,18 +419,4 @@ public static class Extensions
 
     #endregion
 
-    /// <summary>
-    /// 读取Redis配置
-    /// </summary>
-    /// <param name="configuration"></param>
-    /// <param name="configVariable"></param>
-    /// <param name="envVariable"></param>
-    /// <returns></returns>
-    private static RedisConfig GetRedisConfig(
-        this IConfiguration configuration,
-        string configVariable = "RedisConfig",
-        string envVariable = "REDIS_CONFIG")
-    {
-        return configuration.GetConfig<RedisConfig>(configVariable, envVariable);
-    }
 }

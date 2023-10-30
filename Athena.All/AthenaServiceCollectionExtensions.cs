@@ -23,6 +23,7 @@ public static class AthenaServiceCollectionExtensions
         // Add services to the container.
         services.AddAthenaProvider();
         services.AddCustomServiceComponent();
+        services.AddCustomValidators();
         if (!configuration.GetValue<bool>("Module:Swagger:Disabled"))
         {
             services.AddCustomSwaggerGen(configuration);
@@ -45,7 +46,7 @@ public static class AthenaServiceCollectionExtensions
 
         if (!configuration.GetValue<bool>("Module:JwtAuth:Disabled"))
         {
-            services.AddCustomJwtAuthWithSignalR(configuration);
+            services.AddCustomJwtAuth(configuration);
         }
 
         if (!configuration.GetValue<bool>("Module:SignalR:Disabled"))
@@ -58,10 +59,18 @@ public static class AthenaServiceCollectionExtensions
             services.AddCustomCors(configuration);
         }
 
-        services.AddCustomController().AddNewtonsoftJson();
+        services.AddCustomMiddlewareInjector();
         moreServiceActions?.Invoke(services);
+        services
+            .AddCustomController()
+            .AddNewtonsoftJson();
 
         builder.UseCustomSerilog();
+        builder.Host.UseDefaultServiceProvider(options =>
+        {
+            // 
+            options.ValidateScopes = false;
+        });
         return builder;
     }
 }

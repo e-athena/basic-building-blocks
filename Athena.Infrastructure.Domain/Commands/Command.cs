@@ -1,7 +1,7 @@
 namespace Athena.Infrastructure.Domain.Commands;
 
 /// <summary>
-/// 兼容ENode的Command
+/// Command
 /// </summary>
 public class Command : TxTraceRequest<string>
 {

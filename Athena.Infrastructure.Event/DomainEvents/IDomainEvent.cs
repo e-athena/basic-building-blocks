@@ -9,7 +9,7 @@ public interface IDomainEvent : INotification
     /// 读取Id
     /// </summary>
     /// <returns></returns>
-    string? GetId();
+    string GetId();
 
     /// <summary>
     /// 根跟踪Id

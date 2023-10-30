@@ -8,7 +8,7 @@ namespace Athena.Infrastructure.Logger.FreeSql;
 /// </summary>
 public class LoggerStorageService : ILoggerStorageService
 {
-    private readonly FreeSqlCloud _freeSql;
+    private readonly IFreeSql<ILoggerFreeSql> _freeSql;
 
     // 获取当前月份
     private readonly string _currentMonth = DateTime.Now.ToString("yyyy-MM");
@@ -17,7 +17,7 @@ public class LoggerStorageService : ILoggerStorageService
     /// 
     /// </summary>
     /// <param name="freeSql"></param>
-    public LoggerStorageService(FreeSqlCloud freeSql)
+    public LoggerStorageService(IFreeSql<ILoggerFreeSql> freeSql)
     {
         _freeSql = freeSql;
     }

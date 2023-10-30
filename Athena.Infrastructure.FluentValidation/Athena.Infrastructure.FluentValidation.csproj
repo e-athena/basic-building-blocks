@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Version>7.0.0-preview.20231027.1</Version>
+        <PackageIcon>e-athena.png</PackageIcon>
+        <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
+        <Title>Athena.Infrastructure.FluentValidation</Title>
+        <Authors>VanZheng</Authors>
+        <Description>FluentValidation</Description>
+        <Copyright>Copyright (c) 2023 e-athena</Copyright>
+        <PackageProjectUrl>https://github.com/e-athena/basic-building-blocks</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DocumentationFile>bin\Debug\net7.0\Athena.Infrastructure.FluentValidation.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DocumentationFile>bin\Release\net7.0\Athena.Infrastructure.FluentValidation.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="FluentValidation" Version="11.8.0"/>
+        <PackageReference Include="MediatR" Version="11.1.0"/>
+        <PackageReference Include="Scrutor" Version="4.2.2"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Athena.Infrastructure\Athena.Infrastructure.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Resource Include="e-athena.png">
+            <Pack>True</Pack>
+            <PackagePath/>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Resource>
+    </ItemGroup>
+
+</Project>

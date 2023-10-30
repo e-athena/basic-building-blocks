@@ -6,11 +6,11 @@ namespace Athena.Infrastructure.EventTracking.FreeSql;
 /// <summary>
 /// 
 /// </summary>
-public class TrackConfigService : QueryServiceBase<TrackConfig>, ITrackConfigService
+public class TrackConfigService : ITrackConfigService
 {
-    private readonly FreeSqlCloud _freeSql;
+    private readonly IFreeSql<IEventTrackingFreeSql> _freeSql;
 
-    public TrackConfigService(FreeSqlCloud freeSql) : base(freeSql)
+    public TrackConfigService(IFreeSql<IEventTrackingFreeSql> freeSql)
     {
         _freeSql = freeSql;
     }
@@ -21,7 +21,7 @@ public class TrackConfigService : QueryServiceBase<TrackConfig>, ITrackConfigSer
         var root = request.GetRootConfig();
 
         // 查询历史配置
-        var configId = await QueryNoTracking<TrackConfig>()
+        var configId = await _freeSql.Queryable<TrackConfig>()
             .Where(p => p.EventTypeFullName == root.EventTypeFullName && p.ParentId == null)
             .FirstAsync(p => p.Id, cancellationToken);
 
@@ -47,14 +47,14 @@ public class TrackConfigService : QueryServiceBase<TrackConfig>, ITrackConfigSer
 
     public Task<Paging<GetTrackConfigPagingResponse>> GetPagingAsync(GetTrackConfigPagingRequest request)
     {
-        return QueryableNoTracking
+        return _freeSql.Queryable<TrackConfig>()
             .Where(p => p.ParentId == null)
             .ToPagingAsync(request, p => new GetTrackConfigPagingResponse());
     }
 
     public async Task<GetTrackConfigInfoResponse?> GetAsync(string id)
     {
-        var list = await QueryableNoTracking
+        var list = await _freeSql.Queryable<TrackConfig>()
             .Where(p => p.Id == id || p.ConfigId == id)
             .ToListAsync();
 

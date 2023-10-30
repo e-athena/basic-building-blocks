@@ -46,7 +46,13 @@ public static class AthenaBuilderExtensions
             httpContext.Response.ContentType = "text/html;charset=utf-8";
 
             await using var stream = type.Assembly.GetManifestResourceStream(name);
-            if (stream == null) throw new InvalidOperationException();
+            if (stream == null)
+            {
+                // 
+                await httpContext.Response.WriteAsync("Welcome to Athena Pro", Encoding.UTF8);
+                // throw new InvalidOperationException();
+                return;
+            }
 
             using var sr = new StreamReader(stream);
             var htmlBuilder = new StringBuilder(await sr.ReadToEndAsync());

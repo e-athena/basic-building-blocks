@@ -289,13 +289,13 @@ public class QiNiuKoDoService : IQiNiuKoDoService
     private string CreateUploadToken()
     {
         var (mac, jsonStr) = GetMacAndPolicyJson();
-        return Auth.CreateUploadToken(mac, jsonStr);
+        return Qiniu.Util.Auth.CreateUploadToken(mac, jsonStr);
     }
 
     private string CreateDownloadToken(string url)
     {
         var mac = new Mac(Config.AccessKey, Config.SecretKey);
-        return Auth.CreateDownloadToken(mac, url);
+        return Qiniu.Util.Auth.CreateDownloadToken(mac, url);
     }
 
 

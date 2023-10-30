@@ -1,3 +1,4 @@
+// ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
 
 public static class Extensions
@@ -28,21 +29,5 @@ public static class Extensions
         });
 
         return services;
-    }
-
-
-    /// <summary>
-    /// 读取Redis配置
-    /// </summary>
-    /// <param name="configuration"></param>
-    /// <param name="configVariable"></param>
-    /// <param name="envVariable"></param>
-    /// <returns></returns>
-    private static RedisConfig GetRedisConfig(
-        this IConfiguration configuration,
-        string configVariable = "RedisConfig",
-        string envVariable = "REDIS_CONFIG")
-    {
-        return configuration.GetConfig<RedisConfig>(configVariable, envVariable);
     }
 }

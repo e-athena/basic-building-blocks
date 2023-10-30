@@ -4,35 +4,40 @@
         <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>7.0.0-preview.20231013.1</Version>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageIcon>e-athena.png</PackageIcon>
+        <Version>7.0.0-preview.20231020.2</Version>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
+        <PackageIcon>e-athena.png</PackageIcon>
+        <Title>Athena.Infrastructure.FreeSql.Otel</Title>
+        <Authors>VanZheng</Authors>
+        <Description>ORM基于FreeSql的实现，OTel</Description>
+        <Copyright>Copyright (c) 2023 e-athena</Copyright>
+        <PackageProjectUrl>https://github.com/e-athena/basic-building-blocks</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-        <DocumentationFile>bin\Debug\net6.0\Athena.Infrastructure.FreeSql.OTel.xml</DocumentationFile>
+        <DocumentationFile>bin\Debug\Athena.Infrastructure.FreeSql.OTel.xml</DocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-        <DocumentationFile>bin\Release\net6.0\Athena.Infrastructure.FreeSql.OTel.xml</DocumentationFile>
+        <DocumentationFile>bin\Release\Athena.Infrastructure.FreeSql.OTel.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Athena.Infrastructure.FreeSql\Athena.Infrastructure.FreeSql.csproj" />
+        <ProjectReference Include="..\Athena.Infrastructure.FreeSql\Athena.Infrastructure.FreeSql.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="OpenTelemetry.Exporter.Zipkin" Version="1.6.0" />
-        <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.6.0" />
-        <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9.14" />
-        <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9.14" />
+        <PackageReference Include="OpenTelemetry.Exporter.Zipkin" Version="1.7.0-alpha.1"/>
+        <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.7.0-alpha.1"/>
+        <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.5.1-beta.1"/>
+        <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.5.1-beta.1"/>
     </ItemGroup>
 
     <ItemGroup>
         <Resource Include="e-athena.png">
             <Pack>True</Pack>
-            <PackagePath></PackagePath>
+            <PackagePath/>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Resource>
     </ItemGroup>

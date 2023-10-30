@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
-using Athena.Infrastructure.Domain.Attributes;
 using Athena.Infrastructure.Event;
 using Athena.Infrastructure.Event.DomainEvents;
 using Athena.Infrastructure.Event.IntegrationEvents;

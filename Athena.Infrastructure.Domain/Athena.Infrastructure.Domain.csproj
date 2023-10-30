@@ -1,14 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>7.0.0-preview.20231013.1</PackageVersion>
-        <LangVersion>11</LangVersion>
-        <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+        <Version>7.0.0-preview.20231020.5</Version>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
         <PackageIcon>e-athena.png</PackageIcon>
+        <Title>Athena.Infrastructure.Domain</Title>
+        <Authors>VanZheng</Authors>
+        <Description>实体相关内容</Description>
+        <Copyright>Copyright (c) 2023 e-athena</Copyright>
+        <PackageProjectUrl>https://github.com/e-athena/basic-building-blocks</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -20,13 +24,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Athena.Infrastructure.Event\Athena.Infrastructure.Event.csproj" />
+        <ProjectReference Include="..\Athena.Infrastructure.Event\Athena.Infrastructure.Event.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
         <Resource Include="e-athena.png">
             <Pack>True</Pack>
-            <PackagePath></PackagePath>
+            <PackagePath/>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Resource>
     </ItemGroup>

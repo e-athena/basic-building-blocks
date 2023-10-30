@@ -81,6 +81,11 @@ public class TableColumnAttribute : Attribute
     public bool Ignore { get; set; }
 
     /// <summary>
+    /// 表格忽略
+    /// </summary>
+    public bool TableIgnore { get; set; }
+
+    /// <summary>
     /// 是否显示
     /// </summary>
     public bool HideInTable { get; set; }

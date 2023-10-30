@@ -1,5 +1,3 @@
-using Athena.Infrastructure.Domain.Attributes;
-
 namespace Athena.Infrastructure.Domain;
 
 /// <summary>

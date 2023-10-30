@@ -1,5 +1,4 @@
-﻿using System.Net;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using Athena.Infrastructure.Status;
 using Microsoft.Extensions.PlatformAbstractions;
 

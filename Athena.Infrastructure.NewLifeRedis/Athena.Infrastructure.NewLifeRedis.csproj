@@ -4,24 +4,29 @@
         <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>7.0.0-preview.20231013.1</Version>
+        <Version>7.0.0-preview.20231020.1</Version>
         <PackageIcon>e-athena.png</PackageIcon>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
+        <Title>Athena.Infrastructure.NewLifeRedis</Title>
+        <Authors>VanZheng</Authors>
+        <Description>分布式缓存(NewLifeRedis实现)</Description>
+        <Copyright>Copyright (c) 2023 e-athena</Copyright>
+        <PackageProjectUrl>https://github.com/e-athena/basic-building-blocks</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="NewLife.Extensions.Caching.Redis" Version="5.5.2023.803" />
+        <PackageReference Include="NewLife.Extensions.Caching.Redis" Version="5.5.2023.803"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Athena.Infrastructure\Athena.Infrastructure.csproj" />
+        <ProjectReference Include="..\Athena.Infrastructure\Athena.Infrastructure.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
         <Resource Include="e-athena.png">
             <Pack>True</Pack>
-            <PackagePath></PackagePath>
+            <PackagePath/>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Resource>
     </ItemGroup>

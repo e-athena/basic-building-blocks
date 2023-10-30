@@ -34,6 +34,15 @@ public class QueryServiceBase<T> where T : class
     }
 
     /// <summary>
+    /// 构造函数
+    /// </summary>
+    /// <param name="multiTenancy"></param>
+    public QueryServiceBase(FreeSqlMultiTenancy multiTenancy) : this(freeSql: multiTenancy)
+    {
+        _multiTenancy = multiTenancy;
+    }
+
+    /// <summary>
     /// 
     /// </summary>
     /// <param name="freeSql"></param>

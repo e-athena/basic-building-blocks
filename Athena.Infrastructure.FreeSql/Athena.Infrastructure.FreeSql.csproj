@@ -4,10 +4,15 @@
         <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <PackageVersion>7.0.0-preview.20231013.1</PackageVersion>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Version>7.0.0-preview.20231030.1</Version>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
         <PackageIcon>e-athena.png</PackageIcon>
+        <Title>Athena.Infrastructure.FreeSql</Title>
+        <Authors>VanZheng</Authors>
+        <Description>ORM基于FreeSql的实现</Description>
+        <Copyright>Copyright (c) 2023 e-athena</Copyright>
+        <PackageProjectUrl>https://github.com/e-athena/basic-building-blocks</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -21,19 +26,17 @@
     <ItemGroup>
         <PackageReference Include="FreeSql.Cloud" Version="1.6.6"/>
         <PackageReference Include="FreeSql.Repository" Version="3.2.801"/>
-<!--        <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0"/>-->
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Athena.Infrastructure.DataPermission\Athena.Infrastructure.DataPermission.csproj" />
+        <ProjectReference Include="..\Athena.Infrastructure.DataPermission\Athena.Infrastructure.DataPermission.csproj"/>
         <ProjectReference Include="..\Athena.Infrastructure.Domain\Athena.Infrastructure.Domain.csproj"/>
-        <ProjectReference Include="..\Athena.Infrastructure.Jwt\Athena.Infrastructure.Jwt.csproj" />
     </ItemGroup>
 
     <ItemGroup>
         <Resource Include="e-athena.png">
             <Pack>True</Pack>
-            <PackagePath></PackagePath>
+            <PackagePath/>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Resource>
     </ItemGroup>

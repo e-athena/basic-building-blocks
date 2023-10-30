@@ -90,6 +90,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.All", "Athena.All\At
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreeSqlWebApiTest", "FreeSqlWebApiTest\FreeSqlWebApiTest.csproj", "{AF160161-466F-4C29-86E6-AC71C33121C6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Infrastructure.Auth", "Athena.Infrastructure.Auth\Athena.Infrastructure.Auth.csproj", "{4907D808-3669-4E82-8289-54B38A94B5F7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Infrastructure.FluentValidation", "Athena.Infrastructure.FluentValidation\Athena.Infrastructure.FluentValidation.csproj", "{001C3397-4D47-425E-B708-77CFD3DDB2D7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -272,6 +276,14 @@ Global
 		{AF160161-466F-4C29-86E6-AC71C33121C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF160161-466F-4C29-86E6-AC71C33121C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AF160161-466F-4C29-86E6-AC71C33121C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4907D808-3669-4E82-8289-54B38A94B5F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4907D808-3669-4E82-8289-54B38A94B5F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4907D808-3669-4E82-8289-54B38A94B5F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4907D808-3669-4E82-8289-54B38A94B5F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{001C3397-4D47-425E-B708-77CFD3DDB2D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{001C3397-4D47-425E-B708-77CFD3DDB2D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{001C3397-4D47-425E-B708-77CFD3DDB2D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{001C3397-4D47-425E-B708-77CFD3DDB2D7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{8487FB7B-8DBB-414E-B707-CF8FFC285C75} = {E5B19187-0A21-4BC1-9690-2727240C2158}

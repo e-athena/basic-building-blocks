@@ -1,4 +1,5 @@
 // ReSharper disable once CheckNamespace
+
 namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
@@ -30,9 +31,11 @@ public static class Extensions
             config.Configuration += $",prefix={config.InstanceName}";
         }
 
-        var cli = new RedisClient(config.Configuration);
-        cli.Serialize = obj => JsonSerializer.Serialize(obj);
-        cli.Deserialize = (json, type) => JsonSerializer.Deserialize(json, type);
+        var cli = new RedisClient(config.Configuration)
+        {
+            Serialize = obj => JsonSerializer.Serialize(obj),
+            Deserialize = (json, type) => JsonSerializer.Deserialize(json, type)
+        };
         RedisHelper.Initialization(cli);
         services.AddSingleton<ICacheManager>(new RedisCacheAdapter(config));
 
@@ -68,27 +71,13 @@ public static class Extensions
             config.Configuration += $",prefix={config.InstanceName}";
         }
 
-        var csRedis = new RedisClient(config.Configuration, config.Sentinels.ToArray(), true);
-        csRedis.Serialize = obj => JsonSerializer.Serialize(obj);
-        csRedis.Deserialize = (json, type) => JsonSerializer.Deserialize(json, type);
+        var csRedis = new RedisClient(config.Configuration, config.Sentinels.ToArray(), true)
+        {
+            Serialize = obj => JsonSerializer.Serialize(obj),
+            Deserialize = (json, type) => JsonSerializer.Deserialize(json, type)
+        };
         RedisHelper.Initialization(csRedis);
         services.AddSingleton<ICacheManager>(new RedisCacheAdapter(config));
         return services;
-    }
-
-
-    /// <summary>
-    /// 读取Redis配置
-    /// </summary>
-    /// <param name="configuration"></param>
-    /// <param name="configVariable"></param>
-    /// <param name="envVariable"></param>
-    /// <returns></returns>
-    private static RedisConfig GetRedisConfig(
-        this IConfiguration configuration,
-        string configVariable = "RedisConfig",
-        string envVariable = "REDIS_CONFIG")
-    {
-        return configuration.GetConfig<RedisConfig>(configVariable, envVariable);
     }
 }

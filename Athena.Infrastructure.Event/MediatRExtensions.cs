@@ -167,4 +167,64 @@ public static class MediatRExtensions
     {
         return mediator.Send(request, cancellationToken);
     }
+
+    /// <summary>Asynchronously send a notification to multiple handlers</summary>
+    /// <param name="mediator"></param>
+    /// <param name="notification">Notification object</param>
+    /// <param name="cancellationToken">Optional cancellation token</param>
+    /// <returns>A task that represents the publish operation.</returns>
+    public static Task PublishAsync(this IMediator mediator, object notification,
+        CancellationToken cancellationToken = default)
+    {
+        return mediator.Publish(notification, cancellationToken);
+    }
+
+    /// <summary>Asynchronously send a notification to multiple handlers</summary>
+    /// <param name="mediator"></param>
+    /// <param name="notification">Notification object</param>
+    /// <param name="cancellationToken">Optional cancellation token</param>
+    /// <returns>A task that represents the publish operation.</returns>
+    public static Task PublishAsync<TNotification>(this IMediator mediator, TNotification notification,
+        CancellationToken cancellationToken = default) where TNotification : INotification
+    {
+        return mediator.Publish(notification, cancellationToken);
+    }
+
+    /// <summary>Asynchronously send a notification to multiple handlers</summary>
+    /// <param name="publisher"></param>
+    /// <param name="notification">Notification object</param>
+    /// <param name="cancellationToken">Optional cancellation token</param>
+    /// <returns>A task that represents the publish operation.</returns>
+    public static Task PublishAsync(this IPublisher publisher, object notification,
+        CancellationToken cancellationToken = default)
+    {
+        return publisher.Publish(notification, cancellationToken);
+    }
+
+    /// <summary>Asynchronously send a notification to multiple handlers</summary>
+    /// <param name="publisher"></param>
+    /// <param name="notification">Notification object</param>
+    /// <param name="cancellationToken">Optional cancellation token</param>
+    /// <returns>A task that represents the publish operation.</returns>
+    public static Task PublishAsync<TNotification>(this IPublisher publisher, TNotification notification,
+        CancellationToken cancellationToken = default) where TNotification : INotification
+    {
+        return publisher.Publish(notification, cancellationToken);
+    }
+
+    /// <summary>
+    /// Asynchronously send a request to a single handler
+    /// </summary>
+    /// <typeparam name="TResponse">Response type</typeparam>
+    /// <param name="sender"></param>
+    /// <param name="request">Request object</param>
+    /// <param name="cancellationToken">Optional cancellation token</param>
+    /// <returns>A task that represents the send operation. The task result contains the handler response</returns>
+    public static Task<TResponse> SendAsync<TResponse>(
+        this ISender sender,
+        IRequest<TResponse> request,
+        CancellationToken cancellationToken = default)
+    {
+        return sender.Send(request, cancellationToken);
+    }
 }

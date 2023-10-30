@@ -1,7 +1,4 @@
-﻿using System.Net;
-using System.Text.RegularExpressions;
-
-namespace Athena.Infrastructure.Summaries;
+﻿namespace Athena.Infrastructure.Summaries;
 
 /// <summary>
 /// 

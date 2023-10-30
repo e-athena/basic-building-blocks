@@ -4,11 +4,17 @@
         <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <PackageVersion>7.0.0-preview.20231013.1</PackageVersion>
+        <PackageVersion>7.0.0-preview.20231027.1</PackageVersion>
         <IsPackable>true</IsPackable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageIcon>e-athena.png</PackageIcon>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
+        <Title>Athena.Infrastructure.Mvc</Title>
+        <Authors>VanZheng</Authors>
+        <Description>Mvc开发包，提供统一错误处理，审计日志中间件，统一API返回值等功能</Description>
+        <Copyright>Copyright (c) 2023 e-athena</Copyright>
+        <PackageProjectUrl>https://github.com/e-athena/basic-building-blocks</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -20,6 +26,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+<!--        <ProjectReference Include="..\Athena.Infrastructure.FluentValidation\Athena.Infrastructure.FluentValidation.csproj" />-->
         <ProjectReference Include="..\Athena.Infrastructure.Logger\Athena.Infrastructure.Logger.csproj"/>
     </ItemGroup>
 

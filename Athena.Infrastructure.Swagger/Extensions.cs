@@ -1,7 +1,5 @@
 // ReSharper disable once CheckNamespace
 
-using Athena.Infrastructure.Swagger;
-
 namespace Microsoft.Extensions.DependencyInjection;
 
 public static class Extensions

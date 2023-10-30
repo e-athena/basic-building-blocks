@@ -35,7 +35,6 @@ public static class SerilogHostBuilderExtensions
                     configureLogger.Invoke(ctx, cfg);
                 }
             }, preserveStaticLogger, writeToProviders);
-        builder.Host.UseDefaultServiceProvider(options => { options.ValidateScopes = false; });
         return builder;
     }
 }

@@ -4,16 +4,31 @@
         <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>7.0.0-preview.20231013.1</Version>
+        <Version>7.0.0-preview.20231020.1</Version>
+        <PackageIcon>e-athena.png</PackageIcon>
+        <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
+        <Title>Athena.InstantMessaging</Title>
+        <Authors>VanZheng</Authors>
+        <Description>即时通讯开发包</Description>
+        <Copyright>Copyright (c) 2023 e-athena</Copyright>
+        <PackageProjectUrl>https://github.com/e-athena/basic-building-blocks</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <DocumentationFile>bin\Debug\net6.0\Athena.InstantMessaging.xml</DocumentationFile>
+        <DocumentationFile>bin\Debug\Athena.InstantMessaging.xml</DocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <DocumentationFile>bin\Release\net6.0\Athena.InstantMessaging.xml</DocumentationFile>
+        <DocumentationFile>bin\Release\Athena.InstantMessaging.xml</DocumentationFile>
     </PropertyGroup>
+
+    <ItemGroup>
+        <Resource Include="e-athena.png">
+            <Pack>True</Pack>
+            <PackagePath/>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Resource>
+    </ItemGroup>
 
 </Project>

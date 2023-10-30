@@ -4,15 +4,29 @@
         <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <PackageVersion>7.0.0-preview.20231013.1</PackageVersion>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Version>7.0.0-preview.20231027.1</Version>
+        <PackageIcon>e-athena.png</PackageIcon>
+        <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
+        <Title>Athena.Infrastructure.Excel</Title>
+        <Authors>VanZheng</Authors>
+        <Description>FluentValidation</Description>
+        <Copyright>Copyright (c) 2023 e-athena</Copyright>
+        <PackageProjectUrl>https://github.com/e-athena/basic-building-blocks</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="EPPlusFree" Version="4.5.3.8" />
-        <PackageReference Include="DotNetCore.NPOI" Version="1.2.3" />
+        <PackageReference Include="EPPlusFree" Version="4.5.3.8"/>
+        <PackageReference Include="DotNetCore.NPOI" Version="1.2.3"/>
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\Athena.Infrastructure\Athena.Infrastructure.csproj" />
+        <ProjectReference Include="..\Athena.Infrastructure\Athena.Infrastructure.csproj"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Resource Include="e-athena.png">
+            <Pack>True</Pack>
+            <PackagePath/>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Resource>
     </ItemGroup>
 
 </Project>

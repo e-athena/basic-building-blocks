@@ -5,9 +5,15 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>7.0.0-preview.20231014.4</Version>
+        <Version>7.0.0-preview.20231022.1</Version>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
         <PackageIcon>e-athena.png</PackageIcon>
+        <Title>Athena.All</Title>
+        <Authors>VanZheng</Authors>
+        <Description>管理系统应用开发包</Description>
+        <Copyright>Copyright (c) 2023 e-athena</Copyright>
+        <PackageProjectUrl>https://github.com/e-athena/basic-building-blocks</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
     <ItemGroup>
@@ -16,13 +22,14 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Athena.Infrastructure.FluentValidation\Athena.Infrastructure.FluentValidation.csproj" />
         <ProjectReference Include="..\Athena.Infrastructure\Athena.Infrastructure.csproj"/>
         <ProjectReference Include="..\Athena.Infrastructure.ApiPermission\Athena.Infrastructure.ApiPermission.csproj"/>
         <ProjectReference Include="..\Athena.Infrastructure.Cors\Athena.Infrastructure.Cors.csproj"/>
         <ProjectReference Include="..\Athena.Infrastructure.CSRedis\Athena.Infrastructure.CSRedis.csproj"/>
         <ProjectReference Include="..\Athena.Infrastructure.DataPermission\Athena.Infrastructure.DataPermission.csproj"/>
         <ProjectReference Include="..\Athena.Infrastructure.Serilog\Athena.Infrastructure.Serilog.csproj"/>
-        <ProjectReference Include="..\Athena.Infrastructure.Jwt\Athena.Infrastructure.Jwt.csproj"/>
+        <ProjectReference Include="..\Athena.Infrastructure.Auth\Athena.Infrastructure.Auth.csproj"/>
         <ProjectReference Include="..\Athena.Infrastructure.Mvc\Athena.Infrastructure.Mvc.csproj"/>
         <ProjectReference Include="..\Athena.Infrastructure.Swagger\Athena.Infrastructure.Swagger.csproj"/>
         <ProjectReference Include="..\Athena.InstantMessaging.SignalR\Athena.InstantMessaging.SignalR.csproj"/>

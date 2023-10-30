@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace Athena.Infrastructure.FreeSql.OTel;
 
 /// <summary>

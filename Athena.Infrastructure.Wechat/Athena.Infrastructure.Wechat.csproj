@@ -4,25 +4,38 @@
         <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <PackageVersion>7.0.0-preview.20231013.1</PackageVersion>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageVersion>7.0.0-preview.20231020.1</PackageVersion>
         <PackageIcon>e-athena.png</PackageIcon>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
+        <Title>Athena.Infrastructure.Wechat</Title>
+        <Authors>VanZheng</Authors>
+        <Description>微信公众号，小程序开发包</Description>
+        <Copyright>Copyright (c) 2023 e-athena</Copyright>
+        <PackageProjectUrl>https://github.com/e-athena/basic-building-blocks</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <DocumentationFile>bin\Debug\Athena.Infrastructure.Wechat.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <DocumentationFile>bin\Release\Athena.Infrastructure.Wechat.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
-        <PackageReference Include="SKIT.FlurlHttpClient.Wechat.Api" Version="2.33.0" />
+        <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0"/>
+        <PackageReference Include="SKIT.FlurlHttpClient.Wechat.Api" Version="2.34.0"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Athena.Infrastructure\Athena.Infrastructure.csproj" />
+        <ProjectReference Include="..\Athena.Infrastructure\Athena.Infrastructure.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
         <Resource Include="e-athena.png">
             <Pack>True</Pack>
-            <PackagePath></PackagePath>
+            <PackagePath/>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Resource>
     </ItemGroup>

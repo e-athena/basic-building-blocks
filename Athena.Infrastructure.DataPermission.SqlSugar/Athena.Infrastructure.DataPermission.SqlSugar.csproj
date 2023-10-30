@@ -4,10 +4,15 @@
         <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>7.0.0-preview.20231013.1</Version>
+        <Version>7.0.0-preview.20231028.1</Version>
         <PackageIcon>e-athena.png</PackageIcon>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
+        <Title>Athena.Infrastructure.DataPermission.SqlSugar</Title>
+        <Authors>VanZheng</Authors>
+        <Description>数据权限(SqlSugar实现)</Description>
+        <Copyright>Copyright (c) 2023 e-athena</Copyright>
+        <PackageProjectUrl>https://github.com/e-athena/basic-building-blocks</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
     <ItemGroup>
@@ -15,7 +20,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="SqlSugarCore" Version="5.1.4.110" />
+        <PackageReference Include="SqlSugarCore" Version="5.1.4.110"/>
     </ItemGroup>
 
     <ItemGroup>

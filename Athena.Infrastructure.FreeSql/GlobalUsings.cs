@@ -3,8 +3,10 @@
 global using Athena.Infrastructure.Event.DomainEvents;
 global using System.Linq.Expressions;
 global using System.Collections.Concurrent;
+global using System.Diagnostics;
 global using System.Reflection;
 global using System.Text.Json;
+global using Athena.Infrastructure.Auths;
 global using Athena.Infrastructure.DataPermission;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Configuration;
@@ -27,7 +29,6 @@ global using Athena.Infrastructure.Expressions;
 global using Athena.Infrastructure.FreeSql.Helpers;
 global using Athena.Infrastructure.FreeSql.Tenants;
 global using Athena.Infrastructure.FreeSql.OTel;
-global using Athena.Infrastructure.Jwt;
 global using Athena.Infrastructure.Providers;
 global using Athena.Infrastructure.QueryFilters;
 global using Athena.Infrastructure.Tenants;

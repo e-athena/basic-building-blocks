@@ -6,6 +6,11 @@ namespace Athena.Infrastructure.FrontEndTables;
 public class TableColumnInfo
 {
     /// <summary>
+    /// 表格忽略
+    /// </summary>
+    public bool TableIgnore { get; set; }
+
+    /// <summary>
     /// 分组
     /// <remarks>一般用于详情分组显示</remarks>
     /// </summary>

@@ -1,36 +1,41 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+        <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>7.0.0-preview.20231013.1</Version>
+        <Version>7.0.0-preview.20231020.1</Version>
         <PackageIcon>e-athena.png</PackageIcon>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
+        <Title>Athena.InstantMessaging.SignalR</Title>
+        <Authors>VanZheng</Authors>
+        <Description>即时通讯开发包(SignalR)</Description>
+        <Copyright>Copyright (c) 2023 e-athena</Copyright>
+        <PackageProjectUrl>https://github.com/e-athena/basic-building-blocks</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-        <DocumentationFile>bin\Debug\net6.0\Athena.InstantMessaging.SignalR.xml</DocumentationFile>
+        <DocumentationFile>bin\Debug\net7.0\Athena.InstantMessaging.SignalR.xml</DocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-        <DocumentationFile>bin\Release\net6.0\Athena.InstantMessaging.SignalR.xml</DocumentationFile>
+        <DocumentationFile>bin\Release\net7.0\Athena.InstantMessaging.SignalR.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" Version="6.0.22" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" Version="7.0.12"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Athena.Infrastructure.Jwt\Athena.Infrastructure.Jwt.csproj" />
-        <ProjectReference Include="..\Athena.InstantMessaging\Athena.InstantMessaging.csproj" />
+        <ProjectReference Include="..\Athena.Infrastructure\Athena.Infrastructure.csproj"/>
+        <ProjectReference Include="..\Athena.InstantMessaging\Athena.InstantMessaging.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
         <Resource Include="e-athena.png">
             <Pack>True</Pack>
-            <PackagePath></PackagePath>
+            <PackagePath/>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Resource>
     </ItemGroup>

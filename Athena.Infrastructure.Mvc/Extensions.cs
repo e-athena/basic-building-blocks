@@ -1,5 +1,8 @@
 // ReSharper disable once CheckNamespace
 
+using System.Net.Mime;
+using Athena.Infrastructure.Mvc;
+
 namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
@@ -55,7 +58,37 @@ public static class Extensions
     /// <param name="services"></param>
     public static IMvcBuilder AddCustomController(this IServiceCollection services)
     {
-        return services.AddCustomController(null);
+        return services
+            .AddCustomController(null)
+            .ConfigureApiBehaviorOptions(options =>
+            {
+                // 自定义验证失败返回结果
+                options.InvalidModelStateResponseFactory = context =>
+                {
+                    var traceId = Activity.Current != null
+                        ? Activity.Current.TraceId.ToString()
+                        : context.HttpContext.TraceIdentifier;
+                    var message = context.ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(v => v.ErrorMessage)
+                        .Aggregate("", (current, error) => current + $"{error};");
+                    context.HttpContext.Response.StatusCode = 400;
+                    return new JsonResult(new CustomBadRequestResult
+                    {
+                        Success = false,
+                        Message = message,
+                        Errors = context.ModelState.Keys.Select(key => new Dictionary<string, string[]>
+                        {
+                            {
+                                key,
+                                context.ModelState[key]!.Errors.Select(x => x.ErrorMessage).ToArray()
+                            }
+                        }).ToList(),
+                        StatusCode = context.HttpContext.Response.StatusCode,
+                        TraceId = traceId
+                    });
+                };
+            });
     }
 
     /// <summary>
