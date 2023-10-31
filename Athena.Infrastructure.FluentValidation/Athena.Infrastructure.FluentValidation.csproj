@@ -4,7 +4,7 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>7.0.0-preview.20231030.1</Version>
+        <Version>7.0.0-preview.20231031.1</Version>
         <PackageIcon>e-athena.png</PackageIcon>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
         <Title>Athena.Infrastructure.FluentValidation</Title>
@@ -16,11 +16,11 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <DocumentationFile>bin\Debug\net7.0\Athena.Infrastructure.FluentValidation.xml</DocumentationFile>
+        <DocumentationFile>bin\Debug\net7.0\Athena.Infrastructure.FluentValidation.xml</DocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <DocumentationFile>bin\Release\net7.0\Athena.Infrastructure.FluentValidation.xml</DocumentationFile>
+        <DocumentationFile>bin\Release\net7.0\Athena.Infrastructure.FluentValidation.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
