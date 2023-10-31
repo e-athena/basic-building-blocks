@@ -62,7 +62,42 @@ public static class MediatRExtensions
     }
 
     /// <summary>
-    /// 
+    /// 添加MediatR
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configuration"></param>
+    /// <remarks>可通过：Module:MediatrAssembly:Keyword、Module:MediatrAssembly:Keywords配置</remarks>
+    /// <returns></returns>
+    // ReSharper disable once IdentifierTypo
+    public static IServiceCollection AddCustomMediatR(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
+    {
+        var keywords = new List<string>();
+        // 读取配置MediatrAssembly:Keyword
+        var assemblyKeyword = configuration.GetValue<string>("Module:MediatrAssembly:Keyword");
+        // 如果不为空，添加到关键字列表
+        if (!string.IsNullOrEmpty(assemblyKeyword))
+        {
+            keywords.Add(assemblyKeyword);
+        }
+
+        // 读取配置MediatrAssembly:Keywords
+        var assemblyKeywords = configuration.GetSection("Module:MediatrAssembly:Keywords").Get<string[]>();
+        // 如果不为空，添加到关键字列表
+        if (assemblyKeywords is not null && assemblyKeywords.Length > 0)
+        {
+            keywords.AddRange(assemblyKeywords);
+        }
+
+        // 添加服务组件
+        services.AddCustomMediatR(keywords.ToArray());
+        return services;
+    }
+
+    /// <summary>
+    /// 添加MediatR
     /// </summary>
     /// <param name="services"></param>
     /// <param name="assemblyKeyword"></param>

@@ -1,4 +1,5 @@
 ﻿// ReSharper disable once CheckNamespace
+
 namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
@@ -12,13 +13,9 @@ public static class Extensions
     /// 同步表结构
     /// </summary>
     /// <param name="freeSql"></param>
-    /// <param name="entityTypes"></param>
-    public static void SyncStructure(this IFreeSql freeSql, params Type[] entityTypes)
+    public static void SyncStructure<TType>(this IFreeSql freeSql)
     {
-        freeSql.CodeFirst.SyncStructure(entityTypes);
-        // 同步CAP两张表
-        freeSql.CodeFirst.SyncStructure<Published>();
-        freeSql.CodeFirst.SyncStructure<Received>();
+        SyncStructure(freeSql, typeof(TType).Assembly);
     }
 
     /// <summary>
@@ -29,19 +26,7 @@ public static class Extensions
     public static void SyncStructure(this IFreeSql freeSql, string? assemblyKeyword = null)
     {
         var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword);
-        var tableAssemblies = new List<Type>();
-        foreach (var assembly in assemblies)
-        {
-            foreach (var type in assembly.GetExportedTypes())
-            {
-                tableAssemblies.AddRange(type.GetCustomAttributes()
-                    .Where(p => p.GetType() == typeof(TableAttribute) ||
-                                p.GetType() == typeof(FreeSql.DataAnnotations.TableAttribute))
-                    .Select(_ => type));
-            }
-        }
-
-        freeSql.SyncStructure(tableAssemblies.ToArray());
+        SyncStructure(freeSql, assemblies);
     }
 
     /// <summary>
@@ -52,19 +37,20 @@ public static class Extensions
     public static void SyncStructure(this IFreeSql freeSql, params string[] assemblyKeywords)
     {
         var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords);
-        var tableAssemblies = new List<Type>();
+        SyncStructure(freeSql, assemblies);
+    }
+
+    /// <summary>
+    /// 同步表结构
+    /// </summary>
+    /// <param name="freeSql"></param>
+    /// <param name="assemblies"></param>
+    public static void SyncStructure(this IFreeSql freeSql, params Assembly[] assemblies)
+    {
         foreach (var assembly in assemblies)
         {
-            foreach (var type in assembly.GetExportedTypes())
-            {
-                tableAssemblies.AddRange(type.GetCustomAttributes()
-                    .Where(p => p.GetType() == typeof(TableAttribute) ||
-                                p.GetType() == typeof(FreeSql.DataAnnotations.TableAttribute))
-                    .Select(_ => type));
-            }
+            SyncStructure(freeSql, assembly);
         }
-
-        freeSql.SyncStructure(tableAssemblies.ToArray());
     }
 
     /// <summary>
@@ -83,16 +69,20 @@ public static class Extensions
                 .Select(_ => type));
         }
 
-        freeSql.SyncStructure(tableAssemblies.ToArray());
+        SyncStructure(freeSql, tableAssemblies.ToArray());
     }
 
     /// <summary>
     /// 同步表结构
     /// </summary>
     /// <param name="freeSql"></param>
-    public static void SyncStructure<TType>(this IFreeSql freeSql)
+    /// <param name="entityTypes"></param>
+    public static void SyncStructure(this IFreeSql freeSql, params Type[] entityTypes)
     {
-        freeSql.SyncStructure(typeof(TType).Assembly);
+        freeSql.CodeFirst.SyncStructure(entityTypes);
+        // 同步CAP两张表
+        freeSql.CodeFirst.SyncStructure<Published>();
+        freeSql.CodeFirst.SyncStructure<Received>();
     }
 
     #endregion
