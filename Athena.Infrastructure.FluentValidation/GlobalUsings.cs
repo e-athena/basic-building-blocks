@@ -9,4 +9,5 @@ global using Athena.Infrastructure.Providers;
 global using FluentValidation;
 global using FluentValidation.Results;
 global using MediatR;
+global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;

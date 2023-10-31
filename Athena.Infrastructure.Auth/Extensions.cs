@@ -1,5 +1,4 @@
 // ReSharper disable once CheckNamespace
-
 namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
@@ -7,63 +6,21 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// </summary>
 public static class Extensions
 {
-    private static IServiceCollection AddCustomAuth(this IServiceCollection services,
-        IConfiguration config,
-        Action<JwtBearerOptions>? configureOptions = null,
-        Action<IServiceCollection>? configureMoreActions = null)
-    {
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                config.Bind("JwtBearer", options);
-                options.ForwardDefaultSelector = context =>
-                {
-                    if (context.Request.Path.StartsWithSegments("/cap"))
-                    {
-                        return CapCookieAuthenticationDefaults.AuthenticationScheme;
-                    }
-
-                    return JwtBearerDefaults.AuthenticationScheme;
-                };
-                configureOptions?.Invoke(options);
-            })
-            .AddCookie(CapCookieAuthenticationDefaults.AuthenticationScheme,
-                options =>
-                {
-                    // 
-                    options.LoginPath = "/cap/login";
-                });
-
-        services.AddAuthorization(options =>
-        {
-            options.AddPolicy(JwtBearerDefaults.AuthenticationScheme, policy =>
-            {
-                policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
-                policy.RequireClaim(ClaimTypes.Name);
-            });
-            options.AddPolicy(CapCookieAuthenticationDefaults.AuthenticationScheme, policy =>
-            {
-                policy.AddAuthenticationSchemes(CapCookieAuthenticationDefaults.AuthenticationScheme);
-                policy.RequireClaim(ClaimTypes.Name);
-            });
-        });
-
-        configureMoreActions?.Invoke(services);
-
-        return services;
-    }
-
     /// <summary>
-    /// 添加Jwt认证
+    /// 添加自定义认证
     /// </summary>
     /// <param name="services"></param>
     /// <param name="configuration"></param>
     /// <param name="configureOptions"></param>
+    /// <param name="authorizationOptions"></param>
+    /// <param name="authenticationBuilderActions"></param>
     /// <param name="configureMoreActions"></param>
     /// <returns></returns>
-    public static IServiceCollection AddCustomJwtAuth(this IServiceCollection services,
+    public static IServiceCollection AddCustomAuth(this IServiceCollection services,
         IConfiguration configuration,
         Action<JwtBearerOptions>? configureOptions = null,
+        Action<AuthorizationOptions>? authorizationOptions = null,
+        Action<AuthenticationBuilder>? authenticationBuilderActions = null,
         Action<IServiceCollection>? configureMoreActions = null)
     {
         services.AddHttpContextAccessor();
@@ -80,47 +37,106 @@ public static class Extensions
             cfg.Expires = config.Expires;
             cfg.ValidateLifetime = config.ValidateLifetime;
         });
-        return services.AddCustomAuth(configuration, options =>
-        {
-            // SecurityKey
-            var issuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.SecurityKey));
-            options.TokenValidationParameters = new TokenValidationParameters
+        var authentication = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
             {
-                ValidateIssuer = config.ValidateIssuer, // 是否验证Issuer
-                ValidateAudience = config.ValidateAudience, // 是否验证Audience
-                ValidateLifetime = config.ValidateLifetime, // 是否验证失效时间
-                ValidateIssuerSigningKey = config.ValidateIssuerSigningKey, // 是否验证SecurityKey
-                ValidAudience = config.Audience, // Audience
-                ValidIssuer = config.Issuer, // Issuer，这两项和前面签发jwt的设置一致
-                IssuerSigningKey = issuerSigningKey
-            };
-            options.Events = new JwtBearerEvents
-            {
-                OnMessageReceived = context =>
+                // SecurityKey
+                var issuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.SecurityKey));
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    // 从headers中读取Authorization，如果包含Bearer，则取出token
-                    var accessToken = context
-                        .Request
-                        .Headers["Authorization"]
-                        .ToString()
-                        .Replace("Bearer ", "");
-
-                    // 如果headers中没有Authorization，则从query中读取access_token
-                    if (string.IsNullOrEmpty(accessToken))
+                    ValidateIssuer = config.ValidateIssuer, // 是否验证Issuer
+                    ValidateAudience = config.ValidateAudience, // 是否验证Audience
+                    ValidateLifetime = config.ValidateLifetime, // 是否验证失效时间
+                    ValidateIssuerSigningKey = config.ValidateIssuerSigningKey, // 是否验证SecurityKey
+                    ValidAudience = config.Audience, // Audience
+                    ValidIssuer = config.Issuer, // Issuer，这两项和前面签发jwt的设置一致
+                    IssuerSigningKey = issuerSigningKey
+                };
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
                     {
-                        accessToken = context.Request.Query["access_token"];
+                        // 从headers中读取Authorization，如果包含Bearer，则取出token
+                        var accessToken = context
+                            .Request
+                            .Headers["Authorization"]
+                            .ToString()
+                            .Replace("Bearer ", "");
+
+                        // 如果headers中没有Authorization，则从query中读取access_token
+                        if (string.IsNullOrEmpty(accessToken))
+                        {
+                            accessToken = context.Request.Query["access_token"];
+                        }
+
+                        if (!string.IsNullOrEmpty(accessToken) && string.IsNullOrEmpty(context.Token))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    }
+                };
+                options.ForwardDefaultSelector = context =>
+                {
+                    if (context.Request.Path.StartsWithSegments("/cap"))
+                    {
+                        return CapCookieAuthenticationDefaults.AuthenticationScheme;
                     }
 
-                    if (!string.IsNullOrEmpty(accessToken) && string.IsNullOrEmpty(context.Token))
-                    {
-                        context.Token = accessToken;
-                    }
-
-                    return Task.CompletedTask;
+                    return JwtBearerDefaults.AuthenticationScheme;
+                };
+                configureOptions?.Invoke(options);
+            })
+            .AddCookie(CapCookieAuthenticationDefaults.AuthenticationScheme,
+                options =>
+                {
+                    // 
+                    options.LoginPath = "/cap/login";
                 }
-            };
-            configureOptions?.Invoke(options);
-        }, configureMoreActions);
+            );
+        // 额外的配置
+        authenticationBuilderActions?.Invoke(authentication);
+
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy(JwtBearerDefaults.AuthenticationScheme, policy =>
+            {
+                policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
+                policy.RequireClaim(ClaimTypes.NameIdentifier);
+            });
+            options.AddPolicy(CapCookieAuthenticationDefaults.AuthenticationScheme, policy =>
+            {
+                policy.AddAuthenticationSchemes(CapCookieAuthenticationDefaults.AuthenticationScheme);
+                policy.RequireClaim(ClaimTypes.NameIdentifier);
+            });
+            // 额外的配置
+            authorizationOptions?.Invoke(options);
+        });
+        configureMoreActions?.Invoke(services);
+
+        return services;
+    }
+
+    /// <summary>
+    /// 添加Jwt认证
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configuration"></param>
+    /// <param name="configureOptions"></param>
+    /// <param name="configureMoreActions"></param>
+    /// <returns></returns>
+    [Obsolete("请使用AddCustomAuth")]
+    public static IServiceCollection AddCustomJwtAuth(this IServiceCollection services,
+        IConfiguration configuration,
+        Action<JwtBearerOptions>? configureOptions = null,
+        Action<IServiceCollection>? configureMoreActions = null)
+    {
+        return services.AddCustomAuth(
+            configuration,
+            configureOptions: configureOptions,
+            configureMoreActions: configureMoreActions
+        );
     }
 
     /// <summary>
@@ -131,7 +147,7 @@ public static class Extensions
     /// <param name="configureOptions"></param>
     /// <param name="configureMoreActions"></param>
     /// <returns></returns>
-    [Obsolete("请使用AddCustomJwtAuth")]
+    [Obsolete("请使用AddCustomAuth")]
     public static IServiceCollection AddCustomJwtAuthWithSignalR(this IServiceCollection services,
         IConfiguration configuration,
         Action<JwtBearerOptions>? configureOptions = null,

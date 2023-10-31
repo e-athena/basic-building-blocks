@@ -35,7 +35,7 @@
     <ItemGroup>
         <Resource Include="e-athena.png">
             <Pack>True</Pack>
-            <PackagePath></PackagePath>
+            <PackagePath/>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Resource>
     </ItemGroup>

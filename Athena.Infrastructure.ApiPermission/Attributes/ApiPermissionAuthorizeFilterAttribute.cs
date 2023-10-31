@@ -1,5 +1,3 @@
-using Athena.Infrastructure.Auths;
-
 namespace Athena.Infrastructure.ApiPermission.Attributes;
 
 /// <summary>
@@ -134,7 +132,7 @@ public class ApiPermissionAuthorizeFilterAttribute : ActionFilterAttribute
         }
 
         // 如果有额外添加规则名称
-        if (permissionInfo is {AdditionalRules: { }})
+        if (permissionInfo is {AdditionalRules: not null})
         {
             currentActionPermission.AddRange(permissionInfo.AdditionalRules);
         }

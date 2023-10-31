@@ -22,8 +22,8 @@ public static class AthenaServiceCollectionExtensions
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         // Add services to the container.
         services.AddAthenaProvider();
-        services.AddCustomServiceComponent();
-        services.AddCustomValidators();
+        services.AddCustomServiceComponent(configuration);
+        services.AddCustomValidators(configuration);
         if (!configuration.GetValue<bool>("Module:Swagger:Disabled"))
         {
             services.AddCustomSwaggerGen(configuration);
@@ -44,9 +44,9 @@ public static class AthenaServiceCollectionExtensions
             services.AddCustomBasicAuth(configuration);
         }
 
-        if (!configuration.GetValue<bool>("Module:JwtAuth:Disabled"))
+        if (!configuration.GetValue<bool>("Module:Auth:Disabled"))
         {
-            services.AddCustomJwtAuth(configuration);
+            services.AddCustomAuth(configuration);
         }
 
         if (!configuration.GetValue<bool>("Module:SignalR:Disabled"))

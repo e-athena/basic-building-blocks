@@ -18,7 +18,7 @@ public static class AthenaServiceCollectionExtensions
         var configuration = builder.Configuration;
         builder.AddCustomAthena(services =>
         {
-            services.AddCustomMediatR();
+            services.AddCustomMediatR(configuration);
 
             if (!configuration.GetValue<bool>("Module:DbContext:Disabled"))
             {

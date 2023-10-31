@@ -9,6 +9,8 @@ global using Microsoft.IdentityModel.Tokens;
 global using System.IdentityModel.Tokens.Jwt;
 global using Athena.Infrastructure.Auth;
 global using Athena.Infrastructure.Auths;
+global using Microsoft.AspNetCore.Authentication;
+global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;

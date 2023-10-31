@@ -8,7 +8,42 @@ namespace Microsoft.Extensions.DependencyInjection;
 public static class ComponentExtensions
 {
     /// <summary>
-    /// 
+    /// 添加服务组件
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configuration"></param>
+    /// <remarks>可通过：Module:ComponentAssembly:Keyword、Module:ComponentAssembly:Keywords配置</remarks>
+    /// <returns></returns>
+    // ReSharper disable once IdentifierTypo
+    public static IServiceCollection AddCustomServiceComponent(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
+    {
+        var keywords = new List<string>();
+        // 读取配置ComponentAssembly:Keyword
+        var assemblyKeyword = configuration.GetValue<string>("Module:ComponentAssembly:Keyword");
+        // 如果不为空，添加到关键字列表
+        if (!string.IsNullOrEmpty(assemblyKeyword))
+        {
+            keywords.Add(assemblyKeyword);
+        }
+
+        // 读取配置ComponentAssembly:Keywords
+        var assemblyKeywords = configuration.GetSection("Module:ComponentAssembly:Keywords").Get<string[]>();
+        // 如果不为空，添加到关键字列表
+        if (assemblyKeywords is not null && assemblyKeywords.Length > 0)
+        {
+            keywords.AddRange(assemblyKeywords);
+        }
+
+        // 添加服务组件
+        services.AddCustomServiceComponent(keywords.ToArray());
+        return services;
+    }
+
+    /// <summary>
+    /// 添加服务组件
     /// </summary>
     /// <param name="services"></param>
     /// <param name="assemblyKeyword"></param>

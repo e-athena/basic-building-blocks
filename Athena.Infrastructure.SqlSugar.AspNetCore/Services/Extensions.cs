@@ -29,18 +29,7 @@ public static class Extensions
     public static void SyncStructure(this ISqlSugarClient sqlSugarClient, string? assemblyKeyword = null)
     {
         var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword);
-        var tableAssemblies = new List<Type>();
-        foreach (var assembly in assemblies)
-        {
-            foreach (var type in assembly.GetExportedTypes())
-            {
-                tableAssemblies.AddRange(type.GetCustomAttributes()
-                    .Where(p => p.GetType() == typeof(TableAttribute) || p.GetType() == typeof(SugarTable))
-                    .Select(_ => type));
-            }
-        }
-
-        sqlSugarClient.SyncStructure(tableAssemblies.ToArray());
+        SyncStructure(sqlSugarClient, assemblies);
     }
 
     /// <summary>
@@ -51,18 +40,20 @@ public static class Extensions
     public static void SyncStructure(this ISqlSugarClient sqlSugarClient, params string[] assemblyKeywords)
     {
         var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords);
-        var tableAssemblies = new List<Type>();
+        SyncStructure(sqlSugarClient, assemblies);
+    }
+
+    /// <summary>
+    /// 同步表结构
+    /// </summary>
+    /// <param name="sqlSugarClient"></param>
+    /// <param name="assemblies"></param>
+    public static void SyncStructure(this ISqlSugarClient sqlSugarClient, params Assembly[] assemblies)
+    {
         foreach (var assembly in assemblies)
         {
-            foreach (var type in assembly.GetExportedTypes())
-            {
-                tableAssemblies.AddRange(type.GetCustomAttributes()
-                    .Where(p => p.GetType() == typeof(TableAttribute) || p.GetType() == typeof(SugarTable))
-                    .Select(_ => type));
-            }
+            SyncStructure(sqlSugarClient, assembly);
         }
-
-        sqlSugarClient.SyncStructure(tableAssemblies.ToArray());
     }
 
     /// <summary>
@@ -80,7 +71,7 @@ public static class Extensions
                 .Select(_ => type));
         }
 
-        sqlSugarClient.SyncStructure(tableAssemblies.ToArray());
+        SyncStructure(sqlSugarClient, tableAssemblies.ToArray());
     }
 
     /// <summary>
@@ -89,7 +80,7 @@ public static class Extensions
     /// <param name="sqlSugarClient"></param>
     public static void SyncStructure<TType>(this ISqlSugarClient sqlSugarClient)
     {
-        sqlSugarClient.SyncStructure(typeof(TType).Assembly);
+        SyncStructure(sqlSugarClient, typeof(TType).Assembly);
     }
 
     #endregion
