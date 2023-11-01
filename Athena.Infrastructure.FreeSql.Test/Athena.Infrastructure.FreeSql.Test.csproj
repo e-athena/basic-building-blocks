@@ -21,7 +21,7 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="FreeSql.Provider.SqliteCore" Version="3.2.801" />
+        <PackageReference Include="FreeSql.Provider.SqliteCore" Version="3.2.802" />
         <PackageReference Include="SQLitePCLRaw.bundle_e_sqlcipher" Version="2.1.6" />
     </ItemGroup>
     <ItemGroup>

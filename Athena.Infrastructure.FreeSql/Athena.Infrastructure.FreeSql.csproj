@@ -4,7 +4,7 @@
         <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>7.0.0-preview.20231030.2</Version>
+        <Version>7.0.0</Version>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
         <PackageIcon>e-athena.png</PackageIcon>
         <Title>Athena.Infrastructure.FreeSql</Title>
@@ -25,7 +25,7 @@
 
     <ItemGroup>
         <PackageReference Include="FreeSql.Cloud" Version="1.6.6"/>
-        <PackageReference Include="FreeSql.Repository" Version="3.2.801"/>
+        <PackageReference Include="FreeSql.Repository" Version="3.2.802" />
     </ItemGroup>
 
     <ItemGroup>
