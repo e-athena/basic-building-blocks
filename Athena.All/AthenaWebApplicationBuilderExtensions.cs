@@ -200,6 +200,7 @@ public static class AthenaWebApplicationBuilderExtensions
                 {
                     var claims = new List<Claim>
                     {
+                        new(ClaimTypes.NameIdentifier, loginRequest.UserName),
                         new(ClaimTypes.Name, loginRequest.UserName),
                         new(ClaimTypes.Role, "admin")
                     };
@@ -216,7 +217,8 @@ public static class AthenaWebApplicationBuilderExtensions
                     await httpContext.SignInAsync(
                         CapCookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(claimsIdentity),
-                        authProperties);
+                        authProperties
+                    );
                     // 跳转到首页
                     httpContext.Response.StatusCode = 301;
                     httpContext.Response.Headers["Location"] = "/cap";
