@@ -1,6 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace Athena.Infrastructure;
 

@@ -42,7 +42,7 @@ public static class Extensions
     {
         var keywords = new List<string>();
         // 读取配置ValidatorAssembly:Keyword
-        var assemblyKeyword = configuration.GetValue<string>("Module:ValidatorAssembly:Keyword");
+        var assemblyKeyword = configuration.GetEnvValue<string>("Module:ValidatorAssembly:Keyword");
         // 如果不为空，添加到关键字列表
         if (!string.IsNullOrEmpty(assemblyKeyword))
         {
@@ -50,7 +50,8 @@ public static class Extensions
         }
 
         // 读取配置ValidatorAssembly:Keywords
-        var assemblyKeywords = configuration.GetSection("Module:ValidatorAssembly:Keywords").Get<string[]>();
+        // var assemblyKeywords = configuration.GetSection("Module:ValidatorAssembly:Keywords").Get<string[]>();
+        var assemblyKeywords = configuration.GetEnvValues<string>("Module:ValidatorAssembly:Keywords");
         // 如果不为空，添加到关键字列表
         if (assemblyKeywords is not null && assemblyKeywords.Length > 0)
         {

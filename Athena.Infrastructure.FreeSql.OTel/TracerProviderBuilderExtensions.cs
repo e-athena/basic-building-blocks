@@ -1,5 +1,4 @@
-using Athena.Infrastructure.FreeSql.OTel;
-
+// ReSharper disable once CheckNamespace
 namespace OpenTelemetry.Trace;
 
 /// <summary>

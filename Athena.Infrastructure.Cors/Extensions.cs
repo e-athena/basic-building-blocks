@@ -72,7 +72,7 @@ public static class Extensions
         string configVariable = "CorsOrigins",
         string envVariable = "CORS_CONFIG")
     {
-        var origins = configuration.GetValue<string>(configVariable);
+        var origins = configuration.GetEnvValue<string>(configVariable);
         var env = Environment.GetEnvironmentVariable(envVariable);
         if (!string.IsNullOrEmpty(env))
         {

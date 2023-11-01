@@ -5,6 +5,7 @@ using Athena.Infrastructure.ApiPermission.Services;
 using Athena.Infrastructure.Cookies;
 using Athena.Infrastructure.DataPermission;
 using Athena.Infrastructure.DataPermission.Models;
+using Athena.Infrastructure.Helpers;
 using Athena.Infrastructure.Messaging.Responses;
 using Athena.Infrastructure.Mvc.Messaging.Requests;
 using Athena.Infrastructure.Providers;
@@ -32,14 +33,14 @@ public static class AthenaWebApplicationBuilderExtensions
     {
         var configuration = app.Services.GetService<IConfiguration>();
         // Configure the HTTP request pipeline.
-        if (configuration != null && !configuration.GetValue<bool>("Module:Swagger:Disabled"))
+        if (configuration != null && !configuration.GetEnvValue<bool>("Module:Swagger:Disabled"))
         {
             app.UseCustomSwagger();
         }
 
         app.UseAthenaProvider();
         app.UseCustomStaticFiles();
-        if (configuration != null && !configuration.GetValue<bool>("Module:Cors:Disabled"))
+        if (configuration != null && !configuration.GetEnvValue<bool>("Module:Cors:Disabled"))
         {
             app.UseCors();
         }
@@ -49,8 +50,8 @@ public static class AthenaWebApplicationBuilderExtensions
         app.UseAuthorization();
         app.UseCustomAuditLog();
         if (configuration != null &&
-            !configuration.GetValue<bool>("Module:DbContext:Disabled") &&
-            !configuration.GetValue<bool>("Module:DbContext:Dashboard:Disabled"))
+            !configuration.GetEnvValue<bool>("Module:DbContext:Disabled") &&
+            !configuration.GetEnvValue<bool>("Module:DbContext:Dashboard:Disabled"))
         {
             app.UseCapDashboard();
         }
@@ -191,8 +192,8 @@ public static class AthenaWebApplicationBuilderExtensions
                 // 读取配置
                 var configuration = AthenaProvider.Provider?.GetService<IConfiguration>();
                 if (configuration == null) throw new InvalidOperationException();
-                var userName = configuration.GetValue<string>("Module:DbContext:Dashboard:UserName");
-                var password = configuration.GetValue<string>("Module:DbContext:Dashboard:Password");
+                var userName = configuration.GetEnvValue<string>("Module:DbContext:Dashboard:UserName");
+                var password = configuration.GetEnvValue<string>("Module:DbContext:Dashboard:Password");
                 userName ??= "admin";
                 password ??= "admin123456";
                 // 如果用户名和密码正确，则登录成功，生成Cookies，然后重定向到/cap
@@ -207,7 +208,7 @@ public static class AthenaWebApplicationBuilderExtensions
                     var claimsIdentity =
                         new ClaimsIdentity(claims, CapCookieAuthenticationDefaults.AuthenticationScheme);
                     // 读取配置中的过期时间
-                    var expireMinutes = configuration.GetValue<int>("Module:DbContext:Dashboard:CookieExpires");
+                    var expireMinutes = configuration.GetEnvValue<int>("Module:DbContext:Dashboard:CookieExpires");
                     expireMinutes = expireMinutes <= 0 ? 60 : expireMinutes;
                     var authProperties = new AuthenticationProperties
                     {

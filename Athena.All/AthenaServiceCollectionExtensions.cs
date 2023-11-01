@@ -26,37 +26,37 @@ public static class AthenaServiceCollectionExtensions
         services.AddCustomValidators(configuration);
         services.AddCustomMediatR(configuration);
 
-        if (!configuration.GetValue<bool>("Module:Swagger:Disabled"))
+        if (!configuration.GetEnvValue<bool>("Module:Swagger:Disabled"))
         {
             services.AddCustomSwaggerGen(configuration);
         }
 
-        if (!configuration.GetValue<bool>("Module:Redis:Disabled"))
+        if (!configuration.GetEnvValue<bool>("Module:Redis:Disabled"))
         {
             services.AddCustomCsRedisCache(configuration);
         }
 
-        if (!configuration.GetValue<bool>("Module:ApiPermission:Disabled"))
+        if (!configuration.GetEnvValue<bool>("Module:ApiPermission:Disabled"))
         {
             services.AddCustomApiPermission();
         }
 
-        if (!configuration.GetValue<bool>("Module:BasicAuth:Disabled"))
+        if (!configuration.GetEnvValue<bool>("Module:BasicAuth:Disabled"))
         {
             services.AddCustomBasicAuth(configuration);
         }
 
-        if (!configuration.GetValue<bool>("Module:Auth:Disabled"))
+        if (!configuration.GetEnvValue<bool>("Module:Auth:Disabled"))
         {
             services.AddCustomAuth(configuration);
         }
 
-        if (!configuration.GetValue<bool>("Module:SignalR:Disabled"))
+        if (!configuration.GetEnvValue<bool>("Module:SignalR:Disabled"))
         {
             services.AddCustomSignalRWithRedis(configuration);
         }
 
-        if (!configuration.GetValue<bool>("Module:Cors:Disabled"))
+        if (!configuration.GetEnvValue<bool>("Module:Cors:Disabled"))
         {
             services.AddCustomCors(configuration);
         }

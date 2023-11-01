@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-namespace Athena.Infrastructure.Helpers;
+﻿namespace Athena.Infrastructure.Helpers;
 
 /// <summary>
 /// 验证相关帮助类

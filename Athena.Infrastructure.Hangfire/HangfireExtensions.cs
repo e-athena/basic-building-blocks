@@ -94,7 +94,7 @@ public static class HangfireExtensions
         string prefixPath = "",
         string pathMatch = "/hangfire",
         string account = "admin",
-        string password = "@@123123qq"
+        string password = "@@123456"
     )
     {
         pathMatch = string.IsNullOrWhiteSpace(pathMatch) ? "/hangfire" : pathMatch;

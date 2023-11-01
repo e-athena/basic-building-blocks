@@ -76,7 +76,7 @@ public static class MediatRExtensions
     {
         var keywords = new List<string>();
         // 读取配置MediatrAssembly:Keyword
-        var assemblyKeyword = configuration.GetValue<string>("Module:MediatrAssembly:Keyword");
+        var assemblyKeyword = configuration.GetEnvValue<string>("Module:MediatrAssembly:Keyword");
         // 如果不为空，添加到关键字列表
         if (!string.IsNullOrEmpty(assemblyKeyword))
         {
@@ -84,7 +84,8 @@ public static class MediatRExtensions
         }
 
         // 读取配置MediatrAssembly:Keywords
-        var assemblyKeywords = configuration.GetSection("Module:MediatrAssembly:Keywords").Get<string[]>();
+        // var assemblyKeywords = configuration.GetSection("Module:MediatrAssembly:Keywords").Get<string[]>();
+        var assemblyKeywords = configuration.GetEnvValues<string>("Module:MediatrAssembly:Keywords");
         // 如果不为空，添加到关键字列表
         if (assemblyKeywords is not null && assemblyKeywords.Length > 0)
         {

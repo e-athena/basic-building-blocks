@@ -22,7 +22,7 @@ public static class ComponentExtensions
     {
         var keywords = new List<string>();
         // 读取配置ComponentAssembly:Keyword
-        var assemblyKeyword = configuration.GetValue<string>("Module:ComponentAssembly:Keyword");
+        var assemblyKeyword = configuration.GetEnvValue<string>("Module:ComponentAssembly:Keyword");
         // 如果不为空，添加到关键字列表
         if (!string.IsNullOrEmpty(assemblyKeyword))
         {
@@ -30,7 +30,8 @@ public static class ComponentExtensions
         }
 
         // 读取配置ComponentAssembly:Keywords
-        var assemblyKeywords = configuration.GetSection("Module:ComponentAssembly:Keywords").Get<string[]>();
+        // var assemblyKeywords = configuration.GetSection("Module:ComponentAssembly:Keywords").Get<string[]>();
+        var assemblyKeywords = configuration.GetEnvValues<string>("Module:ComponentAssembly:Keywords");
         // 如果不为空，添加到关键字列表
         if (assemblyKeywords is not null && assemblyKeywords.Length > 0)
         {

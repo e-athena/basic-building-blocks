@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-namespace Athena.Infrastructure.Summaries;
+﻿namespace Athena.Infrastructure.Summaries;
 
 /// <summary>
 /// 

@@ -18,7 +18,7 @@ public static class AthenaServiceCollectionExtensions
         var configuration = builder.Configuration;
         builder.AddCustomAthena(services =>
         {
-            if (!configuration.GetValue<bool>("Module:DbContext:Disabled"))
+            if (!configuration.GetEnvValue<bool>("Module:DbContext:Disabled"))
             {
                 // 添加ORM
                 services.AddCustomSqlSugar(configuration);
@@ -26,12 +26,12 @@ public static class AthenaServiceCollectionExtensions
                 services.AddCustomIntegrationEvent(configuration, capOptions =>
                 {
                     // 启用仪表盘
-                    if (!configuration.GetValue<bool>("Module:DbContext:Dashboard:Disabled"))
+                    if (!configuration.GetEnvValue<bool>("Module:DbContext:Dashboard:Disabled"))
                     {
                         // Dashboard
                         capOptions.UseDashboard(options =>
                         {
-                            options.UseAuth = !configuration.GetValue<bool>("Module:DbContext:Dashboard:DisabledAuth");
+                            options.UseAuth = !configuration.GetEnvValue<bool>("Module:DbContext:Dashboard:DisabledAuth");
                             options.DefaultAuthenticationScheme = CapCookieAuthenticationDefaults.AuthenticationScheme;
                             options.AuthorizationPolicy = CapCookieAuthenticationDefaults.AuthenticationScheme;
                         });
@@ -39,17 +39,17 @@ public static class AthenaServiceCollectionExtensions
                 });
             }
 
-            if (!configuration.GetValue<bool>("Module:DataPermission:Disabled"))
+            if (!configuration.GetEnvValue<bool>("Module:DataPermission:Disabled"))
             {
                 services.AddCustomDataPermission(configuration);
             }
 
-            if (!configuration.GetValue<bool>("Module:Logger:Disabled"))
+            if (!configuration.GetEnvValue<bool>("Module:Logger:Disabled"))
             {
                 services.AddCustomStorageLogger(configuration);
             }
 
-            if (!configuration.GetValue<bool>("Module:EventTracking:Disabled"))
+            if (!configuration.GetEnvValue<bool>("Module:EventTracking:Disabled"))
             {
                 services.AddCustomEventTracking(configuration);
             }

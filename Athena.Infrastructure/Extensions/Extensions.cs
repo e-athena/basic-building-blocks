@@ -60,9 +60,10 @@ public static class Extensions
     public static TModel GetConfig<TModel>(
         this IConfiguration configuration,
         string configVariable,
-        string envVariable) where TModel : new()
+        string? envVariable = null) where TModel : new()
     {
         var config = configuration.GetOptions<TModel>(configVariable);
+        envVariable ??= configVariable.ConvertToEnvKey();
         var env = Environment.GetEnvironmentVariable(envVariable);
         if (!string.IsNullOrEmpty(env))
         {
@@ -94,7 +95,7 @@ public static class Extensions
     )
     {
         // 允许空值
-        var value = configuration.GetValue<string>(configVariable);
+        var value = configuration.GetEnvValue<string>(configVariable);
         var env = Environment.GetEnvironmentVariable(envVariable);
         if (!string.IsNullOrEmpty(env))
         {
@@ -107,6 +108,75 @@ public static class Extensions
         }
 
         return value;
+    }
+
+    /// <summary>
+    /// 读取环境变量中的值，如果不存在，则读取配置文件中的值
+    /// </summary>
+    /// <param name="configuration"></param>
+    /// <param name="key"></param>
+    /// <typeparam name="TResult"></typeparam>
+    /// <returns></returns>
+    public static TResult? GetEnvValue<TResult>(this IConfiguration configuration, string key)
+    {
+        if (typeof(TResult).IsArray)
+        {
+            throw new NotSupportedException("不支持数组类型");
+        }
+
+        var envKey = key.ConvertToEnvKey();
+        var value = Environment.GetEnvironmentVariable(envKey);
+        if (value == null)
+        {
+            return configuration.GetValue<TResult>(key);
+        }
+
+        return (TResult) Convert.ChangeType(value, typeof(TResult));
+    }
+
+    /// <summary>
+    /// 读取环境变量中的值，如果不存在，则读取配置文件中的值
+    /// </summary>
+    /// <param name="configuration"></param>
+    /// <param name="key"></param>
+    /// <typeparam name="TResult"></typeparam>
+    /// <returns></returns>
+    public static TResult[]? GetEnvValues<TResult>(this IConfiguration configuration, string key)
+    {
+        if (typeof(TResult).IsArray)
+        {
+            throw new NotSupportedException("不支持数组类型");
+        }
+
+        var envKey = key.ConvertToEnvKey();
+        var value = Environment.GetEnvironmentVariable(envKey);
+        if (value == null)
+        {
+            return configuration.GetSection(key).Get<TResult[]>();
+        }
+
+        // 按,分割
+        var arr = value.Split(",");
+        return arr.Select(x => (TResult) Convert.ChangeType(x, typeof(TResult))).ToArray();
+    }
+
+    // 转换字符串，如：Module:DbContext:Disabled 转换为MODULE__DB_CONTEXT__DISABLED
+    private static string ConvertToEnvKey(this string key)
+    {
+        // 按:分割字符串，然后转换为大写，最后用__连接
+        var arr = key.Split(":");
+        var sb = new StringBuilder();
+        for (var i = 0; i < arr.Length; i++)
+        {
+            var item = arr[i];
+            sb.Append(item.ToUpperAndAddUnderline());
+            if (i != arr.Length - 1)
+            {
+                sb.Append("__");
+            }
+        }
+
+        return sb.ToString();
     }
 
     /// <summary>

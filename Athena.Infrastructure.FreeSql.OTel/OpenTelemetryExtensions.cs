@@ -25,7 +25,7 @@ public static class OpenTelemetryExtensions
         services.AddOpenTelemetry()
             // Build a resource configuration action to set service information.
             .ConfigureResource(r => r.AddService(
-                serviceName: configuration.GetValue<string>("ServiceName") ?? "unknown",
+                serviceName: configuration.GetEnvValue<string>("ServiceName") ?? "unknown",
                 serviceVersion: typeof(T).Assembly.GetName().Version?.ToString() ?? "unknown",
                 serviceInstanceId: Environment.MachineName)
             )
@@ -62,7 +62,7 @@ public static class OpenTelemetryExtensions
                         })
                         .AddZipkinExporter(o =>
                         {
-                            var endpoint = configuration.GetValue<string>("Zipkin:Endpoint");
+                            var endpoint = configuration.GetEnvValue<string>("Zipkin:Endpoint");
                             endpoint ??= "http://localhost:9411/api/v2/spans";
                             o.Endpoint = new Uri(endpoint);
                         });

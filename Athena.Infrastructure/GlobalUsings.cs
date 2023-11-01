@@ -8,6 +8,7 @@ global using System.Diagnostics;
 global using System.Text.Json;
 global using System.Reflection;
 global using System.ComponentModel.DataAnnotations;
+global using System.Text;
 global using Athena.Infrastructure.ViewModels;
 global using Athena.Infrastructure.Enums;
 global using Athena.Infrastructure.Attributes;

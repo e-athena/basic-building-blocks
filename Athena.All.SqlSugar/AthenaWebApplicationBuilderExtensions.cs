@@ -21,7 +21,7 @@ public static class AthenaWebApplicationBuilderExtensions
         webApplication.UseCustomAthena<TType>(
             useActions: (app) =>
             {
-                if (configuration != null && !configuration.GetValue<bool>("Module:DbContext:Disabled"))
+                if (configuration != null && !configuration.GetEnvValue<bool>("Module:DbContext:Disabled"))
                 {
                     app.UseCustomSqlSugarMultiTenancy();
                 }

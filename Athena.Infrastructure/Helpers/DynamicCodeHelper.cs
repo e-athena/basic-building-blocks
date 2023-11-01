@@ -1,6 +1,5 @@
 using System.IO.Compression;
 using System.Security.Cryptography;
-using System.Text;
 using Athena.Infrastructure.Exceptions;
 
 namespace Athena.Infrastructure.Helpers;

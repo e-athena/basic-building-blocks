@@ -37,7 +37,7 @@ public static class Extensions
         OpenApiContact apiContact,
         Action<SwaggerGenOptions>? configAction = null)
     {
-        var serviceName = configuration.GetValue<string>("ServiceName");
+        var serviceName = configuration.GetEnvValue<string>("ServiceName");
         return services.AddCustomSwaggerGen(new OpenApiInfo
         {
             Title = serviceName ?? "SwaggerAPI",

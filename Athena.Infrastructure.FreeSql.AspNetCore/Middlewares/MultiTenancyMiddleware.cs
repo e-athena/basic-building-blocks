@@ -81,7 +81,7 @@ public class MultiTenancyMiddleware
             var currentTenant = tenant.DbKey;
             // 是否自动同步结构
             var isAutoSyncStructure = configuration != null &&
-                                      configuration.GetValue<bool>("Module:DbContext:IsAutoSyncStructure");
+                                      configuration.GetEnvValue<bool>("Module:DbContext:IsAutoSyncStructure");
             // 注册租户
             // 只会首次注册，如果已经注册过则不生效
             FreeSqlMultiTenancyManager.Instance.Register(currentTenant, () =>
