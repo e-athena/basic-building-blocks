@@ -1,5 +1,5 @@
 using System.Net.Http.Headers;
-using Athena.Infrastructure.Mvc.Configs;
+using Athena.Infrastructure.Auth.Configs;
 using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace

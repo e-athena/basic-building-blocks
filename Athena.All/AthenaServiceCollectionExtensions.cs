@@ -24,6 +24,8 @@ public static class AthenaServiceCollectionExtensions
         services.AddAthenaProvider();
         services.AddCustomServiceComponent(configuration);
         services.AddCustomValidators(configuration);
+        services.AddCustomMediatR(configuration);
+
         if (!configuration.GetValue<bool>("Module:Swagger:Disabled"))
         {
             services.AddCustomSwaggerGen(configuration);

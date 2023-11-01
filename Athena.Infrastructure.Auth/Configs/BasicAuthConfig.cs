@@ -1,4 +1,4 @@
-namespace Athena.Infrastructure.Mvc.Configs;
+namespace Athena.Infrastructure.Auth.Configs;
 
 /// <summary>
 /// 基础认证配置
@@ -8,10 +8,10 @@ public class BasicAuthConfig
     /// <summary>
     /// 用户名
     /// </summary>
-    public string? UserName { get; set; }
+    public string UserName { get; set; } = null!;
 
     /// <summary>
     /// 密码
     /// </summary>
-    public string? Password { get; set; }
+    public string Password { get; set; } = null!;
 }

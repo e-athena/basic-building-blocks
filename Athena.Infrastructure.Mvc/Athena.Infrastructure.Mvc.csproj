@@ -1,10 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+        <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <PackageVersion>7.0.0-preview.20231027.1</PackageVersion>
+        <PackageVersion>7.0.0-preview.20231031.1</PackageVersion>
         <PackageIcon>e-athena.png</PackageIcon>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
         <Title>Athena.Infrastructure.Mvc</Title>
@@ -16,15 +16,15 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-        <DocumentationFile>bin\Debug\Athena.Infrastructure.Mvc.xml</DocumentationFile>
+        <DocumentationFile>bin\Debug\net7.0\Athena.Infrastructure.Mvc.xml</DocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-        <DocumentationFile>bin\Release\Athena.Infrastructure.Mvc.xml</DocumentationFile>
+        <DocumentationFile>bin\Release\net7.0\Athena.Infrastructure.Mvc.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
-<!--        <ProjectReference Include="..\Athena.Infrastructure.FluentValidation\Athena.Infrastructure.FluentValidation.csproj" />-->
+        <ProjectReference Include="..\Athena.Infrastructure.Auth\Athena.Infrastructure.Auth.csproj"/>
         <ProjectReference Include="..\Athena.Infrastructure.Logger\Athena.Infrastructure.Logger.csproj"/>
     </ItemGroup>
 

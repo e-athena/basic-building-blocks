@@ -4,7 +4,7 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>7.0.0-preview.20231031.2</Version>
+        <Version>7.0.0-preview.20231031.4</Version>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
         <PackageIcon>e-athena.png</PackageIcon>
         <Title>Athena.All</Title>
@@ -17,12 +17,13 @@
 
     <ItemGroup>
         <PackageReference Include="DotNetCore.CAP.Dashboard" Version="7.2.1"/>
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.12"/>
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.13" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Athena.Infrastructure.FluentValidation\Athena.Infrastructure.FluentValidation.csproj" />
         <ProjectReference Include="..\Athena.Infrastructure\Athena.Infrastructure.csproj"/>
+        <ProjectReference Include="..\Athena.Infrastructure.Event\Athena.Infrastructure.Event.csproj"/>
         <ProjectReference Include="..\Athena.Infrastructure.ApiPermission\Athena.Infrastructure.ApiPermission.csproj"/>
         <ProjectReference Include="..\Athena.Infrastructure.Cors\Athena.Infrastructure.Cors.csproj"/>
         <ProjectReference Include="..\Athena.Infrastructure.CSRedis\Athena.Infrastructure.CSRedis.csproj"/>

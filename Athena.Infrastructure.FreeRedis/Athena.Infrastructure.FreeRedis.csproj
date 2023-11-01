@@ -4,7 +4,7 @@
         <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <PackageVersion>7.0.0-preview.20231022.1</PackageVersion>
+        <PackageVersion>7.0.0-preview.20231031.1</PackageVersion>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
         <PackageIcon>e-athena.png</PackageIcon>
         <Title>Athena.Infrastructure.FreeRedis</Title>
@@ -24,7 +24,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FreeRedis" Version="1.1.10"/>
+        <PackageReference Include="FreeRedis" Version="1.1.12" />
     </ItemGroup>
 
     <ItemGroup>

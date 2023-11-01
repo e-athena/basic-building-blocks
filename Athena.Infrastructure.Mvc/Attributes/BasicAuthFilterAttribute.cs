@@ -1,4 +1,5 @@
 using System.Net.Http.Headers;
+using Athena.Infrastructure.Auth.Configs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 

@@ -1,7 +1,3 @@
-using System.Net;
-using Athena.Infrastructure.Logger;
-using Athena.Infrastructure.Mvc.Helpers;
-
 namespace Athena.Infrastructure.Mvc.Attributes;
 
 /// <summary>
@@ -212,7 +208,7 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
 }
 
 //
-class ValidationResult
+internal class ValidationResult
 {
     /// <summary>
     /// 状态码
@@ -233,7 +229,7 @@ class ValidationResult
 /// <summary>
 /// 
 /// </summary>
-class ValidationError
+internal class ValidationError
 {
     public string? Field { get; }
 

@@ -8,6 +8,7 @@ global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.IdentityModel.Tokens;
 global using System.IdentityModel.Tokens.Jwt;
 global using Athena.Infrastructure.Auth;
+global using Athena.Infrastructure.Auth.Configs;
 global using Athena.Infrastructure.Auths;
 global using Microsoft.AspNetCore.Authentication;
 global using Microsoft.AspNetCore.Authorization;

@@ -1,4 +1,5 @@
 // ReSharper disable once CheckNamespace
+
 namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
@@ -6,6 +7,44 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// </summary>
 public static class Extensions
 {
+    /// <summary>
+    /// 添加基础认证
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configuration"></param>
+    /// <returns></returns>
+    public static IServiceCollection AddCustomBasicAuth(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
+    {
+        services.AddOptions();
+        var config = configuration.GetConfig<BasicAuthConfig>("BasicAuthConfig", "BASIC_AUTH_CONFIG");
+        services.AddCustomBasicAuth(config.UserName, config.Password);
+        return services;
+    }
+
+    /// <summary>
+    /// 添加基础认证
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="userName">用户名</param>
+    /// <param name="password">密码</param>
+    /// <returns></returns>
+    public static IServiceCollection AddCustomBasicAuth(
+        this IServiceCollection services,
+        string userName,
+        string password
+    )
+    {
+        services.Configure<BasicAuthConfig>(cfg =>
+        {
+            cfg.UserName = userName;
+            cfg.Password = password;
+        });
+        return services;
+    }
+
     /// <summary>
     /// 添加自定义认证
     /// </summary>

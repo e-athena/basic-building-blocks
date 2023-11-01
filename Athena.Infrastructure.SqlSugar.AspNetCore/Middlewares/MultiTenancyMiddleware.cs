@@ -38,13 +38,14 @@ public class MultiTenancyMiddleware
             return;
         }
 
+        var tenantClient = _sqlSugarClient.AsTenant();
         try
         {
             //通过context的请求头或参数中读取租户code
             var tenantKey = GetTenantKey(context);
             if (string.IsNullOrEmpty(tenantKey))
             {
-                _sqlSugarClient.AsTenant().ChangeDatabase(Constant.DefaultMainTenant);
+                tenantClient.ChangeDatabase(Constant.DefaultMainTenant);
                 await _next(context);
                 return;
             }
@@ -61,7 +62,7 @@ public class MultiTenancyMiddleware
 
             if (tenantService == null)
             {
-                _sqlSugarClient.AsTenant().ChangeDatabase(Constant.DefaultMainTenant);
+                tenantClient.ChangeDatabase(Constant.DefaultMainTenant);
                 await _next(context);
                 return;
             }
@@ -71,7 +72,7 @@ public class MultiTenancyMiddleware
             // 租户不存在或者为共享租户
             if (tenant == null || tenant.IsolationLevel == TenantIsolationLevel.Shared)
             {
-                _sqlSugarClient.AsTenant().ChangeDatabase(Constant.DefaultMainTenant);
+                tenantClient.ChangeDatabase(Constant.DefaultMainTenant);
                 await _next(context);
                 return;
             }
@@ -80,22 +81,22 @@ public class MultiTenancyMiddleware
             var currentTenant = tenant.DbKey;
 
             // 如果当前租户已经存在，则直接切换
-            var exists = _sqlSugarClient.AsTenant().IsAnyConnection(currentTenant);
+            var exists = tenantClient.IsAnyConnection(currentTenant);
             if (exists)
             {
-                _sqlSugarClient.AsTenant().ChangeDatabase(currentTenant);
+                tenantClient.ChangeDatabase(currentTenant);
                 await _next(context);
                 return;
             }
 
             // 注册租户
             SqlSugarBuilderHelper.Registry(
-                _sqlSugarClient,
+                tenantClient,
                 tenant.DbKey,
                 tenant.ConnectionString,
                 tenant.DataType.HasValue ? (DbType) tenant.DataType.Value : null
             );
-            _sqlSugarClient.AsTenant().ChangeDatabase(currentTenant);
+            tenantClient.ChangeDatabase(currentTenant);
             await _next(context);
         }
         catch (Exception ex)
@@ -105,7 +106,10 @@ public class MultiTenancyMiddleware
         }
         finally
         {
-            _sqlSugarClient.AsTenant().ChangeDatabase(Constant.DefaultMainTenant);
+            if (tenantClient.IsAnyConnection(Constant.DefaultMainTenant))
+            {
+                tenantClient.ChangeDatabase(Constant.DefaultMainTenant);
+            }
         }
     }
 

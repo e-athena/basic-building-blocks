@@ -1,5 +1,3 @@
-using Athena.Infrastructure.Logger;
-
 namespace Athena.Infrastructure.Mvc.Middlewares.AuditLogs;
 
 /// <summary>

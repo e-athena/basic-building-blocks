@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using ITenant = SqlSugar.ITenant;
 
 namespace Athena.Infrastructure.SqlSugar.Helpers;
 
@@ -9,6 +10,24 @@ namespace Athena.Infrastructure.SqlSugar.Helpers;
 /// </summary>
 public static class SqlSugarBuilderHelper
 {
+    /// <summary>
+    /// 注册租户
+    /// </summary>
+    /// <param name="tenantId"></param>
+    /// <param name="connectionString"></param>
+    /// <param name="dataType">数据库类型，为空时根据链接字符串自动读取</param>
+    /// <param name="tenant"></param>
+    /// <returns></returns>
+    public static ISqlSugarClient Registry(
+        ITenant tenant,
+        string tenantId,
+        string connectionString,
+        DbType? dataType = null)
+    {
+        tenant.AddConnection(GetConnectionConfig(tenantId, connectionString, dataType));
+        return tenant.GetConnectionScope(tenantId);
+    }
+
     /// <summary>
     /// 注册租户
     /// </summary>
@@ -24,8 +43,7 @@ public static class SqlSugarBuilderHelper
         DbType? dataType = null)
     {
         var tenant = client.AsTenant();
-        tenant.AddConnection(GetConnectionConfig(tenantId, connectionString, dataType));
-        return tenant.GetConnectionScope(tenantId);
+        return Registry(tenant, tenantId, connectionString, dataType);
     }
 
     /// <summary>
