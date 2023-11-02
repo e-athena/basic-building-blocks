@@ -94,6 +94,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Infrastructure.Auth"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Infrastructure.FluentValidation", "Athena.Infrastructure.FluentValidation\Athena.Infrastructure.FluentValidation.csproj", "{001C3397-4D47-425E-B708-77CFD3DDB2D7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Infrastructure.SubApplication", "Athena.Infrastructure.SubApplication\Athena.Infrastructure.SubApplication.csproj", "{46F355C6-A433-4BDC-AA82-847CD7CD6DF8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -284,6 +286,10 @@ Global
 		{001C3397-4D47-425E-B708-77CFD3DDB2D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{001C3397-4D47-425E-B708-77CFD3DDB2D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{001C3397-4D47-425E-B708-77CFD3DDB2D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46F355C6-A433-4BDC-AA82-847CD7CD6DF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46F355C6-A433-4BDC-AA82-847CD7CD6DF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46F355C6-A433-4BDC-AA82-847CD7CD6DF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46F355C6-A433-4BDC-AA82-847CD7CD6DF8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{8487FB7B-8DBB-414E-B707-CF8FFC285C75} = {E5B19187-0A21-4BC1-9690-2727240C2158}

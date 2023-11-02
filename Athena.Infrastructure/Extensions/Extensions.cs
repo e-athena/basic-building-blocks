@@ -54,13 +54,16 @@ public static class Extensions
     /// <param name="configuration"></param>
     /// <param name="configVariable"></param>
     /// <param name="envVariable"></param>
+    /// <param name="callback"></param>
     /// <typeparam name="TModel"></typeparam>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
     public static TModel GetConfig<TModel>(
         this IConfiguration configuration,
         string configVariable,
-        string? envVariable = null) where TModel : new()
+        string? envVariable = null,
+        Action<TModel>? callback = null
+    ) where TModel : new()
     {
         var config = configuration.GetOptions<TModel>(configVariable);
         envVariable ??= configVariable.ConvertToEnvKey();
@@ -74,6 +77,8 @@ public static class Extensions
         {
             throw new ArgumentNullException($"未配置{configVariable}", nameof(config));
         }
+
+        callback?.Invoke(config);
 
         return config;
     }
