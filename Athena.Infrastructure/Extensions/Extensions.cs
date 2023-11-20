@@ -53,7 +53,6 @@ public static class Extensions
     /// </summary>
     /// <param name="configuration"></param>
     /// <param name="configVariable"></param>
-    /// <param name="envVariable"></param>
     /// <param name="callback"></param>
     /// <typeparam name="TModel"></typeparam>
     /// <returns></returns>
@@ -61,24 +60,41 @@ public static class Extensions
     public static TModel GetConfig<TModel>(
         this IConfiguration configuration,
         string configVariable,
-        string? envVariable = null,
         Action<TModel>? callback = null
     ) where TModel : new()
     {
-        var config = configuration.GetOptions<TModel>(configVariable);
-        envVariable ??= configVariable.ConvertToEnvKey();
+        var config = configuration.GetConfig<TModel>(configVariable, configVariable.ConvertToEnvKey());
+        callback?.Invoke(config);
+        return config;
+    }
+
+    /// <summary>
+    /// 读取配置
+    /// </summary>
+    /// <param name="configuration"></param>
+    /// <param name="configVariable"></param>
+    /// <param name="envVariable"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    public static TModel GetConfig<TModel>(
+        this IConfiguration configuration,
+        string configVariable,
+        string envVariable
+    ) where TModel : new()
+    {
+        var config = default(TModel);
         var env = Environment.GetEnvironmentVariable(envVariable);
         if (!string.IsNullOrEmpty(env))
         {
             config = JsonSerializer.Deserialize<TModel>(env);
         }
 
+        config ??= configuration.GetOptions<TModel>(configVariable);
+
         if (config == null)
         {
-            throw new ArgumentNullException($"未配置{configVariable}", nameof(config));
+            throw new ArgumentNullException(nameof(config), $"未配置{configVariable}");
         }
-
-        callback?.Invoke(config);
 
         return config;
     }
