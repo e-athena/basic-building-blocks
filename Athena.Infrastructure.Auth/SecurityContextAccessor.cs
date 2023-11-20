@@ -110,12 +110,6 @@ public class SecurityContextAccessor : ISecurityContextAccessor
                 return true;
             }
 
-            var headerValue1 = _httpContextAccessor.HttpContext?.Request.Query["refresh_cache"];
-            if (bool.TryParse(headerValue1, out var flag2) && flag2)
-            {
-                return true;
-            }
-
             var headerValue2 = _httpContextAccessor.HttpContext?.Request.Headers["RefreshCache"];
             return bool.TryParse(headerValue2, out var flag3) && flag3;
         }
