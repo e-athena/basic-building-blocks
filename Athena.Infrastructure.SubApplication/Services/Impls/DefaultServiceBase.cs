@@ -10,6 +10,10 @@ public class DefaultServiceBase
     private readonly ISecurityContextAccessor _accessor;
     private readonly string _apiUrl = "http://localhost:5078";
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="accessor"></param>
     public DefaultServiceBase(ISecurityContextAccessor accessor)
     {
         _accessor = accessor;

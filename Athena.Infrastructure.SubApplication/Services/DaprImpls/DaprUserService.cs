@@ -7,11 +7,20 @@ public class DaprUserService : DaprServiceBase, IUserService
 {
     private readonly DaprClient _daprClient;
     private readonly ServiceCallConfig _config;
+    private readonly ICacheManager _cacheManager;
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="options"></param>
+    /// <param name="daprClient"></param>
+    /// <param name="accessor"></param>
+    /// <param name="cacheManager"></param>
     public DaprUserService(IOptions<ServiceCallConfig> options, DaprClient daprClient,
-        ISecurityContextAccessor accessor) : base(accessor)
+        ISecurityContextAccessor accessor, ICacheManager cacheManager) : base(accessor)
     {
         _daprClient = daprClient;
+        _cacheManager = cacheManager;
         _config = options.Value;
     }
 
@@ -53,6 +62,29 @@ public class DaprUserService : DaprServiceBase, IUserService
         if (!result.Success || result.Data == null || result.Data.Count == 0)
         {
             return new List<UserCustomColumnModel>();
+        }
+
+        return result.Data;
+    }
+
+    /// <summary>
+    /// 读取用户列权限
+    /// </summary>
+    /// <param name="appId"></param>
+    /// <param name="moduleName"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    public async Task<List<UserColumnPermissionModel>?> GetUserColumnPermissionsAsync(string? appId, string moduleName,
+        string? userId)
+    {
+        var methodName = $"/api/SubApplication/GetUserColumnPermissions?userId={userId}&appId={appId}&moduleName={moduleName}";
+        var result = await _daprClient
+            .InvokeMethodAsync<ApiResult<List<UserColumnPermissionModel>>>(HttpMethod.Get, _config.AppId,
+                GetMethodName(methodName));
+
+        if (!result.Success || result.Data == null || result.Data.Count == 0)
+        {
+            return new List<UserColumnPermissionModel>();
         }
 
         return result.Data;
@@ -192,5 +224,30 @@ public class DaprUserService : DaprServiceBase, IUserService
         }
 
         return result.Data;
+    }
+
+    /// <summary>
+    /// 读取用户列表
+    /// </summary>
+    /// <param name="readFromCache"></param>
+    /// <returns></returns>
+    public async Task<List<SelectViewModel>> GetAllUserAsync(bool readFromCache = true)
+    {
+        if (!readFromCache)
+        {
+            return await Get();
+        }
+
+        const string cacheKey = "userService:GetAllUserAsync";
+        return await _cacheManager.GetOrCreateAsync(cacheKey, Get, TimeSpan.FromDays(1)) ?? new List<SelectViewModel>();
+
+        // 是否读取缓存
+        async Task<List<SelectViewModel>> Get()
+        {
+            const string methodName = "/api/SubApplication/GetUserSelectList";
+            var result = await _daprClient
+                .InvokeMethodAsync<ApiResult<List<SelectViewModel>>>(HttpMethod.Get, _config.AppId, GetMethodName(methodName));
+            return result.Data ?? new List<SelectViewModel>();
+        }
     }
 }

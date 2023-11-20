@@ -8,6 +8,12 @@ public class HttpTenantService : DefaultServiceBase, ITenantService
     private readonly ILogger<HttpTenantService> _logger;
     private readonly ICacheManager _cacheManager;
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="accessor"></param>
+    /// <param name="loggerFactory"></param>
+    /// <param name="cacheManager"></param>
     public HttpTenantService(
         ISecurityContextAccessor accessor,
         ILoggerFactory loggerFactory,

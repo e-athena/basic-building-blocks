@@ -7,6 +7,10 @@ public class DaprServiceBase
 {
     private readonly ISecurityContextAccessor _accessor;
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="accessor"></param>
     public DaprServiceBase(ISecurityContextAccessor accessor)
     {
         _accessor = accessor;

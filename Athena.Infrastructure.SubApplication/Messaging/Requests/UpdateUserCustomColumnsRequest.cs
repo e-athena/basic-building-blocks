@@ -18,7 +18,7 @@ public class UpdateUserCustomColumnsRequest : IRequestBase
     /// <summary>
     /// 用户ID
     /// </summary>
-    public string UserId { get; set; } = null!;
+    public string? UserId { get; set; }
 
     /// <summary>
     /// 所属模块

@@ -5,6 +5,10 @@ namespace Athena.Infrastructure.SubApplication.Services.Impls;
 /// </summary>
 public class DefaultOrganizationService : DefaultServiceBase, IOrganizationService
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="accessor"></param>
     public DefaultOrganizationService(ISecurityContextAccessor accessor) : base(accessor)
     {
     }

@@ -4,7 +4,7 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>7.0.0</Version>
+        <Version>7.0.3-preview.20231105.2</Version>
         <PackageIcon>e-athena.png</PackageIcon>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
         <Title>Athena.Infrastructure</Title>
@@ -15,12 +15,21 @@
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <DocumentationFile>bin\Debug\net7.0\Athena.Infrastructure.SubApplication.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <DocumentationFile>bin\Release\net7.0\Athena.Infrastructure.SubApplication.xml</DocumentationFile>
+    </PropertyGroup>
+
     <ItemGroup>
         <PackageReference Include="Dapr.AspNetCore" Version="1.12.0"/>
         <PackageReference Include="Flurl.Http" Version="3.2.4"/>
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Athena.Infrastructure.DataPermission\Athena.Infrastructure.DataPermission.csproj"/>
         <ProjectReference Include="..\Athena.Infrastructure\Athena.Infrastructure.csproj"/>
     </ItemGroup>
 

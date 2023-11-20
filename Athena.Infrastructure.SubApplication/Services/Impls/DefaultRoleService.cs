@@ -5,6 +5,10 @@ namespace Athena.Infrastructure.SubApplication.Services.Impls;
 /// </summary>
 public class DefaultRoleService : DefaultServiceBase, IRoleService
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="accessor"></param>
     public DefaultRoleService(ISecurityContextAccessor accessor) : base(accessor)
     {
     }

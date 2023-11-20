@@ -5,6 +5,10 @@ namespace Athena.Infrastructure.SubApplication.Services.Impls;
 /// </summary>
 public class DefaultPositionService : DefaultServiceBase, IPositionService
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="accessor"></param>
     public DefaultPositionService(ISecurityContextAccessor accessor) : base(accessor)
     {
     }

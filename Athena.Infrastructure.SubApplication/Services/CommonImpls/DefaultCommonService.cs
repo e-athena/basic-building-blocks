@@ -1,4 +1,4 @@
-namespace Athena.Infrastructure.SubApplication.Services.Impls;
+namespace Athena.Infrastructure.SubApplication.Services.CommonImpls;
 
 /// <summary>
 /// 通用服务接口实现类
@@ -7,6 +7,10 @@ public class DefaultCommonService : ICommonService
 {
     private readonly IUserService _userService;
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="userService"></param>
     public DefaultCommonService(IUserService userService)
     {
         _userService = userService;

@@ -8,6 +8,12 @@ public class DaprPositionService : DaprServiceBase, IPositionService
     private readonly DaprClient _daprClient;
     private readonly ServiceCallConfig _config;
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="options"></param>
+    /// <param name="daprClient"></param>
+    /// <param name="accessor"></param>
     public DaprPositionService(IOptions<ServiceCallConfig> options, DaprClient daprClient,
         ISecurityContextAccessor accessor) : base(accessor)
     {

@@ -1,10 +1,16 @@
+using Athena.Infrastructure.ColumnPermissions;
+using Athena.Infrastructure.DataPermission;
 using Athena.Infrastructure.SubApplication.Services;
+using Athena.Infrastructure.SubApplication.Services.CommonImpls;
 using Athena.Infrastructure.SubApplication.Services.DaprImpls;
 using Athena.Infrastructure.SubApplication.Services.Impls;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
 
+/// <summary>
+/// 
+/// </summary>
 public static class ServiceCollectionExtensions
 {
     /// <summary>
@@ -37,6 +43,7 @@ public static class ServiceCollectionExtensions
         });
         // 通用服务
         services.AddScoped<ICommonService, DefaultCommonService>();
+        services.AddScoped<IColumnPermissionService, DefaultColumnPermissionService>();
 
         if (config.CallType == ServiceCallType.Http)
         {
@@ -46,6 +53,7 @@ public static class ServiceCollectionExtensions
             services.AddScoped<IRoleService, DefaultRoleService>();
             services.AddScoped<IUserService, DefaultUserService>();
             services.AddScoped<ITenantService, HttpTenantService>();
+            services.AddScoped<IDataPermissionService, DefaultDataPermissionService>();
             return services;
         }
 
@@ -62,6 +70,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRoleService, DaprRoleService>();
         services.AddScoped<IUserService, DaprUserService>();
         services.AddScoped<ITenantService, DaprTenantService>();
+        services.AddScoped<IDataPermissionService, DaprDataPermissionService>();
 
         return services;
     }

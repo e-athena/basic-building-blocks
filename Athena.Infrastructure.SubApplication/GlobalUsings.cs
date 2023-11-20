@@ -2,6 +2,7 @@
 
 global using System.ComponentModel;
 global using System.ComponentModel.DataAnnotations;
+global using System.Reflection;
 global using Athena.Infrastructure.Attributes;
 global using Athena.Infrastructure.Exceptions;
 global using Athena.Infrastructure.Helpers;

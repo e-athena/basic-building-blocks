@@ -22,6 +22,15 @@ public interface IUserService
     Task<List<UserCustomColumnModel>> GetUserCustomColumnsAsync(string userId, string appId, string moduleName);
 
     /// <summary>
+    /// 读取用户列权限
+    /// </summary>
+    /// <param name="appId"></param>
+    /// <param name="moduleName"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    Task<List<UserColumnPermissionModel>?> GetUserColumnPermissionsAsync(string? appId, string moduleName, string? userId);
+
+    /// <summary>
     /// 读取用户资源
     /// </summary>
     /// <param name="userId"></param>
@@ -77,4 +86,10 @@ public interface IUserService
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task<string> UpdateUserAsync(UpdateUserRequest request, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// 读取用户列表
+    /// </summary>
+    /// <returns></returns>
+    Task<List<SelectViewModel>> GetAllUserAsync(bool readFromCache = true);
 }

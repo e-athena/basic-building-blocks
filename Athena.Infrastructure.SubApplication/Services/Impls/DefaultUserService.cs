@@ -5,8 +5,16 @@ namespace Athena.Infrastructure.SubApplication.Services.Impls;
 /// </summary>
 public class DefaultUserService : DefaultServiceBase, IUserService
 {
-    public DefaultUserService(ISecurityContextAccessor accessor) : base(accessor)
+    private readonly ICacheManager _cacheManager;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="accessor"></param>
+    /// <param name="cacheManager"></param>
+    public DefaultUserService(ISecurityContextAccessor accessor, ICacheManager cacheManager) : base(accessor)
     {
+        _cacheManager = cacheManager;
     }
 
     /// <summary>
@@ -51,6 +59,33 @@ public class DefaultUserService : DefaultServiceBase, IUserService
         if (!result.Success || result.Data == null || result.Data.Count == 0)
         {
             return new List<UserCustomColumnModel>();
+        }
+
+        return result.Data;
+    }
+
+    /// <summary>
+    /// 读取用户列权限
+    /// </summary>
+    /// <param name="appId"></param>
+    /// <param name="moduleName"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    public async Task<List<UserColumnPermissionModel>?> GetUserColumnPermissionsAsync(string? appId, string moduleName,
+        string? userId)
+    {
+        const string url = "/api/SubApplication/GetUserColumnPermissions";
+        var result = await GetRequest(url)
+            .SetQueryParams(new
+            {
+                userId,
+                appId,
+                moduleName
+            })
+            .GetJsonAsync<ApiResult<List<UserColumnPermissionModel>>>();
+        if (!result.Success || result.Data == null || result.Data.Count == 0)
+        {
+            return new List<UserColumnPermissionModel>();
         }
 
         return result.Data;
@@ -196,5 +231,31 @@ public class DefaultUserService : DefaultServiceBase, IUserService
         }
 
         return result.Data;
+    }
+
+    /// <summary>
+    /// 读取用户列表
+    /// </summary>
+    /// <param name="readFromCache"></param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public async Task<List<SelectViewModel>> GetAllUserAsync(bool readFromCache = true)
+    {
+        if (!readFromCache)
+        {
+            return await Get();
+        }
+
+        const string cacheKey = "userService:GetAllUserAsync";
+        return await _cacheManager.GetOrCreateAsync(cacheKey, Get, TimeSpan.FromDays(1)) ?? new List<SelectViewModel>();
+
+        // 是否读取缓存
+        async Task<List<SelectViewModel>> Get()
+        {
+            const string url = "/api/SubApplication/GetUserSelectList";
+            var result = await GetRequest(url)
+                .GetJsonAsync<ApiResult<List<SelectViewModel>>>();
+            return result.Data ?? new List<SelectViewModel>();
+        }
     }
 }

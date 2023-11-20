@@ -11,6 +11,13 @@ public class DaprTenantService : ITenantService
     private readonly DaprClient _daprClient;
     private readonly ServiceCallConfig _config;
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="loggerFactory"></param>
+    /// <param name="cacheManager"></param>
+    /// <param name="options"></param>
+    /// <param name="daprClient"></param>
     public DaprTenantService(
         ILoggerFactory loggerFactory,
         ICacheManager cacheManager,
