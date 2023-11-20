@@ -2,6 +2,7 @@
 
 global using System.ComponentModel.DataAnnotations.Schema;
 global using System.Reflection;
+global using Athena.Infrastructure.Domain;
 global using Athena.Infrastructure.Event.DomainEvents;
 global using Athena.Infrastructure.Event.IntegrationEvents;
 global using Athena.Infrastructure.Helpers;

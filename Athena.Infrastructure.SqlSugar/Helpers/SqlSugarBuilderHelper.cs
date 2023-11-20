@@ -152,6 +152,15 @@ public static class SqlSugarBuilderHelper
                         column.DbTableName = ((TableAttribute) attributes.First(it => it is TableAttribute))
                             .Name;
                     }
+                },
+                SqlFuncServices = new List<SqlFuncExternal>
+                {
+                    new()
+                    {
+                        UniqueMethodName = "FormatSqlIn",
+                        MethodValue = (expInfo, dbType, expContext) =>
+                            $"{expInfo.Args[1].MemberName} IN ({expInfo.Args[0].MemberValue})"
+                    }
                 }
             },
             MoreSettings = new ConnMoreSettings()
@@ -160,5 +169,23 @@ public static class SqlSugarBuilderHelper
                 SqliteCodeFirstEnableDescription = true
             }
         };
+    }
+}
+
+/// <summary>
+///
+/// </summary>
+public static class DbFunc
+{
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="that"></param>
+    /// <param name="arg0"></param>
+    /// <returns></returns>
+    /// <exception cref="NotSupportedException"></exception>
+    public static bool FormatSqlIn(this string that, string arg0)
+    {
+        throw new NotSupportedException("Can only be used in expressions");
     }
 }

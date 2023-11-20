@@ -37,6 +37,16 @@ public interface IIntegrationEvent
     string EventName { get; set; }
 
     /// <summary>
+    /// 用户Id
+    /// </summary>
+    string? UserId { get; set; }
+
+    /// <summary>
+    /// 真实姓名
+    /// </summary>
+    string? RealName { get; set; }
+
+    /// <summary>
     /// 租户Id
     /// </summary>
     string? TenantId { get; set; }

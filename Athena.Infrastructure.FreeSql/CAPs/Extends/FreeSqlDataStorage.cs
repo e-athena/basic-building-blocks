@@ -2,11 +2,9 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System.Data.Common;
-using Athena.Infrastructure.FreeSql.CAPs.Extends.Models;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
-using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Serialization;
 using Microsoft.Extensions.Options;
 

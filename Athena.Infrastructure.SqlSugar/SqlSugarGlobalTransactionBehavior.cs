@@ -223,6 +223,8 @@ public class SqlSugarGlobalTransactionBehavior<TRequest, TResponse> : IPipelineB
 
             foreach (var @event in events)
             {
+                @event.UserId = _securityContextAccessor?.UserId;
+                @event.RealName = _securityContextAccessor?.RealName;
                 @event.TenantId = tenantId;
                 @event.AppId = appId;
                 @event.RootTraceId ??= rootTraceId;

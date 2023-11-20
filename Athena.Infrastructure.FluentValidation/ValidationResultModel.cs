@@ -35,7 +35,8 @@ public class ValidationResultModel
             .Select(error => new ValidationError(error.PropertyName, error.ErrorMessage))
             .ToList();
 
-        Message = Errors.Aggregate("", (current, error) => current + $"{error.Message};");
+        Message = Errors.Aggregate("", (current, error) => current + $"{error.Message}、");
+        Message = Message[..^1] + "，请检查！";
     }
 
     /// <summary>

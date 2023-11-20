@@ -1,8 +1,6 @@
 // Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-using Athena.Infrastructure.FreeSql.CAPs.Extends.Models;
-using DotNetCore.CAP.Persistence;
 using Microsoft.Extensions.Options;
 
 namespace Athena.Infrastructure.FreeSql.CAPs.Extends;

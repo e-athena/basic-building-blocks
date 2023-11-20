@@ -2,7 +2,6 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using Athena.Infrastructure.FreeSql.CAPs.Extends;
-using DotNetCore.CAP.Persistence;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP;

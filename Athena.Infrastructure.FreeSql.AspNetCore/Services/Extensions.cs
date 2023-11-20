@@ -83,6 +83,8 @@ public static class Extensions
         // 同步CAP两张表
         freeSql.CodeFirst.SyncStructure<Published>();
         freeSql.CodeFirst.SyncStructure<Received>();
+        freeSql.CodeFirst.SyncStructure<Lock>();
+        freeSql.CodeFirst.SyncStructure<OrganizationalUnitAuth>();
     }
 
     #endregion

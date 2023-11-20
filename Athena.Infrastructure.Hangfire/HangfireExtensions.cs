@@ -1,4 +1,3 @@
-using Athena.Infrastructure;
 using Athena.Infrastructure.CronJobs;
 using Athena.Infrastructure.Hangfire;
 using Hangfire;

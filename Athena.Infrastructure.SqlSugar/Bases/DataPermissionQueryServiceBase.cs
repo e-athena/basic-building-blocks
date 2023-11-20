@@ -239,16 +239,40 @@ public class DataPermissionQueryServiceBase<T> : QueryServiceBase<T> where T : F
         // 去重
         organizationIds = organizationIds.GroupBy(p => p).Select(p => p.Key).ToList();
 
-        foreach (var orgId in organizationIds)
+        filters.Add(new QueryFilter
         {
-            filters.Add(new QueryFilter
-            {
-                Key = "OrganizationalUnitIds",
-                Operator = "contains",
-                Value = orgId,
-                XOR = "or"
-            });
-        }
+            Key = "OrganizationalUnitIds",
+            Operator = "in",
+            Value = string.Join(",", organizationIds),
+            XOR = "or"
+        });
+
+        // 生成sql
+        var businessSql0 = DbContext.Queryable<OrganizationalUnitAuth>()
+            .AS("business_org_auths")
+            .Where(p => organizationIds.Contains(p.OrganizationalUnitId))
+            .Where(p => p.BusinessTable == typeof(TResult).Name)
+            .Select(p => p.BusinessId)
+            .ToSqlString();
+
+        filters.Add(new QueryFilter
+        {
+            Key = "Id",
+            Operator = "sub_query",
+            Value = businessSql0,
+            XOR = "or"
+        });
+
+        // foreach (var orgId in organizationIds)
+        // {
+        //     filters.Add(new QueryFilter
+        //     {
+        //         Key = "OrganizationalUnitIds",
+        //         Operator = "contains",
+        //         Value = orgId,
+        //         XOR = "or"
+        //     });
+        // }
 
         return QueryableExtensions.MakeFilterWhere<TResult>(filters);
     }

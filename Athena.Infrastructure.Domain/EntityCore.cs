@@ -116,3 +116,48 @@ public abstract class EntityCore : IAggregateRoot
         IntegrationEvents.Remove(eventItem);
     }
 }
+
+/// <summary>
+/// 组织架构数据权限
+/// </summary>
+[Table("business_org_auths")]
+public class OrganizationalUnitAuth : ValueObject
+{
+    /// <summary>
+    /// 组织ID
+    /// </summary>
+    [MaxLength(36)]
+    public string OrganizationalUnitId { get; set; } = null!;
+
+    /// <summary>
+    /// 业务ID
+    /// </summary>
+    [MaxLength(36)]
+    public string BusinessId { get; set; } = null!;
+
+    /// <summary>
+    /// 业务表
+    /// </summary>
+    [MaxLength(64)]
+    public string BusinessTable { get; set; } = null!;
+
+    /// <summary>
+    ///
+    /// </summary>
+    public OrganizationalUnitAuth()
+    {
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="organizationalUnitId"></param>
+    /// <param name="businessId"></param>
+    /// <param name="businessTable"></param>
+    public OrganizationalUnitAuth(string organizationalUnitId, string businessId, string businessTable)
+    {
+        OrganizationalUnitId = organizationalUnitId;
+        BusinessId = businessId;
+        BusinessTable = businessTable;
+    }
+}

@@ -1,6 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-using FreeSql.DataAnnotations;
-
 namespace Athena.Infrastructure.FreeSql.CAPs.Extends.Models;
 
 /// <summary>

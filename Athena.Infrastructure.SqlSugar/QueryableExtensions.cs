@@ -1024,7 +1024,7 @@ public static class QueryableExtensions
                 }
 
                 // 生成表达式
-                var lambda = parameter.GenerateLambda<TResult>(filter);
+                var lambda = parameter.CustomGenerateLambda<TResult>(filter);
                 groupLambda = filter.XOR switch
                 {
                     "or" => groupLambda.Or(lambda), //groupLambda.Or(lambda),
@@ -1077,7 +1077,7 @@ public static class QueryableExtensions
             }
 
             // 生成表达式
-            var lambda = parameter.GenerateLambda<TResult>(filter);
+            var lambda = parameter.CustomGenerateLambda<TResult>(filter);
             filterLambda = filter.XOR switch
             {
                 "or" => filterLambda.Or(lambda),
@@ -1139,5 +1139,29 @@ public static class QueryableExtensions
         PropertyCache.TryAdd(type, properties);
 
         return properties.Any(p => p.Name == propertyName);
+    }
+
+    /// <summary>
+    /// 生成lambda表达式
+    /// </summary>
+    /// <param name="parameterExpression"></param>
+    /// <param name="filter"></param>
+    /// <typeparam name="TResponse"></typeparam>
+    /// <returns></returns>
+    private static Expression<Func<TResponse, bool>> CustomGenerateLambda<TResponse>(
+        this ParameterExpression parameterExpression,
+        QueryFilter filter
+    )
+    {
+        if (filter.Operator != "sub_query")
+        {
+            return parameterExpression.GenerateLambda<TResponse>(filter);
+        }
+
+        var left = Expression.Constant(filter.Value);
+        var right = Expression.Property(parameterExpression, filter.Key);
+        var method = typeof(DbFunc).GetMethod("FormatSqlIn", new[] {typeof(string), typeof(string)});
+        var expression = Expression.Call(null, method!, left, right);
+        return Expression.Lambda<Func<TResponse, bool>>(expression, parameterExpression);
     }
 }

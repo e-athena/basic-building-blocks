@@ -7,6 +7,16 @@ namespace Athena.Infrastructure.Event.IntegrationEvents;
 public abstract class IntegrationEventBase : IIntegrationEvent
 {
     /// <summary>
+    /// 用户Id
+    /// </summary>
+    public string? UserId { get; set; }
+
+    /// <summary>
+    /// 真实姓名
+    /// </summary>
+    public string? RealName { get; set; }
+
+    /// <summary>
     /// 租户Id
     /// </summary>
     public string? TenantId { get; set; }

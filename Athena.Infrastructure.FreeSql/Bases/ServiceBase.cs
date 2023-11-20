@@ -1060,11 +1060,22 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
         }
 
         // 组织架构
-        if (typeof(IOrganization).IsAssignableFrom(typeof(TEntity)))
+        if (typeof(IOrganization).IsAssignableFrom(typeof(TEntity)) && !string.IsNullOrEmpty(OrganizationalUnitIds))
         {
+            var orgIds = OrganizationalUnitIds?
+                .Split(',')
+                .Select(orgId => new OrganizationalUnitAuth(orgId, entity.Id, typeof(TEntity).Name))
+                .ToList();
+
+            if (orgIds is {Count: > 1})
+            {
+                // 如果当前用户有多个组织架构，则批量新增关联信息，用于数据行权限
+                GetDefaultValueObjectRepository<OrganizationalUnitAuth>().InsertAsync(orgIds);
+            }
+
             // 动态设置组织架构
             typeof(TEntity).GetProperty(nameof(IOrganization.OrganizationalUnitIds))
-                ?.SetValue(entity, OrganizationalUnitIds);
+                ?.SetValue(entity, orgIds?.FirstOrDefault()?.OrganizationalUnitId);
         }
     }
 }

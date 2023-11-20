@@ -49,6 +49,16 @@ public abstract class EventBase : IDomainEvent, IIntegrationEvent
     public string EventName { get; set; }
 
     /// <summary>
+    /// 用户Id
+    /// </summary>
+    public string? UserId { get; set; }
+
+    /// <summary>
+    /// 真实姓名
+    /// </summary>
+    public string? RealName { get; set; }
+
+    /// <summary>
     /// 租户ID
     /// </summary>
     public string? TenantId { get; set; }

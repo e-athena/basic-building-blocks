@@ -37,8 +37,10 @@ public static class Extensions
                     var message = context.ModelState.Values
                         .SelectMany(v => v.Errors)
                         .Select(v => v.ErrorMessage)
-                        .Aggregate("", (current, error) => current + $"{error};");
+                        .Aggregate("", (current, error) => current + $"{error}、");
                     context.HttpContext.Response.StatusCode = 400;
+                    // message去掉最后一个、，添加，请检查！
+                    message = message[..^1] + "，请检查！";
                     return new JsonResult(new CustomBadRequestResult
                     {
                         Success = false,

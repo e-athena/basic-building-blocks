@@ -1,3 +1,5 @@
+using Athena.Infrastructure.DataPermission.Models;
+
 namespace Athena.Infrastructure.DataPermission.FreeSql;
 
 /// <summary>
@@ -140,14 +142,37 @@ public class QueryFilterServiceBase
                     // 设置了组织权限且查询到了数据
                     case {Value: "{SelfOrganizationId}", Key: "OrganizationId"} when selfOrganizationIds != null:
                         // 展开查询
-                        newFilters.AddRange(selfOrganizationIds
-                            .Select(organizationId => new QueryFilter
-                            {
-                                Key = "OrganizationalUnitIds",
-                                Operator = "contains",
-                                Value = organizationId,
-                                XOR = "or"
-                            }));
+                        // newFilters.AddRange(selfOrganizationIds
+                        //     .Select(organizationId => new QueryFilter
+                        //     {
+                        //         Key = "OrganizationalUnitIds",
+                        //         Operator = "contains",
+                        //         Value = organizationId,
+                        //         XOR = "or"
+                        //     }));
+
+                        newFilters.Add(new QueryFilter
+                        {
+                            Key = "OrganizationalUnitIds",
+                            Operator = "in",
+                            Value = string.Join(",", selfOrganizationIds),
+                            XOR = "or"
+                        });
+
+                        // 生成sql
+                        var businessSql0 = _freeSql.Select<OrganizationalUnitAuth>()
+                            .AsTable((_, _) => "business_org_auths")
+                            .Where(p => selfOrganizationIds.Contains(p.OrganizationalUnitId))
+                            .Where(p => p.BusinessTable == resourceKey)
+                            .ToSql(p => p.BusinessId);
+
+                        newFilters.Add(new QueryFilter
+                        {
+                            Key = "Id",
+                            Operator = "sub_query",
+                            Value = businessSql0,
+                            XOR = "or"
+                        });
                         continue;
                     // 设置了组织权限，但是没有组织数据
                     case {Value: "{SelfOrganizationId}", Key: "OrganizationId"}:
@@ -162,14 +187,36 @@ public class QueryFilterServiceBase
                     // 设置了组织权限且查询到了数据
                     case {Value: "{SelfOrganizationChildrenIds}", Key: "OrganizationId"}
                         when selfOrganizationChildrenIds != null:
-                        newFilters.AddRange(selfOrganizationChildrenIds
-                            .Select(organizationId => new QueryFilter
-                            {
-                                Key = "OrganizationalUnitIds",
-                                Operator = "contains",
-                                Value = organizationId,
-                                XOR = "or"
-                            }));
+                        // newFilters.AddRange(selfOrganizationChildrenIds
+                        //     .Select(organizationId => new QueryFilter
+                        //     {
+                        //         Key = "OrganizationalUnitIds",
+                        //         Operator = "contains",
+                        //         Value = organizationId,
+                        //         XOR = "or"
+                        //     }));
+                        newFilters.Add(new QueryFilter
+                        {
+                            Key = "OrganizationalUnitIds",
+                            Operator = "in",
+                            Value = string.Join(",", selfOrganizationChildrenIds),
+                            XOR = "or"
+                        });
+
+                        // 生成sql
+                        var businessSql = _freeSql.Select<OrganizationalUnitAuth>()
+                            .AsTable((_, _) => "business_org_auths")
+                            .Where(p => selfOrganizationChildrenIds.Contains(p.OrganizationalUnitId))
+                            .Where(p => p.BusinessTable == resourceKey)
+                            .ToSql(p => p.BusinessId);
+
+                        newFilters.Add(new QueryFilter
+                        {
+                            Key = "Id",
+                            Operator = "sub_query",
+                            Value = businessSql,
+                            XOR = "or"
+                        });
                         continue;
                     // 设置了组织权限，但是没有组织数据
                     case {Value: "{SelfOrganizationChildrenIds}", Key: "OrganizationId"}:

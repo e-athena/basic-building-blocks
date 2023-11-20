@@ -18,6 +18,7 @@ public static class Extensions
     {
         // 添加CAP的表
         SqlSugarClientHelper.AutoSyncCapMessageTable(sqlSugarClient);
+        sqlSugarClient.CodeFirst.InitTables(typeof(OrganizationalUnitAuth));
         sqlSugarClient.CodeFirst.InitTables(entityTypes);
     }
 
