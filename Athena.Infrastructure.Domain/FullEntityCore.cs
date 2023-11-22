@@ -3,6 +3,9 @@ namespace Athena.Infrastructure.Domain;
 /// <summary>
 /// 全功能实体
 /// </summary>
+[Index(nameof(IsDeleted), IsUnique = false)]
+[Index(nameof(TenantId), IsUnique = false)]
+[Index(nameof(TenantId), nameof(OrganizationalUnitId), IsUnique = false)]
 public class FullEntityCore : EntityCore, IFullCore
 {
     /// <summary>
@@ -39,11 +42,11 @@ public class FullEntityCore : EntityCore, IFullCore
     public string? DeletedUserId { get; set; }
 
     /// <summary>
-    /// 创建人组织架构Ids
+    /// 创建人组织架构Id
     /// </summary>
-    [MaxLength(-1)]
+    [MaxLength(36)]
     [FieldSort(999)]
-    public string? OrganizationalUnitIds { get; set; }
+    public string? OrganizationalUnitId { get; set; }
 
     /// <summary>
     /// 租户ID

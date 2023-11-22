@@ -9,6 +9,8 @@ namespace Athena.Infrastructure.Domain;
 /// <summary>
 /// Entity基类
 /// </summary>
+[Index(nameof(UpdatedOn), IsUnique = false)]
+[Index(nameof(CreatedOn), IsUnique = false)]
 public abstract class EntityCore : IAggregateRoot
 {
     /// <summary>
@@ -121,6 +123,8 @@ public abstract class EntityCore : IAggregateRoot
 /// 组织架构数据权限
 /// </summary>
 [Table("business_org_auths")]
+[Index(nameof(OrganizationalUnitId), IsUnique = false)]
+[Index(nameof(BusinessTable), nameof(BusinessId), IsUnique = false)]
 public class OrganizationalUnitAuth : ValueObject
 {
     /// <summary>

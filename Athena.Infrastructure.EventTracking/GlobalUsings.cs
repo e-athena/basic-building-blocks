@@ -8,4 +8,5 @@ global using Athena.Infrastructure.Enums;
 global using Athena.Infrastructure.EventTracking;
 global using Athena.Infrastructure.EventTracking.Aop;
 global using Athena.Infrastructure.EventTracking.Enums;
+global using Athena.Infrastructure.EventTracking.Messaging.Models;
 global using Athena.Infrastructure.EventTracking.Models;

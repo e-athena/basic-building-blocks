@@ -3,7 +3,7 @@ namespace Athena.Infrastructure.EventTracking.Messaging.Responses;
 /// <summary>
 /// 读取详情
 /// </summary>
-public class GetTrackConfigInfoResponse : TrackConfig
+public class GetTrackConfigInfoResponse : TrackConfigModel
 {
     /// <summary>
     /// 事件类型名称

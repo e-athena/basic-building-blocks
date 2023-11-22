@@ -4,7 +4,7 @@ namespace Athena.Infrastructure.FreeSql.CAPs.Extends.Models;
 /// 
 /// </summary>
 [Table(Name = CapConstant.ReceivedTableName)]
-// [Index("IX_Received_ExpiresAt", nameof(ExpiresAt), false)]
+[Domain.Attributes.Index(nameof(ExpiresAt), Name = "IX_Received_ExpiresAt", IsUnique = false)]
 public class Received
 {
     /// <summary>

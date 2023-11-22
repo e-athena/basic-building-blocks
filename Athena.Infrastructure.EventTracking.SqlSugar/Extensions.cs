@@ -55,6 +55,42 @@ public static class Extensions
                     dataType
                 ));
             sqlSugar.CodeFirst.InitTables(typeof(Track), typeof(TrackConfig));
+            const string trackIndexName = "IX_Track_TraceId";
+            // 检查是否存在
+            var isExists1 = sqlSugar.DbMaintenance.IsAnyIndex(trackIndexName);
+            // 如果不存在则添加
+            if (!isExists1)
+            {
+                // 添加索引
+                sqlSugar.DbMaintenance
+                    .CreateIndex(
+                        sqlSugar.DbMaintenance.Context.EntityMaintenance.GetTableName(typeof(Track)),
+                        new[]
+                        {
+                            "TraceId"
+                        },
+                        trackIndexName
+                    );
+            }
+
+            const string trackConfigIndexName = "IX_TrackConfig_ConfigId";
+            // 检查是否存在
+            var isExists2 = sqlSugar.DbMaintenance.IsAnyIndex(trackConfigIndexName);
+            // 如果不存在则添加
+            if (!isExists2)
+            {
+                // 添加索引
+                sqlSugar.DbMaintenance
+                    .CreateIndex(
+                        sqlSugar.DbMaintenance.Context.EntityMaintenance.GetTableName(typeof(TrackConfig)),
+                        new[]
+                        {
+                            "ConfigId"
+                        },
+                        trackConfigIndexName
+                    );
+            }
+
             return sqlSugar;
         });
         services.AddSingleton<ITrackService, TrackService>();

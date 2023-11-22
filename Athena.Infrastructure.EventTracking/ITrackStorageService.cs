@@ -1,4 +1,3 @@
-using Athena.Infrastructure.EventTracking.Messaging.Models;
 using Athena.Infrastructure.EventTracking.Messaging.Requests;
 using Athena.Infrastructure.EventTracking.Messaging.Responses;
 using Athena.Infrastructure.Messaging.Responses;
