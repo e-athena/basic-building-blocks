@@ -100,12 +100,13 @@ public class QueryFilterServiceBase
         IList<string>? selfOrganizationIds = null;
         // 有本部门及下级部门查询条件
         IList<string>? selfOrganizationChildrenIds = null;
-        // 读取基本权限
+        // 读取用户所在的组织
         if (hasSelfOrganizationId)
         {
             selfOrganizationIds = await _dataPermissionService.GetUserOrganizationIdsAsync(userId, appId);
         }
 
+        // 读取用户所在的组织及下级组织
         if (hasSelfOrganizationChildrenIds)
         {
             selfOrganizationChildrenIds =
@@ -145,7 +146,7 @@ public class QueryFilterServiceBase
                         // newFilters.AddRange(selfOrganizationIds
                         //     .Select(organizationId => new QueryFilter
                         //     {
-                        //         Key = "OrganizationalUnitIds",
+                        //         Key = "OrganizationalUnitId",
                         //         Operator = "contains",
                         //         Value = organizationId,
                         //         XOR = "or"
@@ -153,32 +154,40 @@ public class QueryFilterServiceBase
 
                         newFilters.Add(new QueryFilter
                         {
-                            Key = "OrganizationalUnitIds",
+                            Key = "OrganizationalUnitId",
                             Operator = "in",
                             Value = string.Join(",", selfOrganizationIds),
                             XOR = "or"
                         });
 
-                        // 生成sql
-                        var businessSql0 = _freeSql.Select<OrganizationalUnitAuth>()
-                            .AsTable((_, _) => "business_org_auths")
-                            .Where(p => selfOrganizationIds.Contains(p.OrganizationalUnitId))
-                            .Where(p => p.BusinessTable == resourceKey)
-                            .ToSql(p => p.BusinessId);
-
                         newFilters.Add(new QueryFilter
                         {
                             Key = "Id",
-                            Operator = "sub_query",
-                            Value = businessSql0,
+                            Operator = "boa_left_join",
+                            Value = string.Join(",", selfOrganizationIds),
                             XOR = "or"
                         });
+
+                        // // 生成sql
+                        // var businessSql0 = _freeSql.Select<OrganizationalUnitAuth>()
+                        //     .AsTable((_, _) => "business_org_auths")
+                        //     .Where(p => selfOrganizationIds.Contains(p.OrganizationalUnitId))
+                        //     .Where(p => p.BusinessTable == resourceKey)
+                        //     .ToSql(p => p.BusinessId);
+
+                        // newFilters.Add(new QueryFilter
+                        // {
+                        //     Key = "Id",
+                        //     Operator = "sub_query",
+                        //     Value = businessSql0,
+                        //     XOR = "or"
+                        // });
                         continue;
                     // 设置了组织权限，但是没有组织数据
                     case {Value: "{SelfOrganizationId}", Key: "OrganizationId"}:
                         newFilters.Add(new QueryFilter
                         {
-                            Key = "OrganizationalUnitIds",
+                            Key = "OrganizationalUnitId",
                             Operator = "==",
                             Value = "false",
                             XOR = "and"
@@ -190,39 +199,47 @@ public class QueryFilterServiceBase
                         // newFilters.AddRange(selfOrganizationChildrenIds
                         //     .Select(organizationId => new QueryFilter
                         //     {
-                        //         Key = "OrganizationalUnitIds",
+                        //         Key = "OrganizationalUnitId",
                         //         Operator = "contains",
                         //         Value = organizationId,
                         //         XOR = "or"
                         //     }));
                         newFilters.Add(new QueryFilter
                         {
-                            Key = "OrganizationalUnitIds",
+                            Key = "OrganizationalUnitId",
                             Operator = "in",
                             Value = string.Join(",", selfOrganizationChildrenIds),
                             XOR = "or"
                         });
 
-                        // 生成sql
-                        var businessSql = _freeSql.Select<OrganizationalUnitAuth>()
-                            .AsTable((_, _) => "business_org_auths")
-                            .Where(p => selfOrganizationChildrenIds.Contains(p.OrganizationalUnitId))
-                            .Where(p => p.BusinessTable == resourceKey)
-                            .ToSql(p => p.BusinessId);
-
                         newFilters.Add(new QueryFilter
                         {
                             Key = "Id",
-                            Operator = "sub_query",
-                            Value = businessSql,
+                            Operator = "boa_left_join",
+                            Value = string.Join(",", selfOrganizationChildrenIds),
                             XOR = "or"
                         });
+
+                        // // 生成sql
+                        // var businessSql = _freeSql.Select<OrganizationalUnitAuth>()
+                        //     .AsTable((_, _) => "business_org_auths")
+                        //     .Where(p => selfOrganizationChildrenIds.Contains(p.OrganizationalUnitId))
+                        //     .Where(p => p.BusinessTable == resourceKey)
+                        //     .ToSql(p => p.BusinessId);
+                        //
+                        // newFilters.Add(new QueryFilter
+                        // {
+                        //     Key = "Id",
+                        //     Operator = "sub_query",
+                        //     Value = businessSql,
+                        //     XOR = "or"
+                        // });
                         continue;
                     // 设置了组织权限，但是没有组织数据
                     case {Value: "{SelfOrganizationChildrenIds}", Key: "OrganizationId"}:
                         newFilters.Add(new QueryFilter
                         {
-                            Key = "OrganizationalUnitIds",
+                            Key = "OrganizationalUnitId",
                             Operator = "==",
                             Value = "false",
                             XOR = "and"

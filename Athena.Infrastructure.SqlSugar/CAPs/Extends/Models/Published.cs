@@ -7,7 +7,7 @@ namespace Athena.Infrastructure.SqlSugar.CAPs.Extends.Models;
 /// 
 /// </summary>
 [Table(CapConstant.PublishedTableName)]
-// [Index("IX_Published_ExpiresAt", nameof(ExpiresAt), false)]
+[Index(nameof(ExpiresAt), Name = "IX_Published_ExpiresAt", IsUnique = false)]
 public class Published
 {
     /// <summary>

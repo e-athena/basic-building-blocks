@@ -1,5 +1,3 @@
-using Athena.Infrastructure.DataPermission.Models;
-
 namespace Athena.Infrastructure.DataPermission.SqlSugar;
 
 /// <summary>
@@ -146,40 +144,47 @@ public class QueryFilterServiceBase
                         // newFilters.AddRange(selfOrganizationIds
                         //     .Select(organizationId => new QueryFilter
                         //     {
-                        //         Key = "OrganizationalUnitIds",
+                        //         Key = "OrganizationalUnitId",
                         //         Operator = "contains",
                         //         Value = organizationId,
                         //         XOR = "or"
                         //     }));
                         newFilters.Add(new QueryFilter
                         {
-                            Key = "OrganizationalUnitIds",
+                            Key = "OrganizationalUnitId",
                             Operator = "in",
                             Value = string.Join(",", selfOrganizationIds),
                             XOR = "or"
                         });
 
-                        // OrganizationalUnitAuth 生成sql
-                        var businessSql0 = _sqlSugarClient.Queryable<OrganizationalUnitAuth>()
-                            .AS("business_org_auths")
-                            .Where(p => selfOrganizationIds.Contains(p.OrganizationalUnitId))
-                            .Where(p => p.BusinessTable == resourceKey)
-                            .Select(p => p.BusinessId)
-                            .ToSqlString();
-
                         newFilters.Add(new QueryFilter
                         {
                             Key = "Id",
-                            Operator = "sub_query",
-                            Value = businessSql0,
+                            Operator = "boa_left_join",
+                            Value = string.Join(",", selfOrganizationIds),
                             XOR = "or"
                         });
+                        // // 生成sql
+                        // var businessSql0 = _sqlSugarClient.Queryable<OrganizationalUnitAuth>()
+                        //     .AS("business_org_auths")
+                        //     .Where(p => selfOrganizationIds.Contains(p.OrganizationalUnitId))
+                        //     .Where(p => p.BusinessTable == resourceKey)
+                        //     .Select(p => p.BusinessId)
+                        //     .ToSqlString();
+                        //
+                        // newFilters.Add(new QueryFilter
+                        // {
+                        //     Key = "Id",
+                        //     Operator = "sub_query",
+                        //     Value = businessSql0,
+                        //     XOR = "or"
+                        // });
                         continue;
                     // 设置了组织权限，但是没有组织数据
                     case {Value: "{SelfOrganizationId}", Key: "OrganizationId"}:
                         newFilters.Add(new QueryFilter
                         {
-                            Key = "OrganizationalUnitIds",
+                            Key = "OrganizationalUnitId",
                             Operator = "==",
                             Value = "false",
                             XOR = "and"
@@ -191,40 +196,47 @@ public class QueryFilterServiceBase
                         // newFilters.AddRange(selfOrganizationChildrenIds
                         //     .Select(organizationId => new QueryFilter
                         //     {
-                        //         Key = "OrganizationalUnitIds",
+                        //         Key = "OrganizationalUnitId",
                         //         Operator = "contains",
                         //         Value = organizationId,
                         //         XOR = "or"
                         //     }));
                         newFilters.Add(new QueryFilter
                         {
-                            Key = "OrganizationalUnitIds",
+                            Key = "OrganizationalUnitId",
                             Operator = "in",
                             Value = string.Join(",", selfOrganizationChildrenIds),
                             XOR = "or"
                         });
 
-                        // OrganizationalUnitAuth 生成sql
-                        var businessSql = _sqlSugarClient.Queryable<OrganizationalUnitAuth>()
-                            .AS("business_org_auths")
-                            .Where(p => selfOrganizationChildrenIds.Contains(p.OrganizationalUnitId))
-                            .Where(p => p.BusinessTable == resourceKey)
-                            .Select(p => p.BusinessId)
-                            .ToSqlString();
-
                         newFilters.Add(new QueryFilter
                         {
                             Key = "Id",
-                            Operator = "sub_query",
-                            Value = businessSql,
+                            Operator = "boa_left_join",
+                            Value = string.Join(",", selfOrganizationChildrenIds),
                             XOR = "or"
                         });
+                        // // 生成sql
+                        // var businessSql = _sqlSugarClient.Queryable<OrganizationalUnitAuth>()
+                        //     .AS("business_org_auths")
+                        //     .Where(p => selfOrganizationChildrenIds.Contains(p.OrganizationalUnitId))
+                        //     .Where(p => p.BusinessTable == resourceKey)
+                        //     .Select(p => p.BusinessId)
+                        //     .ToSqlString();
+                        //
+                        // newFilters.Add(new QueryFilter
+                        // {
+                        //     Key = "Id",
+                        //     Operator = "sub_query",
+                        //     Value = businessSql,
+                        //     XOR = "or"
+                        // });
                         continue;
                     // 设置了组织权限，但是没有组织数据
                     case {Value: "{SelfOrganizationChildrenIds}", Key: "OrganizationId"}:
                         newFilters.Add(new QueryFilter
                         {
-                            Key = "OrganizationalUnitIds",
+                            Key = "OrganizationalUnitId",
                             Operator = "==",
                             Value = "false",
                             XOR = "and"

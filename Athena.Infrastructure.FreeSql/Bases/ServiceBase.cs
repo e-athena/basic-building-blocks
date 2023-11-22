@@ -1074,7 +1074,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
             }
 
             // 动态设置组织架构
-            typeof(TEntity).GetProperty(nameof(IOrganization.OrganizationalUnitIds))
+            typeof(TEntity).GetProperty(nameof(IOrganization.OrganizationalUnitId))
                 ?.SetValue(entity, orgIds?.FirstOrDefault()?.OrganizationalUnitId);
         }
     }

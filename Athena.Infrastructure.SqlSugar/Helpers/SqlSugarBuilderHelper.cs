@@ -157,9 +157,20 @@ public static class SqlSugarBuilderHelper
                 {
                     new()
                     {
-                        UniqueMethodName = "FormatSqlIn",
-                        MethodValue = (expInfo, dbType, expContext) =>
+                        UniqueMethodName = "FormatSubQuery",
+                        MethodValue = (expInfo, _, _) =>
                             $"{expInfo.Args[1].MemberName} IN ({expInfo.Args[0].MemberValue})"
+                    },
+                    new()
+                    {
+                        UniqueMethodName = "FormatLeftJoin",
+                        MethodValue = (expInfo, _, _) =>
+                        {
+                            var thatValue = string.Join(',',
+                                expInfo.Args[0].MemberValue.ToString()!.Split(',').Select(p => $"'{p}'"));
+                            return $"boa.OrganizationalUnitId IN ({thatValue})";
+                            //$"{expInfo.Args[1].MemberName} IN ({expInfo.Args[0].MemberValue})";
+                        }
                     }
                 }
             },
@@ -184,7 +195,19 @@ public static class DbFunc
     /// <param name="arg0"></param>
     /// <returns></returns>
     /// <exception cref="NotSupportedException"></exception>
-    public static bool FormatSqlIn(this string that, string arg0)
+    public static bool FormatSubQuery(this string that, string arg0)
+    {
+        throw new NotSupportedException("Can only be used in expressions");
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="that"></param>
+    /// <param name="arg0"></param>
+    /// <returns></returns>
+    /// <exception cref="NotSupportedException"></exception>
+    public static bool FormatLeftJoin(this string that, string arg0)
     {
         throw new NotSupportedException("Can only be used in expressions");
     }

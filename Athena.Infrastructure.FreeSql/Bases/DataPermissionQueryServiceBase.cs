@@ -223,7 +223,7 @@ public class DataPermissionQueryServiceBase<T> : QueryServiceBase<T> where T : F
                 continue;
             }
 
-            if (!HasProperty<TResult>("OrganizationalUnitIds"))
+            if (!HasProperty<TResult>("OrganizationalUnitId"))
             {
                 continue;
             }
@@ -254,32 +254,40 @@ public class DataPermissionQueryServiceBase<T> : QueryServiceBase<T> where T : F
 
         filters.Add(new QueryFilter
         {
-            Key = "OrganizationalUnitIds",
+            Key = "OrganizationalUnitId",
             Operator = "in",
             Value = string.Join(",", organizationIds),
             XOR = "or"
         });
 
-        // 生成sql
-        var businessSql0 = FreeSqlDbContext.Select<OrganizationalUnitAuth>()
-            .AsTable((_, _) => "business_org_auths")
-            .Where(p => organizationIds.Contains(p.OrganizationalUnitId))
-            .Where(p => p.BusinessTable == typeof(TResult).Name)
-            .ToSql(p => p.BusinessId);
-
         filters.Add(new QueryFilter
         {
             Key = "Id",
-            Operator = "sub_query",
-            Value = businessSql0,
+            Operator = "boa_left_join",
+            Value = string.Join(",", organizationIds),
             XOR = "or"
         });
+
+        // // 生成sql
+        // var businessSql0 = FreeSqlDbContext.Select<OrganizationalUnitAuth>()
+        //     .AsTable((_, _) => "business_org_auths")
+        //     .Where(p => organizationIds.Contains(p.OrganizationalUnitId))
+        //     .Where(p => p.BusinessTable == typeof(TResult).Name)
+        //     .ToSql(p => p.BusinessId);
+        //
+        // filters.Add(new QueryFilter
+        // {
+        //     Key = "Id",
+        //     Operator = "sub_query",
+        //     Value = businessSql0,
+        //     XOR = "or"
+        // });
 
         // foreach (var orgId in organizationIds)
         // {
         //     filters.Add(new QueryFilter
         //     {
-        //         Key = "OrganizationalUnitIds",
+        //         Key = "OrganizationalUnitId",
         //         Operator = "contains",
         //         Value = orgId,
         //         XOR = "or"

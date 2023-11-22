@@ -612,6 +612,14 @@ public static class QueryableExtensions
             query = query.OrderBy(sorter);
         }
 
+        var sql = query.ToSql();
+        // 兼容组织架构数据权限查询
+        if (sql.Contains("boa.OrganizationalUnitId"))
+        {
+            query = query.LeftJoin(
+                $"business_org_auths boa on a.Id=boa.BusinessId and boa.BusinessTable='{typeof(T).Name}'");
+        }
+
         using var listActivity = FreeSqlOTelActivityManager.Instance.StartActivity("读取列表数据");
         listActivity?.SetTag("query.sql.text", query.ToSql());
         var result = hasLambda
@@ -1009,6 +1017,16 @@ public static class QueryableExtensions
             query = query.OrderBy(sorter);
         }
 
+        var sql = query.ToSql();
+        // 兼容组织架构数据权限查询
+        if (sql.Contains("boa.OrganizationalUnitId"))
+        {
+            query = query
+                .LeftJoin($"business_org_auths boa on a.Id=boa.BusinessId and boa.BusinessTable='{typeof(T).Name}'")
+                .GroupBy("a.Id");
+        }
+
+        // sql = query.ToSql();
         long totalItems;
         using (var countActivity = FreeSqlOTelActivityManager.Instance.StartActivity("读取总记录数"))
         {
@@ -1393,16 +1411,20 @@ public static class QueryableExtensions
         QueryFilter filter
     )
     {
-        if (filter.Operator != "sub_query")
+        switch (filter.Operator)
         {
-            return parameterExpression.GenerateLambda<TResponse>(filter);
+            case "boa_left_join":
+            case "sub_query":
+                var left = Expression.Constant(filter.Value);
+                var right = Expression.Property(parameterExpression, filter.Key);
+                var method = typeof(DbFunc).GetMethod(
+                    filter.Operator == "sub_query" ? "FormatSubQuery" : "FormatLeftJoin",
+                    new[] {typeof(string), typeof(string)});
+                var expression = Expression.Call(null, method!, left, right);
+                return Expression.Lambda<Func<TResponse, bool>>(expression, parameterExpression);
+            default:
+                return parameterExpression.GenerateLambda<TResponse>(filter);
         }
-
-        var left = Expression.Constant(filter.Value);
-        var right = Expression.Property(parameterExpression, filter.Key);
-        var method = typeof(DbFunc).GetMethod("FormatSqlIn", new[] {typeof(string), typeof(string)});
-        var expression = Expression.Call(null, method!, left, right);
-        return Expression.Lambda<Func<TResponse, bool>>(expression, parameterExpression);
     }
 }
 
@@ -1421,14 +1443,37 @@ public static class DbFunc
     /// <param name="that"></param>
     /// <param name="arg1"></param>
     /// <returns></returns>
-    public static bool FormatSqlIn(this string that, string arg1)
+    public static bool FormatSubQuery(this string that, string arg1)
     {
         var up = Context.Value;
-        if (up != null)
+        if (up == null)
         {
-            // 重写内容
-            up.Result = $"(({up.ParsedContent["arg1"]}) IN ({that}))";
+            return true;
         }
+
+        // 重写内容
+        up.Result = $"(({up.ParsedContent["arg1"]}) IN ({that}))";
+        return true;
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="that"></param>
+    /// <param name="arg1"></param>
+    /// <returns></returns>
+    public static bool FormatLeftJoin(this string that, string arg1)
+    {
+        var up = Context.Value;
+        if (up == null)
+        {
+            return true;
+        }
+
+        // 将that转成值，例：a,b,c -> 'a','b','c'
+        var thatValue = string.Join(',', that.Split(',').Select(p => $"'{p}'"));
+        // 重写内容
+        up.Result = $"boa.OrganizationalUnitId IN ({thatValue})";
 
         return true;
     }

@@ -429,7 +429,17 @@ public static class QueryableExtensions
         var hasLambda = funcExpression != null;
         if (sorter != null)
         {
-            query = query.OrderBy(sorter);
+            query = query.OrderBy(sorter.Replace("a.", ""));
+        }
+
+        query = query.AS(query.Context.EntityMaintenance.GetTableName(typeof(T)), "x");
+        var sql = query.ToSqlString();
+        // 兼容组织架构数据权限查询
+        if (sql.Contains("boa.OrganizationalUnitId"))
+        {
+            query = query.AddJoinInfo("business_org_auths", "boa",
+                    $"x.Id=boa.BusinessId and boa.BusinessTable='{typeof(T).Name}'")
+                .GroupBy("x.Id");
         }
 
         var result = hasLambda
@@ -819,6 +829,18 @@ public static class QueryableExtensions
             query = query.OrderBy(sorter.Replace("a.", ""));
         }
 
+        query = query.AS(query.Context.EntityMaintenance.GetTableName(typeof(T)), "x");
+
+        var sql = query.ToSqlString();
+        // 兼容组织架构数据权限查询
+        if (sql.Contains("boa.OrganizationalUnitId"))
+        {
+            query = query.AddJoinInfo("business_org_auths", "boa",
+                    $"x.Id=boa.BusinessId and boa.BusinessTable='{typeof(T).Name}'")
+                .GroupBy("x.Id");
+        }
+
+        // sql = query.Select<TResult>().ToSqlString();
         long totalItems = await query.CountAsync(cancellationToken);
         var totalPages = totalItems != 0
             ? totalItems % pageSize == 0 ? totalItems / pageSize : totalItems / pageSize + 1
@@ -1153,15 +1175,19 @@ public static class QueryableExtensions
         QueryFilter filter
     )
     {
-        if (filter.Operator != "sub_query")
+        switch (filter.Operator)
         {
-            return parameterExpression.GenerateLambda<TResponse>(filter);
+            case "boa_left_join":
+            case "sub_query":
+                var left = Expression.Constant(filter.Value);
+                var right = Expression.Property(parameterExpression, filter.Key);
+                var method = typeof(DbFunc).GetMethod(
+                    filter.Operator == "sub_query" ? "FormatSubQuery" : "FormatLeftJoin",
+                    new[] {typeof(string), typeof(string)});
+                var expression = Expression.Call(null, method!, left, right);
+                return Expression.Lambda<Func<TResponse, bool>>(expression, parameterExpression);
+            default:
+                return parameterExpression.GenerateLambda<TResponse>(filter);
         }
-
-        var left = Expression.Constant(filter.Value);
-        var right = Expression.Property(parameterExpression, filter.Key);
-        var method = typeof(DbFunc).GetMethod("FormatSqlIn", new[] {typeof(string), typeof(string)});
-        var expression = Expression.Call(null, method!, left, right);
-        return Expression.Lambda<Func<TResponse, bool>>(expression, parameterExpression);
     }
 }

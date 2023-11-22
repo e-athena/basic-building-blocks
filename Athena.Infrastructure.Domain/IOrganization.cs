@@ -6,8 +6,7 @@ namespace Athena.Infrastructure.Domain;
 public interface IOrganization
 {
     /// <summary>
-    /// 所属组织机构Ids
-    /// <remarks>多个用逗号分割</remarks>
+    /// 组织机构Id
     /// </summary>
-    public string? OrganizationalUnitIds { get; set; }
+    public string? OrganizationalUnitId { get; set; }
 }

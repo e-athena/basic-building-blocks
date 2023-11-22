@@ -12,14 +12,18 @@ public static class SqlSugarClientHelper
     /// </summary>
     /// <param name="client"></param>
     /// <param name="version"></param>
-    public static void AutoSyncCapMessageTable(ISqlSugarClient client, string version = "v1")
+    /// <param name="isCodeFirst"></param>
+    public static void AutoSyncCapMessageTable(ISqlSugarClient client, string version = "v1", bool isCodeFirst = true)
     {
-        client.CodeFirst.InitTables(new[]
+        if (isCodeFirst)
         {
-            typeof(Published),
-            typeof(Received),
-            typeof(Lock)
-        });
+            client.CodeFirst.InitTables(new[]
+            {
+                typeof(Published),
+                typeof(Received),
+                typeof(Lock)
+            });
+        }
 
         // 添加锁
         var key1 = $"publish_retry_{version}";

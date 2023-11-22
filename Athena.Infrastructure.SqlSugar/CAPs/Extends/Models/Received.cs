@@ -7,6 +7,7 @@ namespace Athena.Infrastructure.SqlSugar.CAPs.Extends.Models;
 /// 
 /// </summary>
 [Table(CapConstant.ReceivedTableName)]
+[Index(nameof(ExpiresAt), Name = "IX_Received_ExpiresAt", IsUnique = false)]
 public class Received
 {
     /// <summary>
