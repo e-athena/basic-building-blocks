@@ -16,6 +16,11 @@ public class QueryServiceBase<T> where T : class
     /// </summary>
     protected const string OtherTenant = "other_tenant";
 
+    /// <summary>
+    ///
+    /// </summary>
+    protected const string SoftDelete = "soft_delete";
+
     private readonly ISecurityContextAccessor? _accessor;
     private readonly FreeSqlMultiTenancy? _multiTenancy;
 
@@ -126,7 +131,6 @@ public class QueryServiceBase<T> where T : class
         }
     }
 
-
     /// <summary>
     /// 主租户查询
     /// </summary>
@@ -170,8 +174,21 @@ public class QueryServiceBase<T> where T : class
 
     /// <summary>
     /// 查询对象
+    /// <remarks>软删除的数据也会被查询出来</remarks>
+    /// </summary>
+    protected virtual ISelect<T> QueryableWithSoftDelete => Queryable.DisableGlobalFilter(SoftDelete);
+
+    /// <summary>
+    /// 查询对象
     /// </summary>
     protected virtual ISelect<T> QueryableNoTracking => Queryable.NoTracking();
+
+    /// <summary>
+    /// 查询对象
+    /// <remarks>软删除的数据也会被查询出来</remarks>
+    /// </summary>
+    protected virtual ISelect<T> QueryableNoTrackingWithSoftDelete =>
+        QueryableNoTracking.DisableGlobalFilter(SoftDelete);
 
     /// <summary>
     /// 查询对象
@@ -183,10 +200,28 @@ public class QueryServiceBase<T> where T : class
 
     /// <summary>
     /// 查询对象
+    /// <remarks>软删除的数据也会被查询出来</remarks>
+    /// </summary>
+    protected virtual ISelect<T> QueryWithSoftDelete()
+    {
+        return Query().DisableGlobalFilter(SoftDelete);
+    }
+
+    /// <summary>
+    /// 查询对象
     /// </summary>
     protected virtual ISelect<T> QueryNoTracking()
     {
         return Query().NoTracking();
+    }
+
+    /// <summary>
+    /// 查询对象
+    /// <remarks>软删除的数据也会被查询出来</remarks>
+    /// </summary>
+    protected virtual ISelect<T> QueryNoTrackingWithSoftDelete()
+    {
+        return QueryNoTracking().DisableGlobalFilter(SoftDelete);
     }
 
     /// <summary>
@@ -207,10 +242,28 @@ public class QueryServiceBase<T> where T : class
 
     /// <summary>
     /// 查询对象
+    /// <remarks>软删除的数据也会被查询出来</remarks>
+    /// </summary>
+    protected virtual ISelect<T1> QueryWithSoftDelete<T1>() where T1 : class
+    {
+        return Query<T1>().DisableGlobalFilter(SoftDelete);
+    }
+
+    /// <summary>
+    /// 查询对象
     /// </summary>
     protected virtual ISelect<T1> QueryNoTracking<T1>() where T1 : class
     {
         return Query<T1>().NoTracking();
+    }
+
+    /// <summary>
+    /// 查询对象
+    /// <remarks>软删除的数据也会被查询出来</remarks>
+    /// </summary>
+    protected virtual ISelect<T1> QueryNoTrackingWithSoftDelete<T1>() where T1 : class
+    {
+        return QueryNoTracking<T1>().DisableGlobalFilter(SoftDelete);
     }
 
     // 全局过滤器处理
@@ -228,6 +281,11 @@ public class QueryServiceBase<T> where T : class
                 OtherTenant,
                 () => !string.IsNullOrEmpty(TenantId),
                 p => p.TenantId == TenantId,
+                true
+            )
+            .Apply<ISoftDelete>(
+                SoftDelete,
+                p => !p.IsDeleted,
                 true
             );
     }

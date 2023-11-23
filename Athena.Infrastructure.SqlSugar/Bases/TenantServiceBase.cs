@@ -30,6 +30,15 @@ public class TenantServiceBase<T> : ServiceBase<T> where T : EntityCore, new()
     /// <summary>
     /// 切换租户
     /// </summary>
+    /// <param name="eventBase"></param>
+    protected void ChangeTenant(EventBase eventBase)
+    {
+        ChangeTenant(eventBase.TenantId, eventBase.AppId);
+    }
+
+    /// <summary>
+    /// 切换租户
+    /// </summary>
     /// <param name="tenantId"></param>
     /// <param name="appId"></param>
     private void ChangeTenant(string? tenantId, string? appId)
@@ -63,6 +72,21 @@ public class TenantServiceBase<T> : ServiceBase<T> where T : EntityCore, new()
     /// <summary>
     /// 使用事务
     /// </summary>
+    /// <param name="eventBase"></param>
+    /// <param name="action"></param>
+    /// <returns></returns>
+    /// <exception cref="FriendlyException"></exception>
+    protected Task UseTransactionAsync(
+        EventBase eventBase,
+        Func<Task> action
+    )
+    {
+        return UseTransactionAsync(eventBase.TenantId, eventBase.AppId, action);
+    }
+
+    /// <summary>
+    /// 使用事务
+    /// </summary>
     /// <param name="tenantId">租户Id</param>
     /// <param name="appId"></param>
     /// <param name="action"></param>
@@ -80,20 +104,30 @@ public class TenantServiceBase<T> : ServiceBase<T> where T : EntityCore, new()
         }
 
         ChangeTenant(tenantId, appId);
-        using var uow = _sqlSugarClient.CreateContext();
+        var uow = _sqlSugarClient.CreateContext();
         try
         {
             // 执行方法
             await action();
             uow.Commit();
         }
-        catch (FriendlyException)
+        catch (FriendlyException ex)
         {
+            _logger.LogInformation(ex,
+                "{Type},{Method},{Message}",
+                GetType().Name,
+                nameof(UseTransactionAsync),
+                ex.Message);
             throw;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Message}", ex.Message);
+            _logger.LogError(ex,
+                "{Type},{Method},{Message}",
+                GetType().Name,
+                nameof(UseTransactionAsync),
+                ex.Message
+            );
             throw;
         }
         finally

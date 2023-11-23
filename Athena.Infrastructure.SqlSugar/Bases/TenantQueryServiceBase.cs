@@ -24,6 +24,15 @@ public class TenantQueryServiceBase<T> : QueryServiceBase<T> where T : class, ne
     /// <summary>
     /// 切换租户
     /// </summary>
+    /// <param name="eventBase"></param>
+    protected void ChangeTenant(EventBase eventBase)
+    {
+        ChangeTenant(eventBase.TenantId, eventBase.AppId);
+    }
+
+    /// <summary>
+    /// 切换租户
+    /// </summary>
     /// <param name="tenantId">租户Id</param>
     /// <param name="appId">应用ID</param>
     protected void ChangeTenant(string? tenantId, string? appId)

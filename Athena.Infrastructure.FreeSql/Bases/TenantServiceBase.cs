@@ -51,6 +51,15 @@ public class TenantServiceBase<T> : ServiceBase<T> where T : EntityCore, new()
     /// <summary>
     /// 切换租户
     /// </summary>
+    /// <param name="eventBase"></param>
+    protected void ChangeTenant(EventBase eventBase)
+    {
+        ChangeTenant(eventBase.TenantId, eventBase.AppId);
+    }
+
+    /// <summary>
+    /// 切换租户
+    /// </summary>
     /// <param name="tenantId">租户ID</param>
     /// <param name="appId">应用ID</param>
     private void ChangeTenant(string? tenantId, string? appId)
@@ -83,6 +92,24 @@ public class TenantServiceBase<T> : ServiceBase<T> where T : EntityCore, new()
         SetUnitOfWorkManager(_cloud.GetUnitOfWorkManager(tenantId));
     }
 
+    /// <summary>
+    /// 使用事务
+    /// </summary>
+    /// <param name="eventBase"></param>
+    /// <param name="action"></param>
+    /// <param name="propagation"></param>
+    /// <param name="isolationLevel"></param>
+    /// <returns></returns>
+    /// <exception cref="FriendlyException"></exception>
+    protected Task UseTransactionAsync(
+        EventBase eventBase,
+        Func<Task> action,
+        Propagation propagation = Propagation.Required,
+        IsolationLevel? isolationLevel = null
+    )
+    {
+        return UseTransactionAsync(eventBase.TenantId, eventBase.AppId, action, propagation, isolationLevel);
+    }
 
     /// <summary>
     /// 使用事务
@@ -115,19 +142,36 @@ public class TenantServiceBase<T> : ServiceBase<T> where T : EntityCore, new()
             await action();
             uow.Commit();
         }
-        catch (FriendlyException)
+        catch (FriendlyException ex)
         {
+            _logger.LogInformation(ex,
+                "{Type},{Method},{Message}",
+                GetType().Name,
+                nameof(UseTransactionAsync),
+                ex.Message
+            );
             uow.Rollback();
             throw;
         }
-        catch (DbUpdateVersionException)
+        catch (DbUpdateVersionException ex)
         {
+            _logger.LogInformation(ex,
+                "{Type},{Method},{Message}",
+                GetType().Name,
+                nameof(UseTransactionAsync),
+                ex.Message
+            );
             uow.Rollback();
             throw FriendlyException.Of("数据已被修改，请刷新后重试");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Message}", ex.Message);
+            _logger.LogError(ex,
+                "{Type},{Method},{Message}",
+                GetType().Name,
+                nameof(UseTransactionAsync),
+                ex.Message
+            );
             uow.Rollback();
             throw;
         }

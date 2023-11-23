@@ -7,6 +7,7 @@ namespace Athena.Infrastructure.SqlSugar.Bases;
 public class DataPermissionServiceBase<T> : ServiceBase<T> where T : FullEntityCore, new()
 {
     private readonly IDataPermissionService? _dataPermissionService;
+    private readonly ISecurityContextAccessor _accessor;
 
     /// <summary>
     /// 
@@ -16,6 +17,7 @@ public class DataPermissionServiceBase<T> : ServiceBase<T> where T : FullEntityC
     public DataPermissionServiceBase(ISqlSugarClient sqlSugarClient, ISecurityContextAccessor accessor) :
         base(sqlSugarClient, accessor)
     {
+        _accessor = accessor;
         _dataPermissionService =
             AthenaProvider.Provider?.GetService(typeof(IDataPermissionService)) as IDataPermissionService;
     }
@@ -50,6 +52,6 @@ public class DataPermissionServiceBase<T> : ServiceBase<T> where T : FullEntityC
             return new List<string>();
         }
 
-        return _dataPermissionService.GetUserOrganizationIds(userId, null);
+        return _dataPermissionService.GetUserOrganizationIds(userId, _accessor.AppId);
     }
 }

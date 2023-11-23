@@ -20,4 +20,20 @@ public class ValueObject
     /// </summary>
     [Required]
     public DateTime CreatedOn { get; set; } = DateTime.Now;
+
+    /// <summary>
+    ///
+    /// </summary>
+    public ValueObject()
+    {
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="id"></param>
+    public ValueObject(long id)
+    {
+        Id = id;
+    }
 }

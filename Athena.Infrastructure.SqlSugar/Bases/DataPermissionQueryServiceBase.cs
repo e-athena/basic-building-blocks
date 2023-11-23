@@ -7,6 +7,7 @@ namespace Athena.Infrastructure.SqlSugar.Bases;
 public class DataPermissionQueryServiceBase<T> : QueryServiceBase<T> where T : FullEntityCore, new()
 {
     private readonly IDataPermissionService? _dataPermissionService;
+    private readonly ISecurityContextAccessor _accessor;
 
     /// <summary>
     /// 
@@ -18,6 +19,7 @@ public class DataPermissionQueryServiceBase<T> : QueryServiceBase<T> where T : F
         ISecurityContextAccessor accessor
     ) : base(sqlSugarClient, accessor)
     {
+        _accessor = accessor;
         _dataPermissionService =
             AthenaProvider.Provider?.GetService(typeof(IDataPermissionService)) as IDataPermissionService;
     }
@@ -300,7 +302,7 @@ public class DataPermissionQueryServiceBase<T> : QueryServiceBase<T> where T : F
             return new List<string>();
         }
 
-        return _dataPermissionService.GetUserOrganizationIds(userId, null);
+        return _dataPermissionService.GetUserOrganizationIds(userId, _accessor.AppId);
     }
 
     /// <summary>
@@ -316,7 +318,7 @@ public class DataPermissionQueryServiceBase<T> : QueryServiceBase<T> where T : F
             return new List<string>();
         }
 
-        return _dataPermissionService.GetUserOrganizationIdsTree(userId, null);
+        return _dataPermissionService.GetUserOrganizationIdsTree(userId, _accessor.AppId);
     }
 
     /// <summary>
@@ -332,7 +334,7 @@ public class DataPermissionQueryServiceBase<T> : QueryServiceBase<T> where T : F
             return new List<Athena.Infrastructure.DataPermission.Models.DataPermission>();
         }
 
-        return _dataPermissionService.GetUserDataScopes(userId, null);
+        return _dataPermissionService.GetUserDataScopes(userId, _accessor.AppId);
     }
 
     #endregion

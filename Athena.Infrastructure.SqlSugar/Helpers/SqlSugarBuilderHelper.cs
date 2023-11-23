@@ -119,6 +119,13 @@ public static class SqlSugarBuilderHelper
                         column.IsPrimarykey = true;
                     }
 
+                    // // 如果是DatabaseGeneratedAttribute，则设置为自增列
+                    // if (attributes.Any(it => it is KeyAttribute) &&
+                    //     attributes.Any(it => it is DatabaseGeneratedAttribute))
+                    // {
+                    //     column.IsIdentity = true;
+                    // }
+
                     if (attributes.Any(it => it is RowVersionAttribute))
                     {
                         column.IsEnableUpdateVersionValidation = true;

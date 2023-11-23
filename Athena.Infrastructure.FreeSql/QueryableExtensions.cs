@@ -1021,9 +1021,22 @@ public static class QueryableExtensions
         // 兼容组织架构数据权限查询
         if (sql.Contains("boa.OrganizationalUnitId"))
         {
-            query = query
-                .LeftJoin($"business_org_auths boa on a.Id=boa.BusinessId and boa.BusinessTable='{typeof(T).Name}'")
-                .GroupBy("a.Id");
+            var parameter = Expression.Parameter(typeof(T), "p");
+            var parameter2 = Expression.Parameter(typeof(OrganizationalUnitAuth), "boa");
+            var left = Expression.Property(parameter, "Id");
+            var left2 = Expression.Property(parameter2, "BusinessId");
+            var right = Expression.Property(parameter2, "BusinessTable");
+            var right2 = Expression.Constant(typeof(T).Name);
+            var equal = Expression.Equal(left, left2);
+            var equal2 = Expression.Equal(right, right2);
+            var and = Expression.AndAlso(equal, equal2);
+            var lambda = Expression.Lambda<Func<T, OrganizationalUnitAuth, bool>>(and, parameter, parameter2);
+
+            query = query.InnerJoin(lambda).GroupBy("a.Id");
+
+            // query = query
+            //     .InnerJoin($"business_org_auths boa on a.Id=boa.BusinessId and boa.BusinessTable='{typeof(T).Name}'")
+            //     .GroupBy("a.Id");
         }
 
         // sql = query.ToSql();

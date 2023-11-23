@@ -130,8 +130,20 @@ public class QueryServiceBase<T> where T : class, new()
 
     /// <summary>
     /// 查询对象
+    /// <remarks>软删除的数据也会被查询出来</remarks>
+    /// </summary>
+    protected virtual ISugarQueryable<T> QueryableWithSoftDelete => Queryable.ClearFilter<ISoftDelete>();
+
+    /// <summary>
+    /// 查询对象
     /// </summary>
     protected virtual ISugarQueryable<T> QueryableNoTracking => Queryable;
+
+    /// <summary>
+    /// 查询对象
+    /// </summary>
+    protected virtual ISugarQueryable<T> QueryableNoTrackingWithSoftDelete =>
+        QueryableNoTracking.ClearFilter<ISoftDelete>();
 
     /// <summary>
     /// 查询对象
@@ -144,9 +156,25 @@ public class QueryServiceBase<T> where T : class, new()
     /// <summary>
     /// 查询对象
     /// </summary>
+    protected virtual ISugarQueryable<T> QueryWithSoftDelete()
+    {
+        return Query().ClearFilter<ISoftDelete>();
+    }
+
+    /// <summary>
+    /// 查询对象
+    /// </summary>
     protected virtual ISugarQueryable<T> QueryNoTracking()
     {
         return Query();
+    }
+
+    /// <summary>
+    /// 查询对象
+    /// </summary>
+    protected virtual ISugarQueryable<T> QueryNoTrackingWithSoftDelete()
+    {
+        return QueryNoTracking().ClearFilter<ISoftDelete>();
     }
 
     /// <summary>
@@ -168,19 +196,30 @@ public class QueryServiceBase<T> where T : class, new()
     /// <summary>
     /// 查询对象
     /// </summary>
+    protected virtual ISugarQueryable<T1> QueryWithSoftDelete<T1>() where T1 : class, new()
+    {
+        return Query<T1>().ClearFilter<ISoftDelete>();
+    }
+
+    /// <summary>
+    /// 查询对象
+    /// </summary>
     protected virtual ISugarQueryable<T1> QueryNoTracking<T1>() where T1 : class, new()
     {
         return Query<T1>();
     }
 
+    /// <summary>
+    /// 查询对象
+    /// </summary>
+    protected virtual ISugarQueryable<T1> QueryNoTrackingWithSoftDelete<T1>() where T1 : class, new()
+    {
+        return QueryNoTracking<T1>().ClearFilter<ISoftDelete>();
+    }
+
     // 全局过滤器处理
     private void GlobalFilterHandler()
     {
-        // DbContext.QueryFilter.AddTableFilter<ITenant>(
-        //     // !string.IsNullOrEmpty(TenantId),
-        //     p => p.TenantId == TenantId,
-        //     QueryFilterProvider.FilterJoinPosition.Where
-        // );
         DbContext
             .QueryFilter
             .AddTableFilterIF<ITenant>(
@@ -191,6 +230,15 @@ public class QueryServiceBase<T> where T : class, new()
             .AddTableFilterIF<ITenant>(
                 !string.IsNullOrEmpty(TenantId),
                 p => p.TenantId == TenantId,
+                QueryFilterProvider.FilterJoinPosition.Where
+            )
+            // .Add(new SqlFilterItem
+            // {
+            //     FilterValue = _ => new SqlFilterResult {Sql = "x.IsDeleted==0"},
+            //     FilterName = "SoftDelete"
+            // });
+            .AddTableFilter<ISoftDelete>(
+                p => p.IsDeleted == false,
                 QueryFilterProvider.FilterJoinPosition.Where
             );
     }

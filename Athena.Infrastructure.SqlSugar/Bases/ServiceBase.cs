@@ -1,3 +1,4 @@
+using DotNetCore.CAP.Internal;
 using ITenant = Athena.Infrastructure.Domain.ITenant;
 
 namespace Athena.Infrastructure.SqlSugar.Bases;
@@ -12,6 +13,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
     private const string IntegrationEventKey = "IntegrationEvent";
     private ConcurrentDictionary<string, object?>? _repositories;
     private readonly ISqlSugarClient? _sqlSugarClient;
+    private readonly ISnowflakeId? _snowflakeId;
 
     /// <summary>
     /// 
@@ -20,6 +22,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
     public ServiceBase(ISqlSugarClient sqlSugarClient) : base(sqlSugarClient)
     {
         _sqlSugarClient = sqlSugarClient;
+        _snowflakeId = AthenaProvider.GetService<ISnowflakeId>();
     }
 
     /// <summary>
@@ -31,6 +34,19 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
         base(sqlSugarClient, accessor)
     {
         _sqlSugarClient = sqlSugarClient;
+        _snowflakeId = AthenaProvider.GetService<ISnowflakeId>();
+    }
+
+    /// <summary>
+    /// 读取信息
+    /// </summary>
+    /// <param name="id">ID</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    /// <exception cref="FriendlyException"></exception>
+    protected Task<T> GetAsync(string? id, CancellationToken cancellationToken = default)
+    {
+        return GetAsync<T>(id, "数据", cancellationToken);
     }
 
     /// <summary>
@@ -45,6 +61,20 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
         where TEntity : EntityCore, new()
     {
         return GetAsync<TEntity>(id, "数据", cancellationToken);
+    }
+
+    /// <summary>
+    /// 读取信息
+    /// </summary>
+    /// <param name="id">ID</param>
+    /// <param name="name">名称</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    /// <exception cref="FriendlyException"></exception>
+    protected Task<T> GetAsync(string? id, string name,
+        CancellationToken cancellationToken = default)
+    {
+        return GetAsync<T>(id, name, cancellationToken);
     }
 
     /// <summary>
@@ -83,6 +113,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     /// <exception cref="FriendlyException"></exception>
+    [Obsolete("请使用GetAsync方法")]
     protected Task<T> GetForUpdateAsync(string? id, CancellationToken cancellationToken = default)
     {
         return GetForUpdateAsync(id, "数据", cancellationToken);
@@ -96,6 +127,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     /// <exception cref="FriendlyException"></exception>
+    [Obsolete("请使用GetAsync方法")]
     protected async Task<T> GetForUpdateAsync(string? id, string name, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(id))
@@ -125,10 +157,24 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
     /// <summary>
     /// 查询对象
     /// </summary>
+    protected override ISugarQueryable<T> QueryableWithSoftDelete => Queryable.ClearFilter<ISoftDelete>();
+
+    /// <summary>
+    /// 查询对象
+    /// </summary>
     /// <returns></returns>
     protected override ISugarQueryable<T> Query()
     {
         return Queryable;
+    }
+
+    /// <summary>
+    /// 查询对象
+    /// </summary>
+    /// <returns></returns>
+    protected override ISugarQueryable<T> QueryWithSoftDelete()
+    {
+        return Query().ClearFilter<ISoftDelete>();
     }
 
     /// <summary>
@@ -139,6 +185,16 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
     protected override ISugarQueryable<T1> Query<T1>()
     {
         return GetOtherRepository<T1>().AsQueryable();
+    }
+
+    /// <summary>
+    /// 查询对象
+    /// </summary>
+    /// <typeparam name="T1"></typeparam>
+    /// <returns></returns>
+    protected override ISugarQueryable<T1> QueryWithSoftDelete<T1>()
+    {
+        return Query<T1>().ClearFilter<ISoftDelete>();
     }
 
     #endregion
@@ -609,7 +665,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
 
     #endregion
 
-    #region 删除
+    #region 物理删除
 
     /// <summary>
     /// 删除
@@ -786,6 +842,191 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
 
     #endregion
 
+    #region 逻辑删除
+
+    /// <summary>
+    /// 删除
+    /// </summary>
+    /// <param name="entity"></param>
+    /// <typeparam name="TEntity"></typeparam>
+    protected bool RegisterSoftDelete<TEntity>(TEntity entity)
+        where TEntity : EntityCore, ISoftDelete, new()
+    {
+        if (entity == null)
+        {
+            throw new ArgumentNullException(nameof(entity));
+        }
+
+        entity.IsDeleted = true;
+        entity.DeletedOn = DateTime.Now;
+        entity.DeletedUserId = UserId;
+
+        return RegisterDirty(entity);
+    }
+
+    /// <summary>
+    /// 删除
+    /// </summary>
+    /// <param name="entity"></param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="TEntity"></typeparam>
+    protected Task<bool> RegisterSoftDeleteAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default)
+        where TEntity : EntityCore, ISoftDelete, new()
+    {
+        if (entity == null)
+        {
+            throw new ArgumentNullException(nameof(entity));
+        }
+
+        entity.IsDeleted = true;
+        entity.DeletedOn = DateTime.Now;
+        entity.DeletedUserId = UserId;
+
+        return RegisterDirtyAsync(entity, cancellationToken);
+    }
+
+    /// <summary>
+    /// 批量删除
+    /// </summary>
+    /// <param name="entities"></param>
+    /// <typeparam name="TEntity"></typeparam>
+    protected bool RegisterSoftDeleteRange<TEntity>(List<TEntity> entities)
+        where TEntity : EntityCore, ISoftDelete, new()
+    {
+        if (entities == null || !entities.Any())
+        {
+            throw new ArgumentNullException(nameof(entities));
+        }
+
+        foreach (var entity in entities)
+        {
+            entity.IsDeleted = true;
+            entity.DeletedOn = DateTime.Now;
+            entity.DeletedUserId = UserId;
+        }
+
+        return RegisterDirtyRange(entities);
+    }
+
+    /// <summary>
+    /// 批量删除
+    /// </summary>
+    /// <param name="entities"></param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="TEntity"></typeparam>
+    protected Task<bool> RegisterSoftDeleteRangeAsync<TEntity>(List<TEntity> entities,
+        CancellationToken cancellationToken = default)
+        where TEntity : EntityCore, ISoftDelete, new()
+    {
+        if (entities == null || !entities.Any())
+        {
+            throw new ArgumentNullException(nameof(entities));
+        }
+
+        foreach (var entity in entities)
+        {
+            entity.IsDeleted = true;
+            entity.DeletedOn = DateTime.Now;
+            entity.DeletedUserId = UserId;
+        }
+
+        return RegisterDirtyRangeAsync(entities, cancellationToken);
+    }
+
+    /// <summary>
+    /// 删除
+    /// </summary>
+    /// <param name="exp"></param>
+    protected bool RegisterSoftDelete(Expression<Func<T, bool>> exp)
+    {
+        if (!typeof(ISoftDelete).IsAssignableFrom(typeof(T)))
+        {
+            return false;
+        }
+
+        var entities = Query<T>()
+            .Where(exp)
+            .ToList();
+
+        if (entities == null || !entities.Any())
+        {
+            return false;
+        }
+
+        foreach (var entity in entities)
+        {
+            typeof(T).GetProperty(nameof(ISoftDelete.IsDeleted))?.SetValue(entity, true);
+            typeof(T).GetProperty(nameof(ISoftDelete.DeletedOn))?.SetValue(entity, DateTime.Now);
+            typeof(T).GetProperty(nameof(ISoftDelete.DeletedUserId))?.SetValue(entity, UserId);
+        }
+
+        return RegisterDirtyRange<T>(entities);
+    }
+
+    /// <summary>
+    /// 删除
+    /// </summary>
+    /// <param name="exp"></param>
+    /// <param name="cancellationToken"></param>
+    protected async Task<bool> RegisterSoftDeleteAsync(Expression<Func<T, bool>> exp,
+        CancellationToken cancellationToken = default)
+    {
+        if (!typeof(ISoftDelete).IsAssignableFrom(typeof(T)))
+        {
+            return false;
+        }
+
+        var entities = await Query<T>()
+            .Where(exp)
+            .ToListAsync(cancellationToken);
+
+        if (entities == null || !entities.Any())
+        {
+            return false;
+        }
+
+        foreach (var entity in entities)
+        {
+            typeof(T).GetProperty(nameof(ISoftDelete.IsDeleted))?.SetValue(entity, true);
+            typeof(T).GetProperty(nameof(ISoftDelete.DeletedOn))?.SetValue(entity, DateTime.Now);
+            typeof(T).GetProperty(nameof(ISoftDelete.DeletedUserId))?.SetValue(entity, UserId);
+        }
+
+        return await RegisterDirtyRangeAsync<T>(entities, cancellationToken);
+    }
+
+    /// <summary>
+    /// 删除
+    /// </summary>
+    /// <param name="exp"></param>
+    /// <typeparam name="TEntity"></typeparam>
+    protected bool RegisterSoftDelete<TEntity>(Expression<Func<TEntity, bool>> exp)
+        where TEntity : EntityCore, ISoftDelete, new()
+    {
+        var entities = Query<TEntity>()
+            .Where(exp)
+            .ToList();
+        return entities.Count != 0 && RegisterSoftDeleteRange(entities);
+    }
+
+    /// <summary>
+    /// 删除
+    /// </summary>
+    /// <param name="exp"></param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="TEntity"></typeparam>
+    protected async Task<bool> RegisterSoftDeleteAsync<TEntity>(Expression<Func<TEntity, bool>> exp,
+        CancellationToken cancellationToken = default)
+        where TEntity : EntityCore, ISoftDelete, new()
+    {
+        var entities = await Query<TEntity>()
+            .Where(exp)
+            .ToListAsync(cancellationToken);
+        return entities.Count != 0 && await RegisterSoftDeleteRangeAsync(entities, cancellationToken);
+    }
+
+    #endregion
+
     #endregion
 
     #endregion
@@ -851,7 +1092,12 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
         {
             var orgIds = OrganizationalUnitIds?
                 .Split(',')
-                .Select(orgId => new OrganizationalUnitAuth(orgId, entity.Id, typeof(TEntity).Name))
+                .Select((orgId, i) => new OrganizationalUnitAuth(
+                    _snowflakeId?.NextId() ?? DateTime.Now.Ticks + i,
+                    orgId,
+                    entity.Id,
+                    typeof(TEntity).Name)
+                )
                 .ToList();
 
             if (orgIds is {Count: > 1})

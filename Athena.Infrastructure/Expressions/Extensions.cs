@@ -1,4 +1,6 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
+using System.Text.Json.Serialization;
 
 namespace Athena.Infrastructure.Expressions;
 
@@ -32,6 +34,10 @@ public static class Extensions
         var response = Expression.New(typeof(TDto));
         var bindings = typeof(TDto)
             .GetProperties()
+            // 过滤掉NotMapped或JsonIgnore
+            .Where(property =>
+                property.GetCustomAttribute<NotMappedAttribute>() == null &&
+                property.GetCustomAttribute<JsonIgnoreAttribute>() == null)
             .Select(property =>
             {
                 var sourceProperty = typeof(TSource).GetProperty(property.Name);

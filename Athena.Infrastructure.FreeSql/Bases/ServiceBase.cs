@@ -48,6 +48,18 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     /// <exception cref="FriendlyException"></exception>
+    protected Task<T> GetAsync(string? id, CancellationToken cancellationToken = default)
+    {
+        return GetAsync<T>(id, "数据", cancellationToken);
+    }
+
+    /// <summary>
+    /// 读取信息
+    /// </summary>
+    /// <param name="id">ID</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    /// <exception cref="FriendlyException"></exception>
     protected Task<TEntity> GetAsync<TEntity>(string? id,
         CancellationToken cancellationToken = default)
         where TEntity : EntityCore, new()
@@ -63,7 +75,21 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     /// <exception cref="FriendlyException"></exception>
-    protected async Task<TEntity> GetAsync<TEntity>(string? id, string name,
+    protected Task<T> GetAsync(string? id, string name,
+        CancellationToken cancellationToken = default)
+    {
+        return GetAsync<T>(id, name, cancellationToken);
+    }
+
+    /// <summary>
+    /// 读取信息
+    /// </summary>
+    /// <param name="id">ID</param>
+    /// <param name="name">名称</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    /// <exception cref="FriendlyException"></exception>
+    protected Task<TEntity> GetAsync<TEntity>(string? id, string name,
         CancellationToken cancellationToken = default)
         where TEntity : EntityCore, new()
     {
@@ -72,7 +98,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
             throw FriendlyException.NullOrEmptyArgument("id");
         }
 
-        var entity = await Query<TEntity>()
+        var entity = Query<TEntity>()
             .Where(p => p.Id == id)
             .FirstAsync(cancellationToken);
 
@@ -91,6 +117,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     /// <exception cref="FriendlyException"></exception>
+    [Obsolete("请使用GetAsync方法")]
     protected Task<T> GetForUpdateAsync(string? id, CancellationToken cancellationToken = default)
     {
         return GetForUpdateAsync(id, "数据", cancellationToken);
@@ -104,6 +131,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     /// <exception cref="FriendlyException"></exception>
+    [Obsolete("请使用GetAsync方法")]
     protected async Task<T> GetForUpdateAsync(string? id, string name, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(id))
@@ -133,10 +161,25 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
     /// <summary>
     /// 查询对象
     /// </summary>
+    protected override ISelect<T> QueryableWithSoftDelete =>
+        GetDefaultRepository<T, string>().Select.DisableGlobalFilter(SoftDelete);
+
+    /// <summary>
+    /// 查询对象
+    /// </summary>
     /// <returns></returns>
     protected override ISelect<T> Query()
     {
         return Queryable;
+    }
+
+    /// <summary>
+    /// 查询对象
+    /// </summary>
+    /// <returns></returns>
+    protected override ISelect<T> QueryWithSoftDelete()
+    {
+        return QueryableWithSoftDelete;
     }
 
     /// <summary>
@@ -150,6 +193,16 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
         return typeof(ValueObject).IsAssignableFrom(typeof(T1))
             ? GetOtherRepository<T1, long>().Select
             : GetOtherRepository<T1, string>().Select;
+    }
+
+    /// <summary>
+    /// 查询对象
+    /// </summary>
+    /// <typeparam name="T1"></typeparam>
+    /// <returns></returns>
+    protected override ISelect<T1> QueryWithSoftDelete<T1>()
+    {
+        return Query<T1>().DisableGlobalFilter(SoftDelete);
     }
 
     #endregion
@@ -684,7 +737,25 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
     protected int RegisterDirty<TEntity, TEntityKey>(TEntity entity)
         where TEntity : EntityCore, new()
     {
-        entity.UpdatedOn = DateTime.Now;
+        var hasSoftDelete = typeof(ISoftDelete).IsAssignableFrom(typeof(TEntity));
+        var delProperty = typeof(TEntity).GetProperty(nameof(ISoftDelete.IsDeleted));
+        var isDeleted = Convert.ToBoolean(delProperty?.GetValue(entity));
+        // 如果不是逻辑删除，或者是逻辑删除但是未删除，则设置更新时间
+        if (!hasSoftDelete || !isDeleted)
+        {
+            entity.UpdatedOn = DateTime.Now;
+            // 更新人
+            if (typeof(IUpdater).IsAssignableFrom(typeof(TEntity)))
+            {
+                var property = typeof(TEntity).GetProperty(nameof(IUpdater.LastUpdatedUserId));
+                if (property?.GetValue(entity) == null)
+                {
+                    // 动态设置更新人
+                    property?.SetValue(entity, UserId);
+                }
+            }
+        }
+
         TryAddEvent(entity);
         return GetDefaultRepository<TEntity, TEntityKey>().Update(entity);
     }
@@ -700,7 +771,25 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
         CancellationToken cancellationToken = default)
         where TEntity : EntityCore, new()
     {
-        entity.UpdatedOn = DateTime.Now;
+        var hasSoftDelete = typeof(ISoftDelete).IsAssignableFrom(typeof(TEntity));
+        var delProperty = typeof(TEntity).GetProperty(nameof(ISoftDelete.IsDeleted));
+        var isDeleted = Convert.ToBoolean(delProperty?.GetValue(entity));
+        // 如果不是逻辑删除，或者是逻辑删除但是未删除，则设置更新时间
+        if (!hasSoftDelete || !isDeleted)
+        {
+            entity.UpdatedOn = DateTime.Now;
+            // 更新人
+            if (typeof(IUpdater).IsAssignableFrom(typeof(TEntity)))
+            {
+                var property = typeof(TEntity).GetProperty(nameof(IUpdater.LastUpdatedUserId));
+                if (property?.GetValue(entity) == null)
+                {
+                    // 动态设置更新人
+                    property?.SetValue(entity, UserId);
+                }
+            }
+        }
+
         TryAddEvent(entity);
         return GetDefaultRepository<TEntity, TEntityKey>().UpdateAsync(entity, cancellationToken);
     }
@@ -744,9 +833,32 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
             throw new ArgumentNullException(nameof(entities));
         }
 
+        var hasUpdater = typeof(IUpdater).IsAssignableFrom(typeof(TEntity));
+        var hasSoftDelete = typeof(ISoftDelete).IsAssignableFrom(typeof(TEntity));
+
         foreach (var entity in entities)
         {
+            var delProperty = typeof(TEntity).GetProperty(nameof(ISoftDelete.IsDeleted));
+            var isDeleted = Convert.ToBoolean(delProperty?.GetValue(entity));
+            // 如果是逻辑删除，则跳过设置更新时间
+            if (hasSoftDelete && isDeleted)
+            {
+                TryAddEvent(entity);
+                continue;
+            }
+
             entity.UpdatedOn = DateTime.Now;
+            // 更新人
+            if (hasUpdater)
+            {
+                var property = typeof(TEntity).GetProperty(nameof(IUpdater.LastUpdatedUserId));
+                if (property?.GetValue(entity) == null)
+                {
+                    // 动态设置更新人
+                    property?.SetValue(entity, UserId);
+                }
+            }
+
             TryAddEvent(entity);
         }
 
@@ -770,9 +882,31 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
             throw new ArgumentNullException(nameof(entities));
         }
 
+        var hasUpdater = typeof(IUpdater).IsAssignableFrom(typeof(TEntity));
+        var hasSoftDelete = typeof(ISoftDelete).IsAssignableFrom(typeof(TEntity));
         foreach (var entity in entities)
         {
+            var delProperty = typeof(TEntity).GetProperty(nameof(ISoftDelete.IsDeleted));
+            var isDeleted = Convert.ToBoolean(delProperty?.GetValue(entity));
+            // 如果是逻辑删除，则跳过设置更新时间
+            if (hasSoftDelete && isDeleted)
+            {
+                TryAddEvent(entity);
+                continue;
+            }
+
             entity.UpdatedOn = DateTime.Now;
+            // 更新人
+            if (hasUpdater)
+            {
+                var property = typeof(TEntity).GetProperty(nameof(IUpdater.LastUpdatedUserId));
+                if (property?.GetValue(entity) == null)
+                {
+                    // 动态设置更新人
+                    property?.SetValue(entity, UserId);
+                }
+            }
+
             TryAddEvent(entity);
         }
 
@@ -781,7 +915,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
 
     #endregion
 
-    #region 删除
+    #region 物理删除
 
     /// <summary>
     /// 删除
@@ -990,6 +1124,273 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
 
     #endregion
 
+    #region 逻辑删除
+
+    /// <summary>
+    /// 删除
+    /// </summary>
+    /// <param name="entity"></param>
+    /// <typeparam name="TEntity"></typeparam>
+    protected int RegisterSoftDelete<TEntity>(TEntity entity)
+        where TEntity : EntityCore, ISoftDelete, new()
+    {
+        if (entity == null)
+        {
+            throw new ArgumentNullException(nameof(entity));
+        }
+
+        entity.IsDeleted = true;
+        entity.DeletedOn = DateTime.Now;
+        entity.DeletedUserId = UserId;
+
+        return RegisterDirty(entity);
+    }
+
+    /// <summary>
+    /// 删除
+    /// </summary>
+    /// <param name="entity"></param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="TEntity"></typeparam>
+    protected Task<int> RegisterSoftDeleteAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default)
+        where TEntity : EntityCore, ISoftDelete, new()
+    {
+        if (entity == null)
+        {
+            throw new ArgumentNullException(nameof(entity));
+        }
+
+        entity.IsDeleted = true;
+        entity.DeletedOn = DateTime.Now;
+        entity.DeletedUserId = UserId;
+
+        return RegisterDirtyAsync(entity, cancellationToken);
+    }
+
+    /// <summary>
+    /// 删除
+    /// </summary>
+    /// <param name="entity"></param>
+    /// <typeparam name="TEntity"></typeparam>
+    /// <typeparam name="TEntityKey"></typeparam>
+    protected int RegisterSoftDelete<TEntity, TEntityKey>(TEntity entity)
+        where TEntity : EntityCore, ISoftDelete, new()
+    {
+        return RegisterSoftDeleteRange<TEntity, TEntityKey>(new List<TEntity> {entity});
+    }
+
+    /// <summary>
+    /// 删除
+    /// </summary>
+    /// <param name="entity"></param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="TEntity"></typeparam>
+    /// <typeparam name="TEntityKey"></typeparam>
+    protected Task RegisterSoftDeleteAsync<TEntity, TEntityKey>(TEntity entity,
+        CancellationToken cancellationToken = default)
+        where TEntity : EntityCore, ISoftDelete, new()
+    {
+        return RegisterSoftDeleteRangeAsync<TEntity, TEntityKey>(new List<TEntity> {entity}, cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 批量删除
+    /// </summary>
+    /// <param name="entities"></param>
+    /// <typeparam name="TEntity"></typeparam>
+    protected void RegisterSoftDeleteRange<TEntity>(List<TEntity> entities)
+        where TEntity : EntityCore, ISoftDelete, new()
+    {
+        RegisterSoftDeleteRange<TEntity, string>(entities);
+    }
+
+    /// <summary>
+    /// 批量删除
+    /// </summary>
+    /// <param name="entities"></param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="TEntity"></typeparam>
+    protected Task<int> RegisterSoftDeleteRangeAsync<TEntity>(List<TEntity> entities,
+        CancellationToken cancellationToken = default)
+        where TEntity : EntityCore, ISoftDelete, new()
+    {
+        return RegisterSoftDeleteRangeAsync<TEntity, string>(entities, cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 批量删除
+    /// </summary>
+    /// <param name="entities"></param>
+    /// <typeparam name="TEntity"></typeparam>
+    /// <typeparam name="TEntityKey"></typeparam>
+    protected int RegisterSoftDeleteRange<TEntity, TEntityKey>(List<TEntity> entities)
+        where TEntity : EntityCore, ISoftDelete, new()
+    {
+        if (entities == null || !entities.Any())
+        {
+            throw new ArgumentNullException(nameof(entities));
+        }
+
+        foreach (var entity in entities)
+        {
+            entity.IsDeleted = true;
+            entity.DeletedOn = DateTime.Now;
+            entity.DeletedUserId = UserId;
+        }
+
+        return RegisterDirtyRange<TEntity, TEntityKey>(entities);
+    }
+
+    /// <summary>
+    /// 批量删除
+    /// </summary>
+    /// <param name="entities"></param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="TEntity"></typeparam>
+    /// <typeparam name="TEntityKey"></typeparam>
+    protected Task<int> RegisterSoftDeleteRangeAsync<TEntity, TEntityKey>(List<TEntity> entities,
+        CancellationToken cancellationToken = default)
+        where TEntity : EntityCore, ISoftDelete, new()
+    {
+        if (entities == null || !entities.Any())
+        {
+            throw new ArgumentNullException(nameof(entities));
+        }
+
+        foreach (var entity in entities)
+        {
+            entity.IsDeleted = true;
+            entity.DeletedOn = DateTime.Now;
+            entity.DeletedUserId = UserId;
+        }
+
+        return RegisterDirtyRangeAsync<TEntity, TEntityKey>(entities, cancellationToken);
+    }
+
+    /// <summary>
+    /// 删除
+    /// </summary>
+    /// <param name="exp"></param>
+    protected int RegisterSoftDelete(Expression<Func<T, bool>> exp)
+    {
+        if (!typeof(ISoftDelete).IsAssignableFrom(typeof(T)))
+        {
+            return 0;
+        }
+
+        var entities = Query<T>()
+            .Where(exp)
+            .ToList();
+
+        if (entities == null || !entities.Any())
+        {
+            return 0;
+        }
+
+        foreach (var entity in entities)
+        {
+            typeof(T).GetProperty(nameof(ISoftDelete.IsDeleted))?.SetValue(entity, true);
+            typeof(T).GetProperty(nameof(ISoftDelete.DeletedOn))?.SetValue(entity, DateTime.Now);
+            typeof(T).GetProperty(nameof(ISoftDelete.DeletedUserId))?.SetValue(entity, UserId);
+        }
+
+        return RegisterDirtyRange<T, string>(entities);
+    }
+
+    /// <summary>
+    /// 删除
+    /// </summary>
+    /// <param name="exp"></param>
+    /// <param name="cancellationToken"></param>
+    protected async Task<int> RegisterSoftDeleteAsync(Expression<Func<T, bool>> exp,
+        CancellationToken cancellationToken = default)
+    {
+        if (!typeof(ISoftDelete).IsAssignableFrom(typeof(T)))
+        {
+            return 0;
+        }
+
+        var entities = await Query<T>()
+            .Where(exp)
+            .ToListAsync(cancellationToken);
+
+        if (entities == null || !entities.Any())
+        {
+            return 0;
+        }
+
+        foreach (var entity in entities)
+        {
+            typeof(T).GetProperty(nameof(ISoftDelete.IsDeleted))?.SetValue(entity, true);
+            typeof(T).GetProperty(nameof(ISoftDelete.DeletedOn))?.SetValue(entity, DateTime.Now);
+            typeof(T).GetProperty(nameof(ISoftDelete.DeletedUserId))?.SetValue(entity, UserId);
+        }
+
+        return await RegisterDirtyRangeAsync<T, string>(entities, cancellationToken);
+    }
+
+    /// <summary>
+    /// 删除
+    /// </summary>
+    /// <param name="exp"></param>
+    /// <typeparam name="TEntity"></typeparam>
+    protected int RegisterSoftDelete<TEntity>(Expression<Func<TEntity, bool>> exp)
+        where TEntity : EntityCore, ISoftDelete, new()
+    {
+        return RegisterSoftDelete<TEntity, string>(exp);
+    }
+
+    /// <summary>
+    /// 删除
+    /// </summary>
+    /// <param name="exp"></param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="TEntity"></typeparam>
+    protected Task<int> RegisterSoftDeleteAsync<TEntity>(Expression<Func<TEntity, bool>> exp,
+        CancellationToken cancellationToken = default)
+        where TEntity : EntityCore, ISoftDelete, new()
+    {
+        return RegisterSoftDeleteAsync<TEntity, string>(exp, cancellationToken);
+    }
+
+    /// <summary>
+    /// 删除
+    /// </summary>
+    /// <param name="exp"></param>
+    /// <typeparam name="TEntity"></typeparam>
+    /// <typeparam name="TEntityKey"></typeparam>
+    protected int RegisterSoftDelete<TEntity, TEntityKey>(Expression<Func<TEntity, bool>> exp)
+        where TEntity : EntityCore, ISoftDelete, new()
+    {
+        var entities = Query<TEntity>()
+            .Where(exp)
+            .ToList();
+        return entities.Count == 0 ? 0 : RegisterSoftDeleteRange<TEntity, TEntityKey>(entities);
+    }
+
+    /// <summary>
+    /// 删除
+    /// </summary>
+    /// <param name="exp"></param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="TEntity"></typeparam>
+    /// <typeparam name="TEntityKey"></typeparam>
+    protected async Task<int> RegisterSoftDeleteAsync<TEntity, TEntityKey>(Expression<Func<TEntity, bool>> exp,
+        CancellationToken cancellationToken = default)
+        where TEntity : EntityCore, ISoftDelete, new()
+    {
+        var entities = await Query<TEntity>()
+            .Where(exp)
+            .ToListAsync(cancellationToken);
+        return entities.Count == 0
+            ? 0
+            : await RegisterSoftDeleteRangeAsync<TEntity, TEntityKey>(entities, cancellationToken);
+    }
+
+    #endregion
+
     #endregion
 
     #endregion
@@ -1048,15 +1449,23 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
         // 如果实体实现了ITenant接口并且当前环境为租户环境，则设置租户ID
         if (typeof(ITenant).IsAssignableFrom(typeof(TEntity)) && IsTenantEnvironment)
         {
-            // 动态设置租户ID
-            typeof(TEntity).GetProperty(nameof(ITenant.TenantId))?.SetValue(entity, TenantId);
+            var property = typeof(TEntity).GetProperty(nameof(ITenant.TenantId));
+            if (property?.GetValue(entity) == null)
+            {
+                // 动态设置租户ID
+                property?.SetValue(entity, TenantId);
+            }
         }
 
         // 创建人
         if (typeof(ICreator).IsAssignableFrom(typeof(TEntity)))
         {
-            // 动态设置创建人
-            typeof(TEntity).GetProperty(nameof(ICreator.CreatedUserId))?.SetValue(entity, UserId);
+            var property = typeof(TEntity).GetProperty(nameof(ICreator.CreatedUserId));
+            if (property?.GetValue(entity) == null)
+            {
+                // 动态设置创建人
+                property?.SetValue(entity, UserId);
+            }
         }
 
         // 组织架构
@@ -1073,9 +1482,13 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
                 GetDefaultValueObjectRepository<OrganizationalUnitAuth>().InsertAsync(orgIds);
             }
 
-            // 动态设置组织架构
-            typeof(TEntity).GetProperty(nameof(IOrganization.OrganizationalUnitId))
-                ?.SetValue(entity, orgIds?.FirstOrDefault()?.OrganizationalUnitId);
+            var property = typeof(TEntity).GetProperty(nameof(IOrganization.OrganizationalUnitId));
+            if (property?.GetValue(entity) == null)
+            {
+                // 动态设置组织架构
+                typeof(TEntity).GetProperty(nameof(IOrganization.OrganizationalUnitId))
+                    ?.SetValue(entity, orgIds?.FirstOrDefault()?.OrganizationalUnitId);
+            }
         }
     }
 }

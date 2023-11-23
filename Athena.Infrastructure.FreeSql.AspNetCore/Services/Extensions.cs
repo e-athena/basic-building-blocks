@@ -91,6 +91,9 @@ public static class Extensions
             types.AddRange(entityTypes);
         }
 
+        // types去重
+        types = types.Distinct().ToList();
+
         freeSql.CodeFirst.SyncStructure(entityTypes);
 
         // 处理索引

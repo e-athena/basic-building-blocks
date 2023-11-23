@@ -30,6 +30,9 @@ public static class Extensions
             types.AddRange(entityTypes);
         }
 
+        // types去重
+        types = types.Distinct().ToList();
+
         // 添加CAP的表
         SqlSugarClientHelper.AutoSyncCapMessageTable(sqlSugarClient, isCodeFirst: false);
         sqlSugarClient.CodeFirst.InitTables(types.ToArray());

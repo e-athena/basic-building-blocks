@@ -16,6 +16,7 @@ global using Athena.Infrastructure.Domain;
 global using Athena.Infrastructure.Exceptions;
 global using Athena.Infrastructure.Domain.Attributes;
 global using Athena.Infrastructure.Enums;
+global using Athena.Infrastructure.Event;
 global using Athena.Infrastructure.Event.IntegrationEvents;
 global using DotNetCore.CAP;
 global using MediatR;

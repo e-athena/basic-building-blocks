@@ -831,16 +831,45 @@ public static class QueryableExtensions
 
         query = query.AS(query.Context.EntityMaintenance.GetTableName(typeof(T)), "x");
 
-        var sql = query.ToSqlString();
+        var sql = query.Clone().ToSqlString();
         // 兼容组织架构数据权限查询
         if (sql.Contains("boa.OrganizationalUnitId"))
         {
-            query = query.AddJoinInfo("business_org_auths", "boa",
-                    $"x.Id=boa.BusinessId and boa.BusinessTable='{typeof(T).Name}'")
-                .GroupBy("x.Id");
+            // (p, boa) => p.Id == boa.BusinessId && boa.BusinessTable == typeof(T).Name 转成表达式树
+            var parameter = Expression.Parameter(typeof(T), "p");
+            var parameter2 = Expression.Parameter(typeof(OrganizationalUnitAuth), "boa");
+            var left = Expression.Property(parameter, "Id");
+            var left2 = Expression.Property(parameter2, "BusinessId");
+            var right = Expression.Property(parameter2, "BusinessTable");
+            var right2 = Expression.Constant(typeof(T).Name);
+            var equal = Expression.Equal(left, left2);
+            var equal2 = Expression.Equal(right, right2);
+            var and = Expression.AndAlso(equal, equal2);
+            var lambda = Expression.Lambda<Func<T, OrganizationalUnitAuth, bool>>(and, parameter, parameter2);
+
+            // p => p.Id转成表达式树
+            var parameter3 = Expression.Parameter(typeof(T), "p");
+            var left3 = Expression.Property(parameter3, "Id");
+            var lambda2 = Expression.Lambda<Func<T, object>>(left3, parameter3);
+
+            query = query.InnerJoin(lambda).GroupBy(lambda2);
+
+            // query = query.LeftJoin<OrganizationalUnitAuth>(
+            //         (p, boa) => p.Id == boa.BusinessId && boa.BusinessTable == typeof(T).Name)
+            //     .GroupBy(p => p.Id);
+
+            // query = query.AddJoinInfo(typeof(OrganizationalUnitAuth), "boa",
+            //         $"x.Id=boa.BusinessId and boa.BusinessTable='{typeof(T).Name}'")
+            //     .GroupBy("x.Id");
         }
 
-        // sql = query.Select<TResult>().ToSqlString();
+        // var sql1 = query.Clone().ToSqlString();
+        // var sql2 = query.Select<TResult>().Clone().ToSqlString();
+        // if (hasLambda)
+        // {
+        //     var sql3 = query.Select(funcExpression!.AutomaticConverter()).Clone().ToSqlString();
+        // }
+
         long totalItems = await query.CountAsync(cancellationToken);
         var totalPages = totalItems != 0
             ? totalItems % pageSize == 0 ? totalItems / pageSize : totalItems / pageSize + 1

@@ -164,4 +164,19 @@ public class OrganizationalUnitAuth : ValueObject
         BusinessId = businessId;
         BusinessTable = businessTable;
     }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="organizationalUnitId"></param>
+    /// <param name="businessId"></param>
+    /// <param name="businessTable"></param>
+    public OrganizationalUnitAuth(long id, string organizationalUnitId, string businessId, string businessTable) :
+        base(id)
+    {
+        OrganizationalUnitId = organizationalUnitId;
+        BusinessId = businessId;
+        BusinessTable = businessTable;
+    }
 }
