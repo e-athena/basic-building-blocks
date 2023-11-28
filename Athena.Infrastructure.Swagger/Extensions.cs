@@ -83,8 +83,29 @@ public static class Extensions
                 BearerFormat = "JWT"
             });
 
+            // 设置Swagger的安全定义
+            config.AddSecurityDefinition("Basic", new OpenApiSecurityScheme
+            {
+                Description = "Basic Authorization header. Example: \"Authorization: Basic {base64(username:password)}\"",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.Http,
+                Scheme = "basic"
+            });
+
             config.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Basic"
+                        }
+                    },
+                    Array.Empty<string>()
+                },
                 {
                     new OpenApiSecurityScheme
                     {
@@ -94,7 +115,7 @@ public static class Extensions
                             Id = "Bearer"
                         }
                     },
-                    new List<string>()
+                    Array.Empty<string>()
                 }
             });
 
