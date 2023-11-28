@@ -62,7 +62,10 @@ public abstract class EntityCore : IAggregateRoot
     /// <param name="id"></param>
     public EntityCore(string id)
     {
-        Id = id;
+        if (!string.IsNullOrEmpty(id))
+        {
+            Id = id;
+        }
     }
 
     /// <summary>
