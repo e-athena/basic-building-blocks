@@ -432,15 +432,8 @@ public static class QueryableExtensions
             query = query.OrderBy(sorter.Replace("a.", ""));
         }
 
-        query = query.AS(query.Context.EntityMaintenance.GetTableName(typeof(T)), "x");
-        var sql = query.ToSqlString();
         // 兼容组织架构数据权限查询
-        if (sql.Contains("boa.OrganizationalUnitId"))
-        {
-            query = query.AddJoinInfo("business_org_auths", "boa",
-                    $"x.Id=boa.BusinessId and boa.BusinessTable='{typeof(T).Name}'")
-                .GroupBy("x.Id");
-        }
+        query = query.InnerJoinHandler();
 
         var result = hasLambda
             ? await query.Select(funcExpression).ToListAsync(cancellationToken)
@@ -829,39 +822,8 @@ public static class QueryableExtensions
             query = query.OrderBy(sorter.Replace("a.", ""));
         }
 
-        query = query.AS(query.Context.EntityMaintenance.GetTableName(typeof(T)), "x");
-
-        var sql = query.Clone().ToSqlString();
         // 兼容组织架构数据权限查询
-        if (sql.Contains("boa.OrganizationalUnitId"))
-        {
-            // (p, boa) => p.Id == boa.BusinessId && boa.BusinessTable == typeof(T).Name 转成表达式树
-            var parameter = Expression.Parameter(typeof(T), "p");
-            var parameter2 = Expression.Parameter(typeof(OrganizationalUnitAuth), "boa");
-            var left = Expression.Property(parameter, "Id");
-            var left2 = Expression.Property(parameter2, "BusinessId");
-            var right = Expression.Property(parameter2, "BusinessTable");
-            var right2 = Expression.Constant(typeof(T).Name);
-            var equal = Expression.Equal(left, left2);
-            var equal2 = Expression.Equal(right, right2);
-            var and = Expression.AndAlso(equal, equal2);
-            var lambda = Expression.Lambda<Func<T, OrganizationalUnitAuth, bool>>(and, parameter, parameter2);
-
-            // p => p.Id转成表达式树
-            var parameter3 = Expression.Parameter(typeof(T), "p");
-            var left3 = Expression.Property(parameter3, "Id");
-            var lambda2 = Expression.Lambda<Func<T, object>>(left3, parameter3);
-
-            query = query.InnerJoin(lambda).GroupBy(lambda2);
-
-            // query = query.LeftJoin<OrganizationalUnitAuth>(
-            //         (p, boa) => p.Id == boa.BusinessId && boa.BusinessTable == typeof(T).Name)
-            //     .GroupBy(p => p.Id);
-
-            // query = query.AddJoinInfo(typeof(OrganizationalUnitAuth), "boa",
-            //         $"x.Id=boa.BusinessId and boa.BusinessTable='{typeof(T).Name}'")
-            //     .GroupBy("x.Id");
-        }
+        query = query.InnerJoinHandler();
 
         // var sql1 = query.Clone().ToSqlString();
         // var sql2 = query.Select<TResult>().Clone().ToSqlString();
@@ -932,6 +894,61 @@ public static class QueryableExtensions
         // 脱敏和数据处理。
         result.Items = await DataMaskHandleAsync(userId, result.Items!);
         return result;
+    }
+
+    // 处理关联表的数据权限
+    private static ISugarQueryable<T> InnerJoinHandler<T>(this ISugarQueryable<T> query)
+    {
+        query = query.AS(query.Context.EntityMaintenance.GetTableName(typeof(T)), "x");
+
+        var sql = query.Clone().ToSqlString();
+        // 兼容组织架构数据权限查询
+        if (!sql.Contains("boa.OrganizationalUnitId"))
+        {
+            return query;
+        }
+
+        var hasId = typeof(T).HasProperty("Id");
+        if (!hasId)
+        {
+            throw new Exception($"类型{typeof(T).Name}没有Id属性");
+        }
+
+        // (p, boa) => p.Id == boa.BusinessId && boa.BusinessTable == typeof(T).Name 转成表达式树
+        // 如果T没继承EntityCore，则排除 && boa.BusinessTable == typeof(T).Name
+        var isEntityCore = typeof(T).IsSubclassOf(typeof(EntityCore));
+        var parameter = Expression.Parameter(typeof(T), "p");
+        var parameter2 = Expression.Parameter(typeof(OrganizationalUnitAuth), "boa");
+        var left = Expression.Property(parameter, "Id");
+        var left2 = Expression.Property(parameter2, "BusinessId");
+        var right = Expression.Property(parameter2, "BusinessTable");
+        var right2 = Expression.Constant(typeof(T).Name);
+        var equal = Expression.Equal(left, left2);
+        var equal2 = Expression.Equal(right, right2);
+        var and = Expression.AndAlso(equal, equal2);
+        var lambda = Expression
+            .Lambda<Func<T, OrganizationalUnitAuth, bool>>(
+                isEntityCore ? and : equal,
+                parameter,
+                parameter2
+            );
+
+        // p => p.Id转成表达式树
+        var parameter3 = Expression.Parameter(typeof(T), "p");
+        var left3 = Expression.Property(parameter3, "Id");
+        var lambda2 = Expression.Lambda<Func<T, object>>(left3, parameter3);
+
+        query = query.InnerJoin(lambda).GroupBy(lambda2);
+
+        // query = query.LeftJoin<OrganizationalUnitAuth>(
+        //         (p, boa) => p.Id == boa.BusinessId && boa.BusinessTable == typeof(T).Name)
+        //     .GroupBy(p => p.Id);
+
+        // query = query.AddJoinInfo(typeof(OrganizationalUnitAuth), "boa",
+        //         $"x.Id=boa.BusinessId and boa.BusinessTable='{typeof(T).Name}'")
+        //     .GroupBy("x.Id");
+
+        return query;
     }
 
     /// <summary>
@@ -1211,7 +1228,7 @@ public static class QueryableExtensions
                 var left = Expression.Constant(filter.Value);
                 var right = Expression.Property(parameterExpression, filter.Key);
                 var method = typeof(DbFunc).GetMethod(
-                    filter.Operator == "sub_query" ? "FormatSubQuery" : "FormatLeftJoin",
+                    filter.Operator == "sub_query" ? "FormatSubQuery" : "FormatInnerJoin",
                     new[] {typeof(string), typeof(string)});
                 var expression = Expression.Call(null, method!, left, right);
                 return Expression.Lambda<Func<TResponse, bool>>(expression, parameterExpression);

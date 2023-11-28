@@ -1,5 +1,6 @@
 ﻿using Athena.Infrastructure.Domain.Attributes;
 using Athena.Infrastructure.SqlSugar.CAPs.Extends.Models;
+
 // ReSharper disable once CheckNamespace
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -67,6 +68,7 @@ public static class Extensions
                 {
                     indexName = indexName[..64];
                 }
+
                 // 检查是否存在
                 var isExists = sqlSugarClient.DbMaintenance.IsAnyIndex(indexName);
                 // 如果不存在则添加
@@ -464,7 +466,17 @@ public static class Extensions
             {
                 options.Configuration = ConfigurationOptions.Parse(connectionString);
             }
-        }, capOptions, capSubscribeAssemblies);
+        }, options1 =>
+        {
+            // 读取版本号
+            var version = configuration.GetEnvValue<string>("Module:DbContext:Version");
+            if (!string.IsNullOrEmpty(version))
+            {
+                options1.Version = version;
+            }
+
+            capOptions.Invoke(options1);
+        }, capSubscribeAssemblies);
     }
 
     /// <summary>

@@ -612,13 +612,8 @@ public static class QueryableExtensions
             query = query.OrderBy(sorter);
         }
 
-        var sql = query.ToSql();
         // 兼容组织架构数据权限查询
-        if (sql.Contains("boa.OrganizationalUnitId"))
-        {
-            query = query.LeftJoin(
-                $"business_org_auths boa on a.Id=boa.BusinessId and boa.BusinessTable='{typeof(T).Name}'");
-        }
+        query = query.InnerJoinHandler();
 
         using var listActivity = FreeSqlOTelActivityManager.Instance.StartActivity("读取列表数据");
         listActivity?.SetTag("query.sql.text", query.ToSql());
@@ -1017,27 +1012,8 @@ public static class QueryableExtensions
             query = query.OrderBy(sorter);
         }
 
-        var sql = query.ToSql();
         // 兼容组织架构数据权限查询
-        if (sql.Contains("boa.OrganizationalUnitId"))
-        {
-            var parameter = Expression.Parameter(typeof(T), "p");
-            var parameter2 = Expression.Parameter(typeof(OrganizationalUnitAuth), "boa");
-            var left = Expression.Property(parameter, "Id");
-            var left2 = Expression.Property(parameter2, "BusinessId");
-            var right = Expression.Property(parameter2, "BusinessTable");
-            var right2 = Expression.Constant(typeof(T).Name);
-            var equal = Expression.Equal(left, left2);
-            var equal2 = Expression.Equal(right, right2);
-            var and = Expression.AndAlso(equal, equal2);
-            var lambda = Expression.Lambda<Func<T, OrganizationalUnitAuth, bool>>(and, parameter, parameter2);
-
-            query = query.InnerJoin(lambda).GroupBy("a.Id");
-
-            // query = query
-            //     .InnerJoin($"business_org_auths boa on a.Id=boa.BusinessId and boa.BusinessTable='{typeof(T).Name}'")
-            //     .GroupBy("a.Id");
-        }
+        query = query.InnerJoinHandler();
 
         // sql = query.ToSql();
         long totalItems;
@@ -1111,6 +1087,49 @@ public static class QueryableExtensions
         // 脱敏和数据处理。
         result.Items = await DataMaskHandleAsync(userId, result.Items!);
         return result;
+    }
+
+    // 处理关联表的数据权限
+    private static ISelect<T> InnerJoinHandler<T>(this ISelect<T> query)
+    {
+        var sql = query.ToSql();
+        // 兼容组织架构数据权限查询
+        if (!sql.Contains("boa.OrganizationalUnitId"))
+        {
+            return query;
+        }
+
+        var hasId = typeof(T).HasProperty("Id");
+        if (!hasId)
+        {
+            throw new Exception($"类型{typeof(T).Name}没有Id属性");
+        }
+
+        // 如果T没继承EntityCore，则排除 && boa.BusinessTable == typeof(T).Name
+        var isEntityCore = typeof(T).IsSubclassOf(typeof(EntityCore));
+        var parameter = Expression.Parameter(typeof(T), "p");
+        var parameter2 = Expression.Parameter(typeof(OrganizationalUnitAuth), "boa");
+        var left = Expression.Property(parameter, "Id");
+        var left2 = Expression.Property(parameter2, "BusinessId");
+        var right = Expression.Property(parameter2, "BusinessTable");
+        var right2 = Expression.Constant(typeof(T).Name);
+        var equal = Expression.Equal(left, left2);
+        var equal2 = Expression.Equal(right, right2);
+        var and = Expression.AndAlso(equal, equal2);
+        var lambda = Expression
+            .Lambda<Func<T, OrganizationalUnitAuth, bool>>(
+                isEntityCore ? and : equal,
+                parameter,
+                parameter2
+            );
+
+        query = query.InnerJoin(lambda).GroupBy("a.Id");
+
+        // query = query
+        //     .InnerJoin($"business_org_auths boa on a.Id=boa.BusinessId and boa.BusinessTable='{typeof(T).Name}'")
+        //     .GroupBy("a.Id");
+
+        return query;
     }
 
     /// <summary>
@@ -1431,7 +1450,7 @@ public static class QueryableExtensions
                 var left = Expression.Constant(filter.Value);
                 var right = Expression.Property(parameterExpression, filter.Key);
                 var method = typeof(DbFunc).GetMethod(
-                    filter.Operator == "sub_query" ? "FormatSubQuery" : "FormatLeftJoin",
+                    filter.Operator == "sub_query" ? "FormatSubQuery" : "FormatInnerJoin",
                     new[] {typeof(string), typeof(string)});
                 var expression = Expression.Call(null, method!, left, right);
                 return Expression.Lambda<Func<TResponse, bool>>(expression, parameterExpression);
@@ -1475,7 +1494,7 @@ public static class DbFunc
     /// <param name="that"></param>
     /// <param name="arg1"></param>
     /// <returns></returns>
-    public static bool FormatLeftJoin(this string that, string arg1)
+    public static bool FormatInnerJoin(this string that, string arg1)
     {
         var up = Context.Value;
         if (up == null)

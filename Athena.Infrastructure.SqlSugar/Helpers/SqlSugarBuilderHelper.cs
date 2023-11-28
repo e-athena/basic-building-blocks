@@ -170,7 +170,7 @@ public static class SqlSugarBuilderHelper
                     },
                     new()
                     {
-                        UniqueMethodName = "FormatLeftJoin",
+                        UniqueMethodName = "FormatInnerJoin",
                         MethodValue = (expInfo, _, _) =>
                         {
                             var thatValue = string.Join(',',
@@ -214,7 +214,7 @@ public static class DbFunc
     /// <param name="arg0"></param>
     /// <returns></returns>
     /// <exception cref="NotSupportedException"></exception>
-    public static bool FormatLeftJoin(this string that, string arg0)
+    public static bool FormatInnerJoin(this string that, string arg0)
     {
         throw new NotSupportedException("Can only be used in expressions");
     }
