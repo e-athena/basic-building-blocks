@@ -20,3 +20,5 @@ global using Athena.Infrastructure.ApiPermission.Services.Impls;
 global using Athena.Infrastructure.Auths;
 global using Athena.Infrastructure.Helpers;
 global using Microsoft.AspNetCore.Http;
+global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.DependencyInjection;

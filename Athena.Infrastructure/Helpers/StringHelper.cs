@@ -64,7 +64,7 @@ public static class StringHelper
     }
 
     /// <summary>
-    /// 将英文大写字母转为小写字母并在前面加上替换值
+    /// 将英文大写字母转为大写字母并在前面加上替换值
     /// </summary>
     /// <param name="value"></param>
     /// <param name="replaceValue"></param>

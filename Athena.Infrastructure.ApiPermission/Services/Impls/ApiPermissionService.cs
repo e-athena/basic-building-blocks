@@ -5,6 +5,17 @@ namespace Athena.Infrastructure.ApiPermission.Services.Impls;
 /// </summary>
 public class ApiPermissionService : IApiPermissionService
 {
+    private readonly IConfiguration _configuration;
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="configuration"></param>
+    public ApiPermissionService(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+
     #region FrontEndRouting
 
     /// <summary>
@@ -15,7 +26,8 @@ public class ApiPermissionService : IApiPermissionService
     /// <returns></returns>
     public IList<MenuTreeInfo> GetFrontEndRoutingResources(string appId, string? assemblyKeyword = null)
     {
-        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword);
+        var keywords = GetAssemblyKeywords(assemblyKeyword ?? string.Empty);
+        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(keywords);
         var list = new List<MenuTreeInfo>();
         foreach (var assembly in assemblies)
         {
@@ -33,7 +45,8 @@ public class ApiPermissionService : IApiPermissionService
     /// <returns></returns>
     public IList<MenuTreeInfo> GetFrontEndRoutingResources(string appId, params string[] assemblyKeywords)
     {
-        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords);
+        var keywords = GetAssemblyKeywords(assemblyKeywords);
+        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(keywords);
         var list = new List<MenuTreeInfo>();
         foreach (var assembly in assemblies)
         {
@@ -64,7 +77,8 @@ public class ApiPermissionService : IApiPermissionService
     public IList<MenuTreeInfo> GetPermissionFrontEndRoutingResources(IList<string> codes, string appId,
         string? assemblyKeyword = null)
     {
-        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword);
+        var keywords = GetAssemblyKeywords(assemblyKeyword ?? string.Empty);
+        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(keywords);
         var list = new List<MenuTreeInfo>();
         foreach (var assembly in assemblies)
         {
@@ -84,7 +98,8 @@ public class ApiPermissionService : IApiPermissionService
     public IList<MenuTreeInfo> GetPermissionFrontEndRoutingResources(IList<string> codes, string appId,
         params string[] assemblyKeywords)
     {
-        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords);
+        var keywords = GetAssemblyKeywords(assemblyKeywords);
+        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(keywords);
         var list = new List<MenuTreeInfo>();
         foreach (var assembly in assemblies)
         {
@@ -137,7 +152,8 @@ public class ApiPermissionService : IApiPermissionService
     /// <returns></returns>
     public IEnumerable<ResourceCodeInfo> GetResourceCodeInfos(string appId, string? assemblyKeyword = null)
     {
-        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword);
+        var keywords = GetAssemblyKeywords(assemblyKeyword ?? string.Empty);
+        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(keywords);
         var list = new List<ResourceCodeInfo>();
         foreach (var assembly in assemblies)
         {
@@ -155,7 +171,8 @@ public class ApiPermissionService : IApiPermissionService
     /// <returns></returns>
     public IEnumerable<ResourceCodeInfo> GetResourceCodeInfos(string appId, params string[] assemblyKeywords)
     {
-        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords);
+        var keywords = GetAssemblyKeywords(assemblyKeywords);
+        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(keywords);
         var list = new List<ResourceCodeInfo>();
         foreach (var assembly in assemblies)
         {
@@ -184,7 +201,8 @@ public class ApiPermissionService : IApiPermissionService
     /// <returns></returns>
     public IList<string> GetDuplicateResourceCodes(string appId, string? assemblyKeyword = null)
     {
-        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword);
+        var keywords = GetAssemblyKeywords(assemblyKeyword ?? string.Empty);
+        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(keywords);
         var list = new List<string>();
         foreach (var assembly in assemblies)
         {
@@ -202,7 +220,8 @@ public class ApiPermissionService : IApiPermissionService
     /// <returns></returns>
     public IList<string> GetDuplicateResourceCodes(string appId, params string[] assemblyKeywords)
     {
-        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords);
+        var keywords = GetAssemblyKeywords(assemblyKeywords);
+        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(keywords);
         var list = new List<string>();
         foreach (var assembly in assemblies)
         {
@@ -239,7 +258,8 @@ public class ApiPermissionService : IApiPermissionService
     /// <returns></returns>
     public bool HasDuplicateResourceCodes(string appId, string? assemblyKeyword = null)
     {
-        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword);
+        var keywords = GetAssemblyKeywords(assemblyKeyword ?? string.Empty);
+        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(keywords);
         var list = new List<bool>();
         foreach (var assembly in assemblies)
         {
@@ -257,7 +277,8 @@ public class ApiPermissionService : IApiPermissionService
     /// <returns></returns>
     public bool HasDuplicateResourceCodes(string appId, params string[] assemblyKeywords)
     {
-        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords);
+        var keywords = GetAssemblyKeywords(assemblyKeywords);
+        var assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(keywords);
         var list = new List<bool>();
         foreach (var assembly in assemblies)
         {
@@ -277,5 +298,28 @@ public class ApiPermissionService : IApiPermissionService
     public bool HasDuplicateResourceCodes(Assembly assembly, string appId)
     {
         return GetDuplicateResourceCodes(assembly, appId).Count > 0;
+    }
+
+    private string[] GetAssemblyKeywords(params string[] sourceKeywords)
+    {
+        // 去掉空值
+        var keywords = sourceKeywords.Where(p => !string.IsNullOrEmpty(p)).ToList();
+        // 读取配置ApiPermissionAssembly:Keyword
+        var assemblyKeyword = _configuration.GetEnvValue<string>("Module:ApiPermissionAssembly:Keyword");
+        // 如果不为空，添加到关键字列表
+        if (!string.IsNullOrEmpty(assemblyKeyword))
+        {
+            keywords.Add(assemblyKeyword);
+        }
+
+        // 读取配置ApiPermissionAssembly:Keywords
+        var assemblyKeywords = _configuration.GetEnvValues<string>("Module:ApiPermissionAssembly:Keywords");
+        // 如果不为空，添加到关键字列表
+        if (assemblyKeywords is not null && assemblyKeywords.Length > 0)
+        {
+            keywords.AddRange(assemblyKeywords);
+        }
+
+        return keywords.ToArray();
     }
 }
