@@ -5,12 +5,12 @@ using Athena.Infrastructure.ApiPermission.Services;
 using Athena.Infrastructure.Cookies;
 using Athena.Infrastructure.DataPermission;
 using Athena.Infrastructure.DataPermission.Models;
-using Athena.Infrastructure.Helpers;
 using Athena.Infrastructure.Messaging.Responses;
 using Athena.Infrastructure.Mvc.Messaging.Requests;
 using Athena.Infrastructure.Providers;
 using Athena.Infrastructure.ViewModels;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Routing;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Builder;
@@ -73,7 +73,7 @@ public static class AthenaWebApplicationBuilderExtensions
     /// <param name="app"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    private static void MapMenuResources<TType>(this WebApplication app)
+    private static void MapMenuResources<TType>(this IEndpointRouteBuilder app)
     {
         app.MapGet("/api/external/get-menu-resources", () =>
             {
@@ -106,7 +106,7 @@ public static class AthenaWebApplicationBuilderExtensions
     /// <param name="app"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    private static void MapDatePermissionResources(this WebApplication app)
+    private static void MapDatePermissionResources(this IEndpointRouteBuilder app)
     {
         app.MapGet("/api/external/get-data-permission-resources", () =>
             {
@@ -130,8 +130,13 @@ public static class AthenaWebApplicationBuilderExtensions
                     return rsp;
                 }
 
+                //
+                var dataPermissionStaticService = AthenaProvider.Provider?.GetService<IDataPermissionStaticService>();
+
                 var dataPermissionFactory = new DataPermissionFactory(services);
-                var groupList = DataPermissionHelper.GetGroupList(appId);
+                var groupList = dataPermissionStaticService == null
+                    ? DataPermissionHelper.GetGroupList(appId)
+                    : dataPermissionStaticService.GetGroupList(appId);
                 rsp.Data = new ApplicationDataPermissionInfo
                 {
                     ApplicationId = appId,
@@ -150,7 +155,7 @@ public static class AthenaWebApplicationBuilderExtensions
     /// <param name="app"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    private static void UseCapDashboard(this WebApplication app)
+    private static void UseCapDashboard(this IEndpointRouteBuilder app)
     {
         // 读取当前程序集
         var assembly = Assembly.GetExecutingAssembly();

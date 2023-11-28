@@ -215,7 +215,6 @@ public static class DataPermissionHelper
     {
         var asm = Assembly.Load(assemblyName);
         var types = asm.GetExportedTypes();
-        bool IsMyAttribute(IEnumerable<Attribute> o) => o.OfType<DataPermissionAttribute>().Any();
         var typeList = types
             .Where(o => IsMyAttribute(Attribute.GetCustomAttributes(o, false)))
             .ToList();
@@ -339,6 +338,7 @@ public static class DataPermissionHelper
         }
 
         return summaryList;
+        bool IsMyAttribute(IEnumerable<Attribute> o) => o.OfType<DataPermissionAttribute>().Any();
     }
 
     #region 私有方法
