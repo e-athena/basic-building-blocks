@@ -8,7 +8,8 @@ public class DefaultServiceBase
     private readonly string? _basicAuthUserName;
     private readonly string? _basicAuthPassword;
     private readonly ISecurityContextAccessor _accessor;
-    private readonly string _apiUrl = "http://localhost:5078";
+    private string _apiUrl = "http://localhost:5078";
+    private ServiceCallConfig? _callConfig;
 
     /// <summary>
     /// 
@@ -17,8 +18,7 @@ public class DefaultServiceBase
     public DefaultServiceBase(ISecurityContextAccessor accessor)
     {
         _accessor = accessor;
-        var config = AthenaProvider.Provider?.GetService(typeof(IConfiguration)) as IConfiguration;
-        if (config == null)
+        if (AthenaProvider.Provider?.GetService(typeof(IConfiguration)) is not IConfiguration config)
         {
             return;
         }
@@ -27,12 +27,20 @@ public class DefaultServiceBase
         _basicAuthPassword = config.GetSection("BasicAuthConfig").GetValue<string>("Password");
 
         // 读取配置
-        if (AthenaProvider.Provider?.GetService(typeof(IOptions<ServiceCallConfig>)) is IOptions<ServiceCallConfig>
+        if (AthenaProvider.Provider.GetService(typeof(IOptionsMonitor<ServiceCallConfig>)) is
+            IOptionsMonitor<ServiceCallConfig>
             {
-                Value.CallType: ServiceCallType.Http
+                CurrentValue.CallType: ServiceCallType.Http
             } options)
         {
-            _apiUrl = options.Value.HttpApiUrl!;
+            _apiUrl = options.CurrentValue.HttpApiUrl!;
+            _callConfig = options.CurrentValue;
+
+            options.OnChange(newOptions =>
+            {
+                _apiUrl = newOptions.HttpApiUrl!;
+                _callConfig = newOptions;
+            });
             return;
         }
 
@@ -51,6 +59,7 @@ public class DefaultServiceBase
     protected IFlurlRequest GetRequest(string url)
     {
         return $"{_apiUrl}{url}"
+            .WithTimeout(_callConfig?.Timeout ?? 30)
             .WithHeader("AppId", _accessor.AppId)
             .WithHeader("TenantId", _accessor.TenantId)
             .WithOAuthBearerToken(_accessor.JwtTokenNotBearer)
@@ -78,6 +87,7 @@ public class DefaultServiceBase
         }
 
         return $"{_apiUrl}{url}"
+            .WithTimeout(_callConfig?.Timeout ?? 30)
             .WithBasicAuth(_basicAuthUserName, _basicAuthPassword)
             .OnError(act =>
             {

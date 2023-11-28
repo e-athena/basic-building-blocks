@@ -97,6 +97,11 @@ public class ServiceCallConfig
     public ServiceCallType CallType { get; set; }
 
     /// <summary>
+    /// 超时时间/秒
+    /// </summary>
+    public int Timeout { get; set; } = 30;
+
+    /// <summary>
     /// 检查配置是否正确，1、CallType为Dapr时，AppId不能为空，2、CallType为Http时，HttpApiUrl不能为空
     /// </summary>
     public void Check()
