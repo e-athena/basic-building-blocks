@@ -952,212 +952,6 @@ public static class QueryableExtensions
     }
 
     /// <summary>
-    /// 脱敏处理
-    /// </summary>
-    /// <param name="userId"></param>
-    /// <param name="sources"></param>
-    /// <typeparam name="TResult"></typeparam>
-    /// <returns></returns>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
-    private static async Task<List<TResult>> DataMaskHandleAsync<TResult>(string userId, List<TResult> sources)
-    {
-        IList<ColumnPermission>? columnPermissions = null;
-        var columnPermissionQueryService = AthenaProvider.GetService<IColumnPermissionService>();
-        if (columnPermissionQueryService != null)
-        {
-            columnPermissions = await columnPermissionQueryService.GetAsync(userId, typeof(TResult));
-        }
-
-        if (columnPermissions == null)
-        {
-            return sources;
-        }
-
-        foreach (var item in sources)
-        {
-            // 读取属性
-            var properties = item!.GetType().GetProperties();
-            foreach (var property in properties)
-            {
-                var propertyName = property.Name;
-                // 读取配置
-                var single = columnPermissions.FirstOrDefault(p => p.ColumnKey == propertyName);
-                if (single == null)
-                {
-                    // 跳过
-                    continue;
-                }
-
-                // 读取值
-                var propertyValue = property.GetValue(item);
-                // 如果值为空，则跳过
-                if (propertyValue == null)
-                {
-                    continue;
-                }
-
-                // 如果禁用，则代表没有权限，直接替换处理
-                if (!single.Enabled)
-                {
-                    var propertyType = property.PropertyType;
-                    property.SetValue(item,
-                        // 如果是字符串，则将数据替换为***， 其他数据类型，使用默认值
-                        propertyType == typeof(string) ? "***" : Activator.CreateInstance(propertyType));
-
-                    continue;
-                }
-
-                // 脱敏处理
-                if (!single.IsEnableDataMask)
-                {
-                    continue;
-                }
-
-                // 根据长度和位置进行替换
-                var value = propertyValue.ToString();
-                var maskLength = single.MaskLength;
-                var maskChar = single.MaskChar;
-                var maskPosition = single.MaskPosition;
-                var otherLength = value!.Length - maskLength;
-                var mask = string.Empty;
-                // 如果长度大于等于原始长度，则全部替换
-                if (otherLength <= 0)
-                {
-                    for (var i = 0; i < value.Length; i++)
-                    {
-                        mask += maskChar;
-                    }
-
-                    property.SetValue(item, mask);
-                    continue;
-                }
-
-                // 如果长度小于原始长度，则根据位置进行替换
-                for (var i = 0; i < maskLength; i++)
-                {
-                    mask += maskChar;
-                }
-
-                // 根据位置进行替换
-                switch (maskPosition)
-                {
-                    case MaskPosition.Front:
-                        property.SetValue(item, mask + value[otherLength..]);
-                        break;
-                    case MaskPosition.Middle:
-                        var middle = otherLength / 2;
-                        // 将中间部分替换为掩码字符，长度要等于掩码长度
-                        property.SetValue(item, value[..middle] + mask + value[(maskLength + middle)..]);
-                        break;
-                    case MaskPosition.Back:
-                        property.SetValue(item, value[..otherLength] + mask);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-        }
-
-        return sources;
-    }
-
-    /// <summary>
-    /// 生成自定义查询表达式树
-    /// </summary>
-    /// <param name="filterGroups"></param>
-    /// <typeparam name="TResult"></typeparam>
-    /// <returns></returns>
-    public static Expression<Func<TResult, bool>>? MakeFilterWhere<TResult>(
-        IList<QueryFilterGroup>? filterGroups
-    ) where TResult : class, new()
-    {
-        if (filterGroups == null || filterGroups.Count == 0)
-        {
-            return null;
-        }
-
-        var filterGroupWhere = Expressionable.Create<TResult>();
-        var parameter = Expression.Parameter(typeof(TResult), "p");
-        for (var i = 0; i < filterGroups.Count; i++)
-        {
-            var group = filterGroups[i];
-
-            var groupLambda = Expressionable.Create<TResult>();
-            foreach (var filter in group.Filters)
-            {
-                // 过滤掉不支持的属性
-                if (!typeof(TResult).HasProperty(filter.Key))
-                {
-                    continue;
-                }
-
-                // 生成表达式
-                var lambda = parameter.CustomGenerateLambda<TResult>(filter);
-                groupLambda = filter.XOR switch
-                {
-                    "or" => groupLambda.Or(lambda), //groupLambda.Or(lambda),
-                    "and" => groupLambda.And(lambda),
-                    _ => groupLambda
-                };
-            }
-
-            if (i > 0)
-            {
-                filterGroupWhere = group.XOR switch
-                {
-                    "or" => filterGroupWhere.Or(groupLambda.ToExpression()),
-                    "and" => filterGroupWhere.And(groupLambda.ToExpression()),
-                    _ => groupLambda
-                };
-            }
-            else
-            {
-                filterGroupWhere = groupLambda;
-            }
-        }
-
-        return filterGroupWhere.ToExpression();
-    }
-
-    /// <summary>
-    /// 生成自定义查询表达式树
-    /// </summary>
-    /// <param name="filters"></param>
-    /// <typeparam name="TResult"></typeparam>
-    /// <returns></returns>
-    public static Expression<Func<TResult, bool>>? MakeFilterWhere<TResult>(
-        IList<QueryFilter>? filters
-    ) where TResult : class, new()
-    {
-        if (filters == null || filters.Count == 0)
-        {
-            return null;
-        }
-
-        var parameter = Expression.Parameter(typeof(TResult), "p");
-        var filterLambda = Expressionable.Create<TResult>();
-        foreach (var filter in filters)
-        {
-            // 过滤掉不支持的属性
-            if (!typeof(TResult).HasProperty(filter.Key))
-            {
-                continue;
-            }
-
-            // 生成表达式
-            var lambda = parameter.CustomGenerateLambda<TResult>(filter);
-            filterLambda = filter.XOR switch
-            {
-                "or" => filterLambda.Or(lambda),
-                "and" => filterLambda.And(lambda),
-                _ => filterLambda
-            };
-        }
-
-        return filterLambda.ToExpression();
-    }
-
-    /// <summary>
     /// 转化Paging
     /// </summary>
     /// <typeparam name="TSource">转化前</typeparam>
@@ -1185,55 +979,47 @@ public static class QueryableExtensions
 
     #endregion
 
-    // 属性缓存
-    private static readonly ConcurrentDictionary<Type, PropertyInfo[]> PropertyCache = new();
-
     /// <summary>
-    /// 是否存在属性
+    /// 脱敏处理
     /// </summary>
-    /// <param name="type"></param>
-    /// <param name="propertyName">属性名</param>
+    /// <param name="userId"></param>
+    /// <param name="sources"></param>
+    /// <typeparam name="TResult"></typeparam>
     /// <returns></returns>
-    public static bool HasProperty(this Type type, string propertyName)
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    private static async Task<List<TResult>> DataMaskHandleAsync<TResult>(string userId, List<TResult> sources)
     {
-        // 从缓存中读取
-        if (PropertyCache.TryGetValue(type, out var properties))
+        IList<ColumnPermission>? columnPermissions = null;
+        var columnPermissionQueryService = AthenaProvider.GetService<IColumnPermissionService>();
+        if (columnPermissionQueryService != null)
         {
-            return properties.Any(p => p.Name == propertyName);
+            columnPermissions = await columnPermissionQueryService.GetAsync(userId, typeof(TResult));
         }
 
-        properties = type.GetProperties();
-        // 添加到缓存
-        PropertyCache.TryAdd(type, properties);
-
-        return properties.Any(p => p.Name == propertyName);
+        return columnPermissions == null ? sources : ColumnPermissionHelper.DataMaskHandle(sources, columnPermissions);
     }
 
     /// <summary>
-    /// 生成lambda表达式
+    /// 生成自定义查询表达式树
     /// </summary>
-    /// <param name="parameterExpression"></param>
-    /// <param name="filter"></param>
-    /// <typeparam name="TResponse"></typeparam>
+    /// <param name="filterGroups"></param>
+    /// <typeparam name="TResult"></typeparam>
     /// <returns></returns>
-    private static Expression<Func<TResponse, bool>> CustomGenerateLambda<TResponse>(
-        this ParameterExpression parameterExpression,
-        QueryFilter filter
+    public static Expression<Func<TResult, bool>>? MakeFilterWhere<TResult>(this IList<QueryFilterGroup>? filterGroups)
+    {
+        return filterGroups.MakeFilterWhere<TResult>(true, typeof(DbFunc));
+    }
+
+    /// <summary>
+    /// 生成自定义查询表达式树
+    /// </summary>
+    /// <param name="filters"></param>
+    /// <typeparam name="TResult"></typeparam>
+    /// <returns></returns>
+    public static Expression<Func<TResult, bool>>? MakeFilterWhere<TResult>(
+        this IList<QueryFilter>? filters
     )
     {
-        switch (filter.Operator)
-        {
-            case "boa_left_join":
-            case "sub_query":
-                var left = Expression.Constant(filter.Value);
-                var right = Expression.Property(parameterExpression, filter.Key);
-                var method = typeof(DbFunc).GetMethod(
-                    filter.Operator == "sub_query" ? "FormatSubQuery" : "FormatInnerJoin",
-                    new[] {typeof(string), typeof(string)});
-                var expression = Expression.Call(null, method!, left, right);
-                return Expression.Lambda<Func<TResponse, bool>>(expression, parameterExpression);
-            default:
-                return parameterExpression.GenerateLambda<TResponse>(filter);
-        }
+        return filters.MakeFilterWhere<TResult>(true, typeof(DbFunc));
     }
 }

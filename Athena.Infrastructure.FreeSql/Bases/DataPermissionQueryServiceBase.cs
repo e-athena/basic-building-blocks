@@ -266,9 +266,10 @@ public class DataPermissionQueryServiceBase<T> : QueryServiceBase<T> where T : F
         filters.Add(new QueryFilter
         {
             Key = "Id",
-            Operator = "boa_left_join",
+            Operator = "boa_inner_join",
             Value = string.Join(",", organizationIds),
-            XOR = "or"
+            XOR = "or",
+            ExtendFuncMethodName = "FormatInnerJoin"
         });
 
         // // 生成sql

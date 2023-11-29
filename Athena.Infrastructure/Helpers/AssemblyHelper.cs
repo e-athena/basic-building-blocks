@@ -1,6 +1,3 @@
-using System.Collections.Concurrent;
-using Microsoft.Extensions.PlatformAbstractions;
-
 namespace Athena.Infrastructure.Helpers;
 
 /// <summary>

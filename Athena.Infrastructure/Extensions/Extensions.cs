@@ -25,7 +25,7 @@ public static class Extensions
         try
         {
             var converter = TypeDescriptor.GetConverter(typeof(T));
-            return (T) converter.ConvertFromString(input ?? throw new ArgumentNullException(nameof(input)))!;
+            return (T)converter.ConvertFromString(input ?? throw new ArgumentNullException(nameof(input)))!;
         }
         catch (NotSupportedException)
         {
@@ -152,7 +152,7 @@ public static class Extensions
             return configuration.GetValue<TResult>(key);
         }
 
-        return (TResult) Convert.ChangeType(value, typeof(TResult));
+        return (TResult)Convert.ChangeType(value, typeof(TResult));
     }
 
     /// <summary>
@@ -178,7 +178,7 @@ public static class Extensions
 
         // 按,分割
         var arr = value.Split(",");
-        return arr.Select(x => (TResult) Convert.ChangeType(x, typeof(TResult))).ToArray();
+        return arr.Select(x => (TResult)Convert.ChangeType(x, typeof(TResult))).ToArray();
     }
 
     // 转换字符串，如：Module:DbContext:Disabled 转换为MODULE__DB_CONTEXT__DISABLED
@@ -295,5 +295,30 @@ public static class Extensions
         Func<TSource, bool> predicate)
     {
         return condition ? source.Where(predicate) : source;
+    }
+
+
+    // 属性缓存
+    private static readonly ConcurrentDictionary<Type, PropertyInfo[]> PropertyCache = new();
+
+    /// <summary>
+    /// 是否存在属性
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="propertyName">属性名</param>
+    /// <returns></returns>
+    public static bool HasProperty(this Type type, string propertyName)
+    {
+        // 从缓存中读取
+        if (PropertyCache.TryGetValue(type, out var properties))
+        {
+            return properties.Any(p => p.Name == propertyName);
+        }
+
+        properties = type.GetProperties();
+        // 添加到缓存
+        PropertyCache.TryAdd(type, properties);
+
+        return properties.Any(p => p.Name == propertyName);
     }
 }

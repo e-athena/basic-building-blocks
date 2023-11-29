@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 namespace Athena.Infrastructure.Expressions;
 
 /// <summary>
-/// 表达式树护类
+/// 表达式树扩展类
 /// </summary>
 public static class Extensions
 {

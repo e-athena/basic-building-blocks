@@ -26,6 +26,26 @@ public static class ExpressionExtensions
     /// <summary>
     /// 生成表达式树
     /// </summary>
+    /// <param name="param"></param>
+    /// <param name="filter"></param>
+    /// <param name="typeExtendFunc"></param>
+    /// <typeparam name="TResponse"></typeparam>
+    /// <returns></returns>
+    public static Expression GenerateExpression<TResponse>(this ParameterExpression param, QueryFilter filter, Type typeExtendFunc)
+    {
+        if (string.IsNullOrEmpty(filter.ExtendFuncMethodName))
+        {
+            return param.GenerateExpression<TResponse>(filter);
+        }
+        var left = Expression.Constant(filter.Value);
+        var right = Expression.Property(param, filter.Key);
+        var method = typeExtendFunc.GetMethod(filter.ExtendFuncMethodName, new[] { typeof(string), typeof(string) });
+        return Expression.Call(null, method!, left, right);
+    }
+
+    /// <summary>
+    /// 生成表达式树
+    /// </summary>
     public static Expression GenerateExpression<TResponse>(this ParameterExpression param, QueryFilter filter)
     {
         var property = typeof(TResponse).GetProperty(filter.Key);
@@ -137,7 +157,7 @@ public static class ExpressionExtensions
                 expression = Expression.NotEqual(left, right);
                 break;
             case "contains":
-                var method0 = typeof(string).GetMethod("Contains", new[] {typeof(string)});
+                var method0 = typeof(string).GetMethod("Contains", new[] { typeof(string) });
                 expression = Expression.Call(left, method0!, Expression.Constant(filter.Value));
                 break;
             case "in":
@@ -158,14 +178,14 @@ public static class ExpressionExtensions
                 }
 
                 var instance = Expression.Constant(filter.Value.Split(',').ToList());
-                var method1 = typeof(List<string>).GetMethod("Contains", new[] {typeof(string)});
+                var method1 = typeof(List<string>).GetMethod("Contains", new[] { typeof(string) });
                 expression = Expression.Call(instance, method1!, left);
                 break;
             case "not in":
                 // 数组
                 var listExpression = Expression.Constant(filter.Value.Split(',').ToList());
                 // Contains语句
-                var method2 = typeof(List<string>).GetMethod("Contains", new[] {typeof(string)});
+                var method2 = typeof(List<string>).GetMethod("Contains", new[] { typeof(string) });
                 expression = Expression.Not(Expression.Call(listExpression, method2!, left));
                 break;
             //交集，使用交集时左值必须时固定的值
@@ -238,5 +258,250 @@ public static class ExpressionExtensions
     public static Expression AndAlso(this Expression left, Expression right)
     {
         return Expression.AndAlso(left, right);
+    }
+
+    /// <summary>
+    /// 生成自定义查询表达式树
+    /// </summary>
+    /// <param name="filterGroups"></param>
+    /// <param name="typeExtendFunc"></param>
+    /// <typeparam name="TResult"></typeparam>
+    /// <returns></returns>
+    public static Expression<Func<TResult, bool>>? MakeFilterWhere<TResult>(
+        this IList<QueryFilterGroup>? filterGroups, Type typeExtendFunc
+    )
+    {
+        return filterGroups.MakeFilterWhere<TResult>(true, (param, filter) => param.GenerateExpression<TResult>(filter, typeExtendFunc));
+    }
+
+    /// <summary>
+    /// 生成自定义查询表达式树
+    /// </summary>
+    /// <param name="filterGroups"></param>
+    /// <typeparam name="TResult"></typeparam>
+    /// <returns></returns>
+    public static Expression<Func<TResult, bool>>? MakeFilterWhere<TResult>(
+        this IList<QueryFilterGroup>? filterGroups
+    )
+    {
+        return filterGroups.MakeFilterWhere<TResult>(true);
+    }
+
+    /// <summary>
+    /// 生成自定义查询表达式树
+    /// </summary>
+    /// <param name="filterGroups"></param>
+    /// <param name="isTrace"></param>
+    /// <param name="typeExtendFunc"></param>
+    /// <typeparam name="TResult"></typeparam>
+    /// <returns></returns>
+    public static Expression<Func<TResult, bool>>? MakeFilterWhere<TResult>(
+        this IList<QueryFilterGroup>? filterGroups,
+        bool isTrace,
+        Type typeExtendFunc
+    )
+    {
+        return filterGroups.MakeFilterWhere<TResult>(isTrace, (param, filter) => param.GenerateExpression<TResult>(filter, typeExtendFunc));
+    }
+    /// <summary>
+    /// 生成自定义查询表达式树
+    /// </summary>
+    /// <param name="filterGroups"></param>
+    /// <param name="isTrace"></param>
+    /// <param name="generateExpressionFunc"></param>
+    /// <typeparam name="TResult"></typeparam>
+    /// <returns></returns>
+    public static Expression<Func<TResult, bool>>? MakeFilterWhere<TResult>(
+        this IList<QueryFilterGroup>? filterGroups,
+        bool isTrace,
+        Func<ParameterExpression, QueryFilter, Expression>? generateExpressionFunc = null
+    )
+    {
+        if (filterGroups == null || filterGroups.Count == 0)
+        {
+            return null;
+        }
+
+        if (isTrace)
+        {
+            Activity.Current?.SetTag("query.filterGroups.json", JsonSerializer.Serialize(filterGroups));
+        }
+
+        Expression? filterGroupExpression = null;
+        var parameterExpression = Expression.Parameter(typeof(TResult), "p");
+        for (var i = 0; i < filterGroups.Count; i++)
+        {
+            var group = filterGroups[i];
+
+            Expression? groupExpression = null;
+            foreach (var filter in group.Filters)
+            {
+                // 过滤掉不支持的属性
+                if (!typeof(TResult).HasProperty(filter.Key))
+                {
+                    continue;
+                }
+
+                Expression expression;
+                if (generateExpressionFunc == null)
+                {
+                    // 生成表达式
+                    expression = parameterExpression.GenerateExpression<TResult>(filter);
+                }
+                else
+                {
+                    expression = generateExpressionFunc(parameterExpression, filter);
+                }
+                if (groupExpression == null)
+                {
+                    groupExpression = expression;
+                    continue;
+                }
+                switch (filter.XOR)
+                {
+                    case "or":
+                        groupExpression = groupExpression.OrElse(expression);
+                        break;
+                    case "and":
+                        groupExpression = groupExpression.AndAlso(expression);
+                        break;
+                }
+            }
+
+            if (i > 0)
+            {
+                if (groupExpression == null)
+                {
+                    continue;
+
+                }
+                if (filterGroupExpression == null)
+                {
+                    filterGroupExpression = groupExpression;
+                    continue;
+                }
+                filterGroupExpression = group.XOR switch
+                {
+                    "or" => filterGroupExpression.OrElse(groupExpression),
+                    "and" => filterGroupExpression.AndAlso(groupExpression),
+                    _ => groupExpression
+                };
+            }
+            else
+            {
+                filterGroupExpression = groupExpression;
+            }
+        }
+
+        if (filterGroupExpression == null)
+        {
+            return null;
+        }
+
+        return Expression.Lambda<Func<TResult, bool>>(filterGroupExpression, parameterExpression);
+    }
+    /// <summary>
+    /// 生成自定义查询表达式树
+    /// </summary>
+    /// <param name="filters"></param>
+    /// <typeparam name="TResult"></typeparam>
+    /// <returns></returns>
+    public static Expression<Func<TResult, bool>>? MakeFilterWhere<TResult>(
+        this IList<QueryFilter>? filters
+    )
+    {
+        return filters.MakeFilterWhere<TResult>(true);
+    }
+
+    /// <summary>
+    /// 生成自定义查询表达式树
+    /// </summary>
+    /// <param name="filters"></param>
+    /// <param name="typeExtendFunc"></param>
+    /// <typeparam name="TResult"></typeparam>
+    /// <returns></returns>
+    public static Expression<Func<TResult, bool>>? MakeFilterWhere<TResult>(
+        this IList<QueryFilter>? filters, Type typeExtendFunc
+    )
+    {
+        return filters.MakeFilterWhere<TResult>(true, (param, filter) => param.GenerateExpression<TResult>(filter, typeExtendFunc));
+    }
+    /// <summary>
+    /// 生成自定义查询表达式树
+    /// </summary>
+    /// <param name="filters"></param>
+    /// <param name="isTrace"></param>
+    /// <param name="typeExtendFunc"></param>
+    /// <typeparam name="TResult"></typeparam>
+    /// <returns></returns>
+    public static Expression<Func<TResult, bool>>? MakeFilterWhere<TResult>(
+        this IList<QueryFilter>? filters, bool isTrace, Type typeExtendFunc
+    )
+    {
+        return filters.MakeFilterWhere<TResult>(isTrace, (param, filter) => param.GenerateExpression<TResult>(filter, typeExtendFunc));
+    }
+
+    /// <summary>
+    /// 生成自定义查询表达式树
+    /// </summary>
+    /// <param name="filters"></param>
+    /// <param name="isTrace"></param>
+    /// <param name="generateExpressionFunc"></param>
+    /// <typeparam name="TResult"></typeparam>
+    /// <returns></returns>
+    public static Expression<Func<TResult, bool>>? MakeFilterWhere<TResult>(
+        this IList<QueryFilter>? filters, bool isTrace,
+        Func<ParameterExpression, QueryFilter, Expression>? generateExpressionFunc = null
+    )
+    {
+        if (filters == null || filters.Count == 0)
+        {
+            return null;
+        }
+
+        if (isTrace)
+        {
+            Activity.Current?.SetTag("query.filters.json", JsonSerializer.Serialize(filters));
+        }
+
+        var parameterExpression = Expression.Parameter(typeof(TResult), "p");
+        Expression? filterExpression = null;
+        foreach (var filter in filters)
+        {
+            // 过滤掉不支持的属性
+            if (!typeof(TResult).HasProperty(filter.Key))
+            {
+                continue;
+            }
+
+            Expression expression;
+            if (generateExpressionFunc == null)
+            {
+                // 生成表达式
+                expression = parameterExpression.GenerateExpression<TResult>(filter);
+            }
+            else
+            {
+                expression = generateExpressionFunc(parameterExpression, filter);
+            }
+            if (filterExpression == null)
+            {
+                filterExpression = expression;
+                continue;
+            }
+            filterExpression = filter.XOR switch
+            {
+                "or" => filterExpression.OrElse(expression),
+                "and" => filterExpression.AndAlso(expression),
+                _ => filterExpression
+            };
+        }
+
+        if (filterExpression == null)
+        {
+            return null;
+        }
+
+        return Expression.Lambda<Func<TResult, bool>>(filterExpression, parameterExpression);
     }
 }

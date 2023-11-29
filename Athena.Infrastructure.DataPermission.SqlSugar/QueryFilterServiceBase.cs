@@ -160,9 +160,10 @@ public class QueryFilterServiceBase
                         newFilters.Add(new QueryFilter
                         {
                             Key = "Id",
-                            Operator = "boa_left_join",
+                            Operator = "boa_inner_join",
                             Value = string.Join(",", selfOrganizationIds),
-                            XOR = "or"
+                            XOR = "or",
+                            ExtendFuncMethodName = "FormatInnerJoin"
                         });
                         // // 生成sql
                         // var businessSql0 = _sqlSugarClient.Queryable<OrganizationalUnitAuth>()
@@ -212,9 +213,10 @@ public class QueryFilterServiceBase
                         newFilters.Add(new QueryFilter
                         {
                             Key = "Id",
-                            Operator = "boa_left_join",
+                            Operator = "boa_inner_join",
                             Value = string.Join(",", selfOrganizationChildrenIds),
-                            XOR = "or"
+                            XOR = "or",
+                            ExtendFuncMethodName = "FormatInnerJoin"
                         });
                         // // 生成sql
                         // var businessSql = _sqlSugarClient.Queryable<OrganizationalUnitAuth>()

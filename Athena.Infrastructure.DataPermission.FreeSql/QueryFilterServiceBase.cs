@@ -141,7 +141,7 @@ public class QueryFilterServiceBase
                 switch (filter)
                 {
                     // 设置了组织权限且查询到了数据
-                    case {Value: "{SelfOrganizationId}", Key: "OrganizationId"} when selfOrganizationIds != null:
+                    case { Value: "{SelfOrganizationId}", Key: "OrganizationId" } when selfOrganizationIds != null:
                         // 展开查询
                         // newFilters.AddRange(selfOrganizationIds
                         //     .Select(organizationId => new QueryFilter
@@ -163,9 +163,10 @@ public class QueryFilterServiceBase
                         newFilters.Add(new QueryFilter
                         {
                             Key = "Id",
-                            Operator = "boa_left_join",
+                            Operator = "boa_inner_join",
                             Value = string.Join(",", selfOrganizationIds),
-                            XOR = "or"
+                            XOR = "or",
+                            ExtendFuncMethodName = "FormatInnerJoin"
                         });
 
                         // // 生成sql
@@ -184,7 +185,7 @@ public class QueryFilterServiceBase
                         // });
                         continue;
                     // 设置了组织权限，但是没有组织数据
-                    case {Value: "{SelfOrganizationId}", Key: "OrganizationId"}:
+                    case { Value: "{SelfOrganizationId}", Key: "OrganizationId" }:
                         newFilters.Add(new QueryFilter
                         {
                             Key = "OrganizationalUnitId",
@@ -194,7 +195,7 @@ public class QueryFilterServiceBase
                         });
                         continue;
                     // 设置了组织权限且查询到了数据
-                    case {Value: "{SelfOrganizationChildrenIds}", Key: "OrganizationId"}
+                    case { Value: "{SelfOrganizationChildrenIds}", Key: "OrganizationId" }
                         when selfOrganizationChildrenIds != null:
                         // newFilters.AddRange(selfOrganizationChildrenIds
                         //     .Select(organizationId => new QueryFilter
@@ -215,9 +216,10 @@ public class QueryFilterServiceBase
                         newFilters.Add(new QueryFilter
                         {
                             Key = "Id",
-                            Operator = "boa_left_join",
+                            Operator = "boa_inner_join",
                             Value = string.Join(",", selfOrganizationChildrenIds),
-                            XOR = "or"
+                            XOR = "or",
+                            ExtendFuncMethodName = "FormatInnerJoin"
                         });
 
                         // // 生成sql
@@ -236,7 +238,7 @@ public class QueryFilterServiceBase
                         // });
                         continue;
                     // 设置了组织权限，但是没有组织数据
-                    case {Value: "{SelfOrganizationChildrenIds}", Key: "OrganizationId"}:
+                    case { Value: "{SelfOrganizationChildrenIds}", Key: "OrganizationId" }:
                         newFilters.Add(new QueryFilter
                         {
                             Key = "OrganizationalUnitId",

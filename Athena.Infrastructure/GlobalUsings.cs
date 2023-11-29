@@ -1,5 +1,6 @@
 // Global using directives
 
+global using System.Collections.Concurrent;
 global using System.Net;
 global using System.Text.RegularExpressions;
 global using Microsoft.Extensions.DependencyInjection;
@@ -14,3 +15,4 @@ global using Athena.Infrastructure.Enums;
 global using Athena.Infrastructure.Attributes;
 global using Microsoft.Extensions.Configuration;
 global using Athena.Infrastructure.Helpers;
+global using Microsoft.Extensions.PlatformAbstractions;

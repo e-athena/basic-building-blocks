@@ -29,4 +29,10 @@ public class QueryFilter
     /// 属性类型
     /// </summary>
     public string PropertyType { get; set; } = "string";
+
+    /// <summary>
+    /// 扩展方法名
+    /// </summary>
+    /// <value></value>
+    public string? ExtendFuncMethodName { get; set; }
 }

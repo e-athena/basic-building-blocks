@@ -35,15 +35,15 @@ public class BasicAuthFilterAttribute : ActionFilterAttribute
         if (context
                 .HttpContext
                 .RequestServices
-                .GetService(typeof(IOptions<BasicAuthConfig>)) is not IOptions<BasicAuthConfig> options)
+                .GetService(typeof(IOptionsMonitor<BasicAuthConfig>)) is not IOptionsMonitor<BasicAuthConfig> options)
         {
             base.OnActionExecuting(context);
             return;
         }
 
         // 读取配置
-        var userName = options.Value.UserName;
-        var password = options.Value.Password;
+        var userName = options.CurrentValue.UserName;
+        var password = options.CurrentValue.Password;
 
         // 如果配置为空，则直接跳过验证
         if (string.IsNullOrEmpty(userName) ||

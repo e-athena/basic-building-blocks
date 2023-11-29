@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using Athena.Infrastructure.Status;
-using Microsoft.Extensions.PlatformAbstractions;
 
+// ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.Configuration;
 
 /// <summary>
