@@ -9,6 +9,23 @@ public class TenantQueryServiceBase<T> : QueryServiceBase<T> where T : class
     private readonly FreeSqlMultiTenancy _multiTenancy;
     private readonly ITenantService _tenantService;
 
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="freeSql"></param>
+    /// <param name="tenantService"></param>
+    public TenantQueryServiceBase(IFreeSql freeSql, ITenantService tenantService)
+        : base(freeSql)
+    {
+        if (freeSql is not FreeSqlMultiTenancy multiTenancy)
+        {
+            throw new NullReferenceException("FreeSqlMultiTenancy is null.");
+        }
+        _multiTenancy = multiTenancy;
+        _tenantService = tenantService;
+    }
+
     /// <summary>
     /// 
     /// </summary>
@@ -17,6 +34,26 @@ public class TenantQueryServiceBase<T> : QueryServiceBase<T> where T : class
     public TenantQueryServiceBase(FreeSqlMultiTenancy multiTenancy, ITenantService tenantService)
         : base(multiTenancy.Change(Constant.DefaultMainTenant))
     {
+        _multiTenancy = multiTenancy;
+        _tenantService = tenantService;
+    }
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="freeSql"></param>
+    /// <param name="tenantService"></param>
+    /// <param name="accessor"></param>
+    public TenantQueryServiceBase(
+        IFreeSql freeSql,
+        ITenantService tenantService,
+        ISecurityContextAccessor accessor
+    )
+        : base(freeSql, accessor)
+    {
+        if (freeSql is not FreeSqlMultiTenancy multiTenancy)
+        {
+            throw new NullReferenceException("FreeSqlMultiTenancy is null.");
+        }
         _multiTenancy = multiTenancy;
         _tenantService = tenantService;
     }
@@ -77,7 +114,7 @@ public class TenantQueryServiceBase<T> : QueryServiceBase<T> where T : class
         _multiTenancy.Register(tenantId, () =>
             FreeSqlBuilderHelper.Build(
                 tenant.ConnectionString,
-                tenant.DataType.HasValue ? (DataType) tenant.DataType.Value : null
+                tenant.DataType.HasValue ? (DataType)tenant.DataType.Value : null
             )
         );
         // 切换租户

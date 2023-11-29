@@ -36,6 +36,11 @@ public class QueryServiceBase<T> where T : class
     public QueryServiceBase(IFreeSql freeSql)
     {
         FreeSqlDbContext = freeSql;
+        if (_multiTenancy != null)
+        {
+            return;
+        }
+        _multiTenancy = freeSql as FreeSqlMultiTenancy;
     }
 
     /// <summary>
@@ -105,8 +110,17 @@ public class QueryServiceBase<T> where T : class
     /// <summary>
     /// 主租户
     /// </summary>
-    protected IFreeSql MainFreeSql => _multiTenancy?.Use("default") ??
-                                      throw new NullReferenceException("FreeSqlMultiTenancy is null.");
+    protected IFreeSql MainFreeSql
+    {
+        get
+        {
+            if (_multiTenancy == null)
+            {
+                throw new NullReferenceException("FreeSqlMultiTenancy is null.");
+            }
+            return _multiTenancy.Use("default");
+        }//  => _multiTenancy?.Use("default") ??  throw new NullReferenceException("FreeSqlMultiTenancy is null.");
+    }
 
     /// <summary>
     /// 主租户查询
