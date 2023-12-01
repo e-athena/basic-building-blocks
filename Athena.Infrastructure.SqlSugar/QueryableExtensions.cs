@@ -433,7 +433,7 @@ public static class QueryableExtensions
         }
 
         // 兼容组织架构数据权限查询
-        query = query.InnerJoinHandler();
+        query = query.LeftJoinHandler();
 
         var result = hasLambda
             ? await query.Select(funcExpression).ToListAsync(cancellationToken)
@@ -823,7 +823,7 @@ public static class QueryableExtensions
         }
 
         // 兼容组织架构数据权限查询
-        query = query.InnerJoinHandler();
+        query = query.LeftJoinHandler();
 
         // var sql1 = query.Clone().ToSqlString();
         // var sql2 = query.Select<TResult>().Clone().ToSqlString();
@@ -897,10 +897,8 @@ public static class QueryableExtensions
     }
 
     // 处理关联表的数据权限
-    private static ISugarQueryable<T> InnerJoinHandler<T>(this ISugarQueryable<T> query)
+    private static ISugarQueryable<T> LeftJoinHandler<T>(this ISugarQueryable<T> query)
     {
-        query = query.AS(query.Context.EntityMaintenance.GetTableName(typeof(T)), "x");
-
         var sql = query.Clone().ToSqlString();
         // 兼容组织架构数据权限查询
         if (!sql.Contains("boa.OrganizationalUnitId"))
@@ -913,6 +911,8 @@ public static class QueryableExtensions
         {
             throw new Exception($"类型{typeof(T).Name}没有Id属性");
         }
+
+        query = query.AS(query.Context.EntityMaintenance.GetTableName(typeof(T)), "x");
 
         // (p, boa) => p.Id == boa.BusinessId && boa.BusinessTable == typeof(T).Name 转成表达式树
         // 如果T没继承EntityCore，则排除 && boa.BusinessTable == typeof(T).Name
@@ -938,7 +938,7 @@ public static class QueryableExtensions
         var left3 = Expression.Property(parameter3, "Id");
         var lambda2 = Expression.Lambda<Func<T, object>>(left3, parameter3);
 
-        query = query.InnerJoin(lambda).GroupBy(lambda2);
+        query = query.LeftJoin(lambda).GroupBy(lambda2);
 
         // query = query.LeftJoin<OrganizationalUnitAuth>(
         //         (p, boa) => p.Id == boa.BusinessId && boa.BusinessTable == typeof(T).Name)

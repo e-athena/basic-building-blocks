@@ -613,7 +613,7 @@ public static class QueryableExtensions
         }
 
         // 兼容组织架构数据权限查询
-        query = query.InnerJoinHandler();
+        query = query.LeftJoinHandler();
 
         using var listActivity = FreeSqlOTelActivityManager.Instance.StartActivity("读取列表数据");
         listActivity?.SetTag("query.sql.text", query.ToSql());
@@ -1013,7 +1013,7 @@ public static class QueryableExtensions
         }
 
         // 兼容组织架构数据权限查询
-        query = query.InnerJoinHandler();
+        query = query.LeftJoinHandler();
 
         // sql = query.ToSql();
         long totalItems;
@@ -1090,7 +1090,7 @@ public static class QueryableExtensions
     }
 
     // 处理关联表的数据权限
-    private static ISelect<T> InnerJoinHandler<T>(this ISelect<T> query)
+    private static ISelect<T> LeftJoinHandler<T>(this ISelect<T> query)
     {
         var sql = query.ToSql();
         // 兼容组织架构数据权限查询
@@ -1123,11 +1123,7 @@ public static class QueryableExtensions
                 parameter2
             );
 
-        query = query.InnerJoin(lambda).GroupBy("a.Id");
-
-        // query = query
-        //     .InnerJoin($"business_org_auths boa on a.Id=boa.BusinessId and boa.BusinessTable='{typeof(T).Name}'")
-        //     .GroupBy("a.Id");
+        query = query.LeftJoin(lambda).GroupBy("a.Id");
 
         return query;
     }
@@ -1239,7 +1235,7 @@ public static class DbFunc
     /// <param name="that"></param>
     /// <param name="arg1"></param>
     /// <returns></returns>
-    public static bool FormatInnerJoin(this string that, string arg1)
+    public static bool FormatLeftJoin(this string that, string arg1)
     {
         var up = Context.Value;
         if (up == null)
