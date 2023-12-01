@@ -96,6 +96,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Infrastructure.Fluen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Infrastructure.SubApplication", "Athena.Infrastructure.SubApplication\Athena.Infrastructure.SubApplication.csproj", "{46F355C6-A433-4BDC-AA82-847CD7CD6DF8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileObjectTest", "FileObjectTest\FileObjectTest.csproj", "{43D3AFCF-84BA-4166-AC63-0695E4701595}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Infrastructure.EventStorage", "Athena.Infrastructure.EventStorage\Athena.Infrastructure.EventStorage.csproj", "{77B7A1F6-2CB8-49CA-8198-A4DDA0BEC066}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Infrastructure.EventStorage.FreeSql", "Athena.Infrastructure.EventStorage.FreeSql\Athena.Infrastructure.EventStorage.FreeSql.csproj", "{36927990-3F65-4486-B16E-7A534240D298}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Infrastructure.EventStorage.SqlSugar", "Athena.Infrastructure.EventStorage.SqlSugar\Athena.Infrastructure.EventStorage.SqlSugar.csproj", "{4B546B52-3F83-4CDF-BD01-509D048CCD3E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -290,6 +298,22 @@ Global
 		{46F355C6-A433-4BDC-AA82-847CD7CD6DF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{46F355C6-A433-4BDC-AA82-847CD7CD6DF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{46F355C6-A433-4BDC-AA82-847CD7CD6DF8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43D3AFCF-84BA-4166-AC63-0695E4701595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43D3AFCF-84BA-4166-AC63-0695E4701595}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43D3AFCF-84BA-4166-AC63-0695E4701595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43D3AFCF-84BA-4166-AC63-0695E4701595}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77B7A1F6-2CB8-49CA-8198-A4DDA0BEC066}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77B7A1F6-2CB8-49CA-8198-A4DDA0BEC066}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77B7A1F6-2CB8-49CA-8198-A4DDA0BEC066}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77B7A1F6-2CB8-49CA-8198-A4DDA0BEC066}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36927990-3F65-4486-B16E-7A534240D298}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36927990-3F65-4486-B16E-7A534240D298}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36927990-3F65-4486-B16E-7A534240D298}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36927990-3F65-4486-B16E-7A534240D298}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4B546B52-3F83-4CDF-BD01-509D048CCD3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B546B52-3F83-4CDF-BD01-509D048CCD3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B546B52-3F83-4CDF-BD01-509D048CCD3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B546B52-3F83-4CDF-BD01-509D048CCD3E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{8487FB7B-8DBB-414E-B707-CF8FFC285C75} = {E5B19187-0A21-4BC1-9690-2727240C2158}
@@ -297,5 +321,6 @@ Global
 		{018B93B7-4B67-4C48-B92B-66954A1E9750} = {E5B19187-0A21-4BC1-9690-2727240C2158}
 		{B51A458C-EA0A-4E63-977A-9683F4DA1F23} = {E5B19187-0A21-4BC1-9690-2727240C2158}
 		{AF160161-466F-4C29-86E6-AC71C33121C6} = {E5B19187-0A21-4BC1-9690-2727240C2158}
+		{43D3AFCF-84BA-4166-AC63-0695E4701595} = {E5B19187-0A21-4BC1-9690-2727240C2158}
 	EndGlobalSection
 EndGlobal

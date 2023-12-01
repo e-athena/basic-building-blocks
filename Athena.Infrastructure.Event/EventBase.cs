@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Athena.Infrastructure.Event.DomainEvents;
 using Athena.Infrastructure.Event.IntegrationEvents;
 
@@ -29,8 +30,36 @@ public abstract class EventBase : IDomainEvent, IIntegrationEvent
     }
 
     /// <summary>
+    /// 读取用户ID
+    /// </summary>
+    /// <returns></returns>
+    public string? GetUserId()
+    {
+        return MetaData.TryGetValue("userId", out var value) ? value.ToString() : null;
+    }
+
+    /// <summary>
+    /// 读取用户名
+    /// </summary>
+    /// <returns></returns>
+    public string? GetUserName()
+    {
+        return MetaData.TryGetValue("userName", out var value) ? value.ToString() : null;
+    }
+
+    /// <summary>
+    /// 读取用户姓名
+    /// </summary>
+    /// <returns></returns>
+    public string? GetRealName()
+    {
+        return MetaData.TryGetValue("realName", out var value) ? value.ToString() : null;
+    }
+
+    /// <summary>
     /// Id
     /// </summary>
+    [JsonIgnore]
     public string AggregateRootId => GetId();
 
     /// <summary>
@@ -47,16 +76,6 @@ public abstract class EventBase : IDomainEvent, IIntegrationEvent
     /// 事件名称
     /// </summary>
     public string EventName { get; set; }
-
-    /// <summary>
-    /// 用户Id
-    /// </summary>
-    public string? UserId { get; set; }
-
-    /// <summary>
-    /// 真实姓名
-    /// </summary>
-    public string? RealName { get; set; }
 
     /// <summary>
     /// 租户ID

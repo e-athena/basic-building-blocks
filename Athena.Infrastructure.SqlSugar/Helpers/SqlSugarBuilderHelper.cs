@@ -98,7 +98,7 @@ public static class SqlSugarBuilderHelper
             },
             DbType = dataType.Value,
             ConnectionString = connectionString,
-            IsAutoCloseConnection = true,
+            IsAutoCloseConnection = false,
             ConfigId = tenantId,
             ConfigureExternalServices = new ConfigureExternalServices
             {
@@ -149,6 +149,12 @@ public static class SqlSugarBuilderHelper
                     {
                         column.IsNullable = true;
                     }
+
+                    // 乐观锁
+                    if (attributes.Any(it => it is RowVersionAttribute))
+                    {
+                        column.IsEnableUpdateVersionValidation = true;
+                    }
                 },
                 EntityNameService = (property, column) =>
                 {
@@ -170,7 +176,7 @@ public static class SqlSugarBuilderHelper
                     },
                     new()
                     {
-                        UniqueMethodName = "FormatInnerJoin",
+                        UniqueMethodName = "FormatLeftJoin",
                         MethodValue = (expInfo, _, _) =>
                         {
                             var thatValue = string.Join(',',
@@ -214,7 +220,7 @@ public static class DbFunc
     /// <param name="arg0"></param>
     /// <returns></returns>
     /// <exception cref="NotSupportedException"></exception>
-    public static bool FormatInnerJoin(this string that, string arg0)
+    public static bool FormatLeftJoin(this string that, string arg0)
     {
         throw new NotSupportedException("Can only be used in expressions");
     }

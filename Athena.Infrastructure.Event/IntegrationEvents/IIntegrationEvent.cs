@@ -12,6 +12,24 @@ public interface IIntegrationEvent
     string? GetId();
 
     /// <summary>
+    /// 读取用户ID
+    /// </summary>
+    /// <returns></returns>
+    string? GetUserId();
+
+    /// <summary>
+    /// 读取用户名
+    /// </summary>
+    /// <returns></returns>
+    string? GetUserName();
+
+    /// <summary>
+    /// 读取用户姓名
+    /// </summary>
+    /// <returns></returns>
+    string? GetRealName();
+
+    /// <summary>
     /// 创建时间
     /// </summary>
     DateTime CreatedOn { get; set; }
@@ -35,16 +53,6 @@ public interface IIntegrationEvent
     /// 事件名称
     /// </summary>
     string EventName { get; set; }
-
-    /// <summary>
-    /// 用户Id
-    /// </summary>
-    string? UserId { get; set; }
-
-    /// <summary>
-    /// 真实姓名
-    /// </summary>
-    string? RealName { get; set; }
 
     /// <summary>
     /// 租户Id

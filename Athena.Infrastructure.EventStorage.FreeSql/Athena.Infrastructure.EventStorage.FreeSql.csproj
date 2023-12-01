@@ -4,35 +4,28 @@
         <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>7.0.2-preview.20231201.1</Version>
+        <Version>7.0.0-preview.20231201.1</Version>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
         <PackageIcon>e-athena.png</PackageIcon>
-        <Title>Athena.Infrastructure.SqlSugar</Title>
+        <Title>Athena.Infrastructure.EventStorage.FreeSql</Title>
         <Authors>VanZheng</Authors>
-        <Description>ORM基于SqlSugar的实现</Description>
+        <Description>事件存储(FreeSql实现)</Description>
         <Copyright>Copyright (c) 2023 e-athena</Copyright>
         <PackageProjectUrl>https://github.com/e-athena/basic-building-blocks</PackageProjectUrl>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-        <DocumentationFile>bin\Debug\Athena.Infrastructure.SqlSugar.xml</DocumentationFile>
+      <DocumentationFile>bin\Debug\Athena.Infrastructure.EventStorage.FreeSql.xml</DocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-        <DocumentationFile>bin\Release\Athena.Infrastructure.SqlSugar.xml</DocumentationFile>
+      <DocumentationFile>bin\Release\Athena.Infrastructure.EventStorage.FreeSql.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Athena.Infrastructure.DataPermission\Athena.Infrastructure.DataPermission.csproj"/>
-        <ProjectReference Include="..\Athena.Infrastructure.Domain\Athena.Infrastructure.Domain.csproj"/>
-        <ProjectReference Include="..\Athena.Infrastructure.EventStorage\Athena.Infrastructure.EventStorage.csproj" />
+        <PackageReference Include="FreeSql" Version="3.2.802"/>
     </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="SqlSugarCore" Version="5.1.4.123" />
-    </ItemGroup>
-
     <ItemGroup>
         <Resource Include="e-athena.png">
             <Pack>True</Pack>
@@ -40,4 +33,9 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Resource>
     </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Athena.Infrastructure.EventStorage\Athena.Infrastructure.EventStorage.csproj"/>
+    </ItemGroup>
+
 </Project>

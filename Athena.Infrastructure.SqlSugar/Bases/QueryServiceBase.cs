@@ -42,6 +42,16 @@ public class QueryServiceBase<T> where T : class, new()
     protected string? UserId => _accessor?.UserId;
 
     /// <summary>
+    /// 用户名
+    /// </summary>
+    protected string? UserName => _accessor?.UserName;
+
+    /// <summary>
+    /// 用户姓名
+    /// </summary>
+    protected string? RealName => _accessor?.RealName;
+
+    /// <summary>
     /// 是否为开发者帐号
     /// </summary>
     protected bool IsRoot => _accessor?.IsRoot ?? false;

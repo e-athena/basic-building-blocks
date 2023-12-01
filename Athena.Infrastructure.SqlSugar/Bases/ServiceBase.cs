@@ -366,14 +366,69 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
 
     #region 新增
 
+    #region EventMetaDataHandle
+
+    private void DomainEventMetaDataHandle<TEntity>(IDomainEvent domainEvent, TEntity entity, bool isNew = false)
+        where TEntity : EntityCore, new()
+    {
+        domainEvent.MetaData.TryAdd("id", entity.Id);
+        domainEvent.MetaData.TryAdd("version", isNew ? entity.Version : entity.Version + 1);
+        domainEvent.MetaData.TryAdd("entityTypeName", entity.GetType().FullName ?? entity.GetType().Name);
+        if (!string.IsNullOrEmpty(UserId))
+        {
+            domainEvent.MetaData.TryAdd("userId", UserId);
+        }
+
+        if (!string.IsNullOrEmpty(RealName))
+        {
+            domainEvent.MetaData.TryAdd("realName", RealName);
+        }
+
+        if (!string.IsNullOrEmpty(UserName))
+        {
+            domainEvent.MetaData.TryAdd("userName", UserName);
+        }
+    }
+
+    private void IntegrationEventMetaDataHandle<TEntity>(IIntegrationEvent integrationEvent, TEntity entity,
+        bool isNew = false)
+        where TEntity : EntityCore, new()
+    {
+        integrationEvent.MetaData.TryAdd("id", entity.Id);
+        integrationEvent.MetaData.TryAdd("version", isNew ? entity.Version : entity.Version + 1);
+        integrationEvent.MetaData.TryAdd("entityTypeName", entity.GetType().FullName ?? entity.GetType().Name);
+        if (!string.IsNullOrEmpty(UserId))
+        {
+            integrationEvent.MetaData.TryAdd("userId", UserId);
+        }
+
+        if (!string.IsNullOrEmpty(RealName))
+        {
+            integrationEvent.MetaData.TryAdd("realName", RealName);
+        }
+
+        if (!string.IsNullOrEmpty(UserName))
+        {
+            integrationEvent.MetaData.TryAdd("userName", UserName);
+        }
+    }
+
+    #endregion
+
     /// <summary>
     /// 添加事件
     /// </summary>
     /// <param name="entity"></param>
+    /// <param name="isNew"></param>
     /// <typeparam name="TEntity"></typeparam>
-    private void TryAddEvent<TEntity>(TEntity entity) where TEntity : EntityCore, new()
+    private void TryAddEvent<TEntity>(TEntity entity, bool isNew = false) where TEntity : EntityCore, new()
     {
         #region 领域事件
+
+        foreach (var domainEvent in entity.DomainEvents)
+        {
+            DomainEventMetaDataHandle(domainEvent, entity, isNew);
+        }
 
         var domainEventKey = GetDomainEventKey(entity.Id);
         var domainEvents = _sqlSugarClient?.TempItems.FirstOrDefault(p => p.Key == domainEventKey)
@@ -382,6 +437,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
         {
             foreach (var domainEvent in domainEvents)
             {
+                DomainEventMetaDataHandle(domainEvent, entity, isNew);
                 entity.DomainEvents.Add(domainEvent);
             }
         }
@@ -394,6 +450,11 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
 
         #region 集成事件
 
+        foreach (var integrationEvent in entity.IntegrationEvents)
+        {
+            IntegrationEventMetaDataHandle(integrationEvent, entity, isNew);
+        }
+
         var integrationEventKey = GetIntegrationEventKey(entity.Id);
         var integrationEvents = _sqlSugarClient?.TempItems.FirstOrDefault(p => p.Key == integrationEventKey)
             .Value as HashSet<IIntegrationEvent> ?? new HashSet<IIntegrationEvent>();
@@ -401,6 +462,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
         {
             foreach (var integrationEvent in integrationEvents)
             {
+                IntegrationEventMetaDataHandle(integrationEvent, entity, isNew);
                 entity.IntegrationEvents.Add(integrationEvent);
             }
         }
@@ -435,7 +497,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
         }
 
         SetOtherValues(entity);
-        TryAddEvent(entity);
+        TryAddEvent(entity, true);
 
         return GetDefaultRepository<TEntity>().Insert(entity);
     }
@@ -467,7 +529,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
         }
 
         SetOtherValues(entity);
-        TryAddEvent(entity);
+        TryAddEvent(entity, true);
 
         return GetDefaultRepository<TEntity>().InsertAsync(entity, cancellationToken);
     }
@@ -499,7 +561,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
         foreach (var entity in entities)
         {
             SetOtherValues(entity);
-            TryAddEvent(entity);
+            TryAddEvent(entity, true);
         }
 
         return GetDefaultRepository<TEntity>().InsertRange(entities);
@@ -535,7 +597,7 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
         foreach (var entity in entities)
         {
             SetOtherValues(entity);
-            TryAddEvent(entity);
+            TryAddEvent(entity, true);
         }
 
         return GetDefaultRepository<TEntity>().InsertRangeAsync(entities, cancellationToken);
@@ -564,7 +626,8 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
     {
         entity.UpdatedOn = DateTime.Now;
         TryAddEvent(entity);
-        return GetDefaultRepository<TEntity>().Update(entity);
+        // return GetDefaultRepository<TEntity>().Update(entity);
+        return UpdateWithOptimisticLock(new List<TEntity> {entity});
     }
 
     /// <summary>
@@ -584,14 +647,75 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
     /// <param name="entity"></param>
     /// <param name="cancellationToken"></param>
     /// <typeparam name="TEntity"></typeparam>
-    protected virtual Task<bool> RegisterDirtyAsync<TEntity>(TEntity entity,
+    protected virtual async Task<bool> RegisterDirtyAsync<TEntity>(TEntity entity,
         CancellationToken cancellationToken = default)
         where TEntity : EntityCore, new()
     {
         entity.UpdatedOn = DateTime.Now;
         TryAddEvent(entity);
-        return GetDefaultRepository<TEntity>().UpdateAsync(entity, cancellationToken);
+
+        return await UpdateWithOptimisticLockAsync(new List<TEntity> {entity}, cancellationToken);
+        // return GetDefaultRepository<TEntity>().UpdateAsync(entity, cancellationToken);
     }
+
+    #region 更新乐观锁
+
+    private bool UpdateWithOptimisticLock<TEntity>(List<TEntity> entities)
+        where TEntity : EntityCore, new()
+    {
+        var repository = GetDefaultRepository<TEntity>();
+
+        if (entities.Count > 1)
+        {
+            return repository.AsUpdateable(entities)
+                .ExecuteCommandWithOptLock(true) > 0;
+        }
+
+        var entity = entities.First();
+        entity.Version++;
+        var succeed = repository
+            .AsUpdateable(entity)
+            .Where(p => p.Version == entity.Version - 1)
+            .Where(p => p.Id == entity.Id)
+            .ExecuteCommandHasChange();
+
+        if (!succeed)
+        {
+            throw new VersionExceptions("数据已被其他用户修改，无法完成操作。请刷新数据后重试。");
+        }
+
+        return true;
+    }
+
+    private async Task<bool> UpdateWithOptimisticLockAsync<TEntity>(List<TEntity> entities,
+        CancellationToken cancellationToken = default)
+        where TEntity : EntityCore, new()
+    {
+        var repository = GetDefaultRepository<TEntity>();
+
+        if (entities.Count > 1)
+        {
+            return await repository.AsUpdateable(entities)
+                .ExecuteCommandWithOptLockAsync(true) > 0;
+        }
+
+        var entity = entities.First();
+        entity.Version++;
+        var succeed = await repository
+            .AsUpdateable(entity)
+            .Where(p => p.Version == entity.Version - 1)
+            .Where(p => p.Id == entity.Id)
+            .ExecuteCommandHasChangeAsync(cancellationToken);
+
+        if (!succeed)
+        {
+            throw new VersionExceptions("数据已被其他用户修改，无法完成操作。请刷新数据后重试。");
+        }
+
+        return true;
+    }
+
+    #endregion
 
     /// <summary>
     /// 批量修改
@@ -623,7 +747,8 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
             TryAddEvent(entity);
         }
 
-        return GetDefaultRepository<TEntity>().UpdateRange(entities);
+        // return GetDefaultRepository<TEntity>().UpdateRange(entities);
+        return UpdateWithOptimisticLock(entities);
     }
 
     /// <summary>
@@ -660,7 +785,8 @@ public class ServiceBase<T> : QueryServiceBase<T> where T : EntityCore, new()
             TryAddEvent(entity);
         }
 
-        return GetDefaultRepository<TEntity>().UpdateRangeAsync(entities, cancellationToken);
+        // return GetDefaultRepository<TEntity>().UpdateRangeAsync(entities, cancellationToken);
+        return UpdateWithOptimisticLockAsync(entities, cancellationToken);
     }
 
     #endregion

@@ -1,5 +1,11 @@
 ﻿using System.Data;
 using System.Diagnostics;
+using Athena.Infrastructure.EventStorage;
+using Athena.Infrastructure.EventStorage.Events;
+using Athena.Infrastructure.EventStorage.Models;
+using Athena.Infrastructure.Helpers;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 
 namespace Athena.Infrastructure.SqlSugar;
 
@@ -18,6 +24,7 @@ public class SqlSugarGlobalTransactionBehavior<TRequest, TResponse> : IPipelineB
     private readonly ILogger<SqlSugarGlobalTransactionBehavior<TRequest, TResponse>> _logger;
     private readonly ICapPublisher? _capPublisher;
     private readonly ISecurityContextAccessor? _securityContextAccessor;
+    private readonly IOptionsMonitor<EventStorageOptions>? _eventStorageOptions;
 
     /// <summary>
     /// 
@@ -45,6 +52,7 @@ public class SqlSugarGlobalTransactionBehavior<TRequest, TResponse> : IPipelineB
         _integrationEventContext = integrationEventContext;
         _securityContextAccessor = securityContextAccessor;
         _capPublisher = serviceProvider.GetService<ICapPublisher>();
+        _eventStorageOptions = AthenaProvider.GetService<IOptionsMonitor<EventStorageOptions>>();
     }
 
     /// <summary>
@@ -137,6 +145,20 @@ public class SqlSugarGlobalTransactionBehavior<TRequest, TResponse> : IPipelineB
 
             throw;
         }
+        catch (VersionExceptions ex)
+        {
+            _logger.LogWarning(ex, "{Message}", ex.Message);
+            if (capTransaction != null)
+            {
+                await capTransaction.RollbackAsync(cancellationToken);
+            }
+            else
+            {
+                dbTransaction?.Rollback();
+            }
+
+            throw FriendlyException.Of("数据已被修改，请刷新后重试");
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "{Message}", ex.Message);
@@ -223,8 +245,6 @@ public class SqlSugarGlobalTransactionBehavior<TRequest, TResponse> : IPipelineB
 
             foreach (var @event in events)
             {
-                @event.UserId = _securityContextAccessor?.UserId;
-                @event.RealName = _securityContextAccessor?.RealName;
                 @event.TenantId = tenantId;
                 @event.AppId = appId;
                 @event.RootTraceId ??= rootTraceId;
@@ -248,6 +268,39 @@ public class SqlSugarGlobalTransactionBehavior<TRequest, TResponse> : IPipelineB
                     @event.CallbackName,
                     cancellationToken
                 );
+
+                // 不启用事件存储
+                if (_eventStorageOptions == null || !_eventStorageOptions.CurrentValue.Enabled)
+                {
+                    continue;
+                }
+
+                try
+                {
+                    // 事件存储发布，用于事件回溯，异步执行
+                    @event.MetaData.TryGetValue("entityTypeName", out var entityTypeName);
+                    @event.MetaData.TryGetValue("version", out var version);
+                    @event.MetaData.TryGetValue("userId", out var userId);
+                    await _capPublisher.PublishAsync(
+                        StringHelper.ConvertToLowerAndAddPoint(nameof(EventPublished)),
+                        new EventPublished(new EventStream
+                        {
+                            AggregateRootTypeName = entityTypeName?.ToString() ?? @event.GetType().Name,
+                            AggregateRootId = @event.GetId()!,
+                            Version = int.Parse(version?.ToString() ?? "0"),
+                            EventId = @event.EventId,
+                            EventName = @event.EventName,
+                            CreatedOn = @event.CreatedOn,
+                            Events = JsonConvert.SerializeObject(@event),
+                            UserId = userId?.ToString()
+                        }),
+                        cancellationToken: cancellationToken
+                    );
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "事件存储发布失败");
+                }
             }
         } while (true);
     }
@@ -261,7 +314,7 @@ public class SqlSugarGlobalTransactionBehavior<TRequest, TResponse> : IPipelineB
     /// 读取应用ID
     /// </summary>
     private string? AppId => _securityContextAccessor?.AppId;
-    
+
     /// <summary>
     /// Commit
     /// </summary>

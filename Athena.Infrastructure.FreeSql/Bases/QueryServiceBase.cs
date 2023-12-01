@@ -40,6 +40,7 @@ public class QueryServiceBase<T> where T : class
         {
             return;
         }
+
         _multiTenancy = freeSql as FreeSqlMultiTenancy;
     }
 
@@ -83,6 +84,16 @@ public class QueryServiceBase<T> where T : class
     protected string? UserId => _accessor?.UserId;
 
     /// <summary>
+    /// 用户名
+    /// </summary>
+    protected string? UserName => _accessor?.UserName;
+
+    /// <summary>
+    /// 用户姓名
+    /// </summary>
+    protected string? RealName => _accessor?.RealName;
+
+    /// <summary>
     /// 是否为开发者帐号
     /// </summary>
     protected bool IsRoot => _accessor?.IsRoot ?? false;
@@ -118,8 +129,9 @@ public class QueryServiceBase<T> where T : class
             {
                 throw new NullReferenceException("FreeSqlMultiTenancy is null.");
             }
+
             return _multiTenancy.Use("default");
-        }//  => _multiTenancy?.Use("default") ??  throw new NullReferenceException("FreeSqlMultiTenancy is null.");
+        } //  => _multiTenancy?.Use("default") ??  throw new NullReferenceException("FreeSqlMultiTenancy is null.");
     }
 
     /// <summary>

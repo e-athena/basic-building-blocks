@@ -17,7 +17,7 @@ namespace Athena.Infrastructure.SqlSugar.CAPs.Extends;
 /// </summary>
 public class SqlSugarDataStorage : IDataStorage
 {
-    private readonly IOptions<CapOptions> _capOptions;
+    private readonly IOptionsMonitor<CapOptions> _capOptions;
     private readonly IStorageInitializer _initializer;
     private readonly string _pubName;
     private readonly string _recName;
@@ -34,7 +34,7 @@ public class SqlSugarDataStorage : IDataStorage
     /// <param name="serializer"></param>
     /// <param name="sqlSugarClient"></param>
     /// <param name="snowflakeId"></param>
-    public SqlSugarDataStorage(IOptions<CapOptions> capOptions,
+    public SqlSugarDataStorage(IOptionsMonitor<CapOptions> capOptions,
         IStorageInitializer initializer,
         ISerializer serializer,
         ISqlSugarClient sqlSugarClient, ISnowflakeId snowflakeId)
@@ -170,7 +170,7 @@ public class SqlSugarDataStorage : IDataStorage
             Added = message.Added,
             ExpiresAt = message.ExpiresAt,
             StatusName = StatusName.Scheduled.ToString(),
-            Version = _capOptions.Value.Version
+            Version = _capOptions.CurrentValue.Version
         };
         if (transaction is DbTransaction dbTransaction)
         {
@@ -198,11 +198,11 @@ public class SqlSugarDataStorage : IDataStorage
             Name = name,
             Group = group,
             Content = content,
-            Retries = _capOptions.Value.FailedRetryCount,
+            Retries = _capOptions.CurrentValue.FailedRetryCount,
             Added = DateTime.Now,
-            ExpiresAt = DateTime.Now.AddSeconds(_capOptions.Value.FailedMessageExpiredAfter),
+            ExpiresAt = DateTime.Now.AddSeconds(_capOptions.CurrentValue.FailedMessageExpiredAfter),
             StatusName = nameof(StatusName.Failed),
-            Version = _capOptions.Value.Version
+            Version = _capOptions.CurrentValue.Version
         };
 
         await _sqlSugarClient.Insertable(dto).AS(_recName).ExecuteCommandAsync();
@@ -235,7 +235,7 @@ public class SqlSugarDataStorage : IDataStorage
             Added = mdMessage.Added,
             ExpiresAt = mdMessage.ExpiresAt ?? DateTime.MinValue,
             StatusName = nameof(StatusName.Scheduled),
-            Version = _capOptions.Value.Version
+            Version = _capOptions.CurrentValue.Version
         };
         await _sqlSugarClient.Insertable(rec).AS(_recName).ExecuteCommandAsync();
         return mdMessage;
@@ -270,8 +270,8 @@ public class SqlSugarDataStorage : IDataStorage
 
         var result = await _sqlSugarClient.Queryable<Published>()
             .AS(_pubName)
-            .Where(p => p.Retries < _capOptions.Value.FailedRetryCount)
-            .Where(p => p.Version == _capOptions.Value.Version)
+            .Where(p => p.Retries < _capOptions.CurrentValue.FailedRetryCount)
+            .Where(p => p.Version == _capOptions.CurrentValue.Version)
             .Where(p => p.Added < fourMinAgo)
             .Where(p =>
                 p.StatusName == StatusName.Failed.ToString() ||
@@ -304,7 +304,7 @@ public class SqlSugarDataStorage : IDataStorage
     {
         var result = await _sqlSugarClient.Queryable<Published>()
             .AS(_pubName)
-            .Where(p => p.Version == _capOptions.Value.Version)
+            .Where(p => p.Version == _capOptions.CurrentValue.Version)
             .Where(p =>
                 (p.ExpiresAt < DateTime.Now.AddMinutes(2) && p.StatusName == StatusName.Delayed.ToString()) ||
                 (p.ExpiresAt < DateTime.Now.AddMinutes(-1) && p.StatusName == StatusName.Queued.ToString()))
@@ -339,8 +339,8 @@ public class SqlSugarDataStorage : IDataStorage
 
         var result = await _sqlSugarClient.Queryable<Received>()
             .AS(_recName)
-            .Where(p => p.Retries < _capOptions.Value.FailedRetryCount)
-            .Where(p => p.Version == _capOptions.Value.Version)
+            .Where(p => p.Retries < _capOptions.CurrentValue.FailedRetryCount)
+            .Where(p => p.Version == _capOptions.CurrentValue.Version)
             .Where(p => p.Added < fourMinAgo)
             .Where(p =>
                 p.StatusName == StatusName.Failed.ToString() ||
