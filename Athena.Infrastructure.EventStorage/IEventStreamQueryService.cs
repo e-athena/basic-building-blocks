@@ -15,4 +15,11 @@ public interface IEventStreamQueryService
     /// <param name="request">请求类</param>
     /// <returns></returns>
     Task<Paging<GetEventStreamPagingResponse>> GetPagingAsync(GetEventStreamPagingRequest request);
+
+    /// <summary>
+    /// 读取内容
+    /// </summary>
+    /// <param name="sequence"></param>
+    /// <returns></returns>
+    Task<string> GetEventPayloadAsync(long sequence);
 }

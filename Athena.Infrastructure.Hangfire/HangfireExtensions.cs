@@ -193,10 +193,10 @@ public static class HangfireExtensions
                 jobId = worker.GetType().FullName;
             }
 
-            var queue = worker.Queue ?? "default";
+            // var queue = worker.Queue ?? "default";
             RecurringJob.AddOrUpdate(
                 jobId,
-                queue,
+                // queue,
                 () => worker.DoWorkAsync(),
                 worker.CronExpression,
                 new RecurringJobOptions

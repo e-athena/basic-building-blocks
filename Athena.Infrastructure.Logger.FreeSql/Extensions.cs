@@ -67,6 +67,11 @@ public static class Extensions
             connectionString = env;
         }
 
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            connectionString = configuration.GetEnvValue<string>("Module:LoggerCenter:ConnectionString");
+        }
+
         if (connectionString == null)
         {
             throw new ArgumentNullException(nameof(connectionString),

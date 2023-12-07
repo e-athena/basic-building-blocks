@@ -5,7 +5,7 @@ namespace Athena.Infrastructure.Logger.Models;
 /// <summary>
 /// 日志模型
 /// </summary>
-[Table("Logs")]
+[Table("logs")]
 public class Log
 {
     /// <summary>

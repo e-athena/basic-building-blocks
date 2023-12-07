@@ -94,7 +94,7 @@ public static class Extensions
         // types去重
         types = types.Distinct().ToList();
 
-        freeSql.CodeFirst.SyncStructure(entityTypes);
+        freeSql.CodeFirst.SyncStructure(types.ToArray());
 
         // 处理索引
         // 读取types中带有IndexAttribute的类

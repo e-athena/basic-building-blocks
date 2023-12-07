@@ -60,7 +60,7 @@ public class TrackStorageService : ITrackStorageService
             // 如果找不到，则跳过记录
             if (config == null)
             {
-                _logger.LogWarning("未配置事件类型 {EventTypeFullName} 的追踪配置", track.EventTypeFullName);
+                _logger.LogDebug("未配置事件类型 {EventTypeFullName} 的追踪配置", track.EventTypeFullName);
                 // 释放锁
                 await lockResource.ReleaseAsync();
                 return;
@@ -74,7 +74,7 @@ public class TrackStorageService : ITrackStorageService
 
             if (configs.Count == 0)
             {
-                _logger.LogWarning("未配置事件类型 {EventTypeFullName} 的追踪配置", track.EventTypeFullName);
+                _logger.LogDebug("未配置事件类型 {EventTypeFullName} 的追踪配置", track.EventTypeFullName);
                 // 释放锁
                 await lockResource.ReleaseAsync();
                 return;

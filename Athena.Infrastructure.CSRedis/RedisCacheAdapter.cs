@@ -208,13 +208,12 @@ public class RedisCacheAdapter : ICacheManager
 
     public string GetString(string key)
     {
-        return _redisService.GetString(key) ?? throw new Exception($"Redis缓存中不存在Key为{key}的数据");
+        return _redisService.GetString(key) ?? string.Empty;
     }
 
     public async Task<string> GetStringAsync(string key, CancellationToken cancellationToken = default)
     {
-        return (await _redisService.GetStringAsync(key, token: cancellationToken)) ??
-               throw new Exception($"Redis缓存中不存在Key为{key}的数据");
+        return await _redisService.GetStringAsync(key, token: cancellationToken) ?? string.Empty;
     }
 
     public void Remove(string key)

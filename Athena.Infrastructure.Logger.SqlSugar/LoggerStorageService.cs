@@ -1,6 +1,7 @@
 using Athena.Infrastructure.Helpers;
 using Athena.Infrastructure.Messaging.Responses;
 using Athena.Infrastructure.SqlSugar;
+using Athena.Infrastructure.ViewModels;
 
 namespace Athena.Infrastructure.Logger.SqlSugar;
 
@@ -11,13 +12,12 @@ public class LoggerStorageService : ILoggerStorageService
 {
     private readonly ISqlSugarLoggerClient _sqlSugarClient;
 
-    // 获取当前月份
-    private readonly string _currentMonth = DateTime.Now.ToString("yyyy-MM");
-
     public LoggerStorageService(ISqlSugarLoggerClient sqlSugarLoggerClient)
     {
         _sqlSugarClient = sqlSugarLoggerClient;
     }
+
+    private static readonly List<string> ServiceNameList = new();
 
     /// <summary>
     /// 添加日志
@@ -26,10 +26,23 @@ public class LoggerStorageService : ILoggerStorageService
     /// <returns></returns>
     public async Task WriteAsync(Log log)
     {
-        var tableName = $"Logs_{log.ServiceName}_{_currentMonth}";
+        // 判断服务名是否存在,先读取缓存
+        if (!ServiceNameList.Contains(log.ServiceName))
+        {
+            if (!await _sqlSugarClient.Queryable<ServiceInfo>().AnyAsync(c => c.Name == log.ServiceName))
+            {
+                await _sqlSugarClient.Insertable(new ServiceInfo
+                {
+                    Name = log.ServiceName
+                }).ExecuteCommandAsync();
+                ServiceNameList.Add(log.ServiceName);
+            }
+        }
+
+        var tableName = $"Logs_{log.ServiceName}";
         _sqlSugarClient.CodeFirst.As<Log>(tableName).InitTables(typeof(Log));
-        await GetRepository()
-            .AsInsertable(log)
+        await _sqlSugarClient
+            .Insertable(log)
             .AS(tableName)
             .ExecuteCommandAsync();
     }
@@ -42,9 +55,10 @@ public class LoggerStorageService : ILoggerStorageService
     /// <exception cref="NotImplementedException"></exception>
     public Task<Paging<GetLogPagingResponse>> GetPagingAsync(GetLogPagingRequest request)
     {
-        return Query(request.ServiceName, request.DateRange)
+        return Query(request.ServiceName)
             .Where(p => p.CreatedOn > request.DateRange[0] && p.CreatedOn < request.DateRange[1].AddDays(1))
             .HasWhere(request.UserId, p => p.UserId == request.UserId)
+            .HasWhere(request.TraceId, p => p.TraceId == request.TraceId)
             .HasWhere(request.LogLevel, p => p.LogLevel == request.LogLevel)
             .ToPagingAsync<Log, GetLogPagingResponse>(request);
     }
@@ -56,7 +70,7 @@ public class LoggerStorageService : ILoggerStorageService
     /// <returns></returns>
     public Task<GetByIdResponse> GetByIdAsync(GetByIdRequest request)
     {
-        return Query(request.ServiceName, request.DateRange)
+        return Query(request.ServiceName)
             .Where(p => p.Id == request.Id)
             .Select<GetByIdResponse>()
             .FirstAsync();
@@ -69,7 +83,7 @@ public class LoggerStorageService : ILoggerStorageService
     /// <returns></returns>
     public Task<GetByTraceIdResponse> GetByTraceIdAsync(GetByTraceIdRequest request)
     {
-        return Query(request.ServiceName, request.DateRange)
+        return Query(request.ServiceName)
             .Where(p => p.TraceId == request.TraceId)
             .Select<GetByTraceIdResponse>()
             .FirstAsync();
@@ -83,7 +97,7 @@ public class LoggerStorageService : ILoggerStorageService
     /// <exception cref="NotImplementedException"></exception>
     public async Task<long> GetCallCountAsync(GetCallCountRequest request)
     {
-        var count = await Query(request.ServiceName, request.DateRange)
+        var count = await Query(request.ServiceName)
             .WhereIF(!string.IsNullOrEmpty(request.Route), p => p.Route == request.Route)
             .WhereIF(!string.IsNullOrEmpty(request.UserId), p => p.UserId == request.UserId)
             .WhereIF(!string.IsNullOrEmpty(request.AliasName), p => p.AliasName!.Contains(request.AliasName!))
@@ -92,25 +106,34 @@ public class LoggerStorageService : ILoggerStorageService
         return count;
     }
 
+    /// <summary>
+    /// 读取服务列表
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public Task<List<SelectViewModel>> GetServiceSelectListAsync()
+    {
+        return _sqlSugarClient
+            .Queryable<ServiceInfo>()
+            .ToListAsync(p => new SelectViewModel
+            {
+                Label = p.Name,
+                Value = p.Name
+            });
+    }
+
     #region Private Methods
 
     /// <summary>
     /// Repository
     /// <remarks>按服务名和月份分表，e.g.:Logs_CommonService_2022-09</remarks>
     /// </summary>
-    private ISugarQueryable<Log> Query(string serviceName, IList<DateTime> dateRange)
+    private ISugarQueryable<Log> Query(string serviceName)
     {
-        CheckDateRange(dateRange);
-        var query = _sqlSugarClient.Queryable<Log>();
-        var monthList = DateHelper.GetMonthList(dateRange[0], dateRange[1]);
-        foreach (var month in monthList)
-        {
-            var tableName = $"Logs_{serviceName}_{month}";
-            _sqlSugarClient.CodeFirst.As<Log>(tableName).InitTables(typeof(Log));
-            query = query.AS(tableName);
-        }
+        var tableName = $"Logs_{serviceName}";
+        _sqlSugarClient.CodeFirst.As<Log>(tableName).InitTables(typeof(Log));
 
-        return query;
+        return _sqlSugarClient.Queryable<Log>().AS(tableName);
     }
 
     /// <summary>

@@ -20,14 +20,24 @@ public class GetLogPagingRequest : GetPagingRequestBase
         DateTime.Now.Date,
         DateTime.Now.Date.AddDays(1)
     };
-    
+
     /// <summary>
     /// 用户Id
     /// </summary>
     public string? UserId { get; set; }
 
     /// <summary>
+    /// 追踪ID
+    /// </summary>
+    public string? TraceId { get; set; }
+
+    /// <summary>
     /// 日志等级
     /// </summary>
     public LogLevel? LogLevel { get; set; }
+
+    /// <summary>
+    /// 排序
+    /// </summary>
+    public override string? Sorter { get; set; } = "a.Id DESC";
 }

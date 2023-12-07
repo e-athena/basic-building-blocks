@@ -52,6 +52,7 @@ internal class FreeSqlMonitoringApi : IMonitoringApi
             .WhereIf(!string.IsNullOrEmpty(queryDto.Group), p => p.Group == queryDto.Group)
             .WhereIf(!string.IsNullOrEmpty(queryDto.Content),
                 p => p.Content.Contains(queryDto.Content!))
+            .OrderByDescending(p => p.Added)
             .ToPagingAsync(new GetPagingRequestBase(queryDto.CurrentPage + 1, queryDto.PageSize))
             .ConfigureAwait(false);
         return new PagedQueryResult<MessageDto>

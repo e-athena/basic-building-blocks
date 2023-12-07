@@ -8,7 +8,10 @@ namespace Athena.Infrastructure.EventStorage.Models;
 /// 事件源
 /// </summary>
 [Table("event_streams")]
-[Index(nameof(AggregateRootId), nameof(EventId), nameof(Version))]
+[Index(nameof(UserId))]
+[Index(nameof(Version))]
+[Index(nameof(CreatedOn))]
+[Index(nameof(AggregateRootId))]
 public class EventStream
 {
     /// <summary>

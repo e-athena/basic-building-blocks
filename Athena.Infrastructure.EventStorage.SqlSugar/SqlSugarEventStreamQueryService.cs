@@ -29,7 +29,31 @@ public class SqlSugarEventStreamQueryService : IEventStreamQueryService
     public Task<Paging<GetEventStreamPagingResponse>> GetPagingAsync(GetEventStreamPagingRequest request)
     {
         return _sqlSugarClient.Queryable<EventStream>()
-            .Where(p => p.AggregateRootId == request.AggregateRootId)
-            .ToPagingAsync(request, p => new GetEventStreamPagingResponse());
+            .Where(p => p.AggregateRootId == request.Id || p.UserId == request.Id)
+            .ToPagingAsync(request, p => new GetEventStreamPagingResponse
+            {
+                Sequence = p.Sequence,
+                AggregateRootTypeName = p.AggregateRootTypeName,
+                AggregateRootId = p.AggregateRootId,
+                Version = p.Version,
+                EventId = p.EventId,
+                EventName = p.EventName,
+                CreatedOn = p.CreatedOn,
+                UserId = p.UserId
+            });
+    }
+
+    /// <summary>
+    /// 读取内容
+    /// </summary>
+    /// <param name="sequence"></param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public Task<string> GetEventPayloadAsync(long sequence)
+    {
+        return _sqlSugarClient.Queryable<EventStream>()
+            .Where(p => p.Sequence == sequence)
+            .Select(p => p.Events)
+            .FirstAsync();
     }
 }

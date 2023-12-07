@@ -47,12 +47,6 @@ public class GetEventStreamPagingResponse
     public DateTime CreatedOn { get; set; }
 
     /// <summary>
-    /// 事件
-    /// </summary>
-    /// <value></value>
-    public string Events { get; set; } = null!;
-
-    /// <summary>
     /// 用户ID
     /// </summary>
     /// <value></value>

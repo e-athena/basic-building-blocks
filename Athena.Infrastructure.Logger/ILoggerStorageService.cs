@@ -1,4 +1,5 @@
 using Athena.Infrastructure.Messaging.Responses;
+using Athena.Infrastructure.ViewModels;
 
 namespace Athena.Infrastructure.Logger;
 
@@ -41,4 +42,10 @@ public interface ILoggerStorageService
     /// <param name="request"></param>
     /// <returns></returns>
     Task<long> GetCallCountAsync(GetCallCountRequest request);
+
+    /// <summary>
+    /// 读取服务列表
+    /// </summary>
+    /// <returns></returns>
+    Task<List<SelectViewModel>> GetServiceSelectListAsync();
 }

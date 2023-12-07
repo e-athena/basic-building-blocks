@@ -1,3 +1,6 @@
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Reflection;
+using Athena.Infrastructure.Domain.Attributes;
 using Athena.Infrastructure.EventStorage;
 using Athena.Infrastructure.EventStorage.Models;
 using Athena.Infrastructure.EventStorage.SqlSugar;
@@ -75,26 +78,50 @@ public static class Extensions
                     connectionString,
                     dataType
                 ));
-            sqlSugar.CodeFirst.InitTables(typeof(EventStream));
-            const string trackIndexName = "IX_EventStream_AggregateRootId_EventId_Version";
-            // 检查是否存在
-            var isExists1 = sqlSugar.DbMaintenance.IsAnyIndex(trackIndexName);
-            // 如果不存在则添加
-            if (!isExists1)
+
+            var type = typeof(EventStream);
+            sqlSugar.CodeFirst.InitTables(type);
+
+            #region 处理索引
+
+            // 读取索引
+            var indexAttributes = type.GetCustomAttributes()
+                .Where(p => p is IndexAttribute)
+                .Cast<IndexAttribute>()
+                .ToList();
+
+            // 读取表名
+            var tableName = type.GetCustomAttributes()
+                .Where(p => p is TableAttribute or SugarTable)
+                .Select(p => p is TableAttribute tableAttribute ? tableAttribute.Name : ((SugarTable) p).TableName)
+                .FirstOrDefault();
+
+            foreach (var indexAttribute in indexAttributes)
             {
-                // 添加索引
-                sqlSugar.DbMaintenance
-                    .CreateIndex(
-                        sqlSugar.DbMaintenance.Context.EntityMaintenance.GetTableName(typeof(EventStream)),
-                        new[]
-                        {
-                            "AggregateRootId",
-                            "EventId",
-                            "Version"
-                        },
-                        trackIndexName
+                // 读取索引名
+                var indexName = indexAttribute.Name ??
+                                $"IX_{tableName}_{string.Join("_", indexAttribute.PropertyNames)}";
+                if (indexName.Length > 64)
+                {
+                    indexName = indexName[..64];
+                }
+
+                // 检查是否存在
+                var isExists = sqlSugar.DbMaintenance.IsAnyIndex(indexName);
+                // 如果不存在则添加
+                if (!isExists)
+                {
+                    // 添加索引
+                    sqlSugar.DbMaintenance.CreateIndex(
+                        tableName,
+                        indexAttribute.PropertyNames.ToArray(),
+                        indexName,
+                        indexAttribute.IsUnique
                     );
+                }
             }
+
+            #endregion
 
             return sqlSugar;
         });

@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>7.0.0</Version>
+        <Version>7.0.1-preview.20231205.1</Version>
         <PackageIcon>e-athena.png</PackageIcon>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
-        <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <Title>Athena.Infrastructure.CsRedis</Title>
         <Authors>VanZheng</Authors>
         <Description>分布式缓存(CsRedis实现)</Description>

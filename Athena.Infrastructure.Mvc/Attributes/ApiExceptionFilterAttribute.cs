@@ -173,6 +173,8 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
         Activity.Current?.AddTag("errorStack", ex.StackTrace);
         Activity.Current?.SetStatus(ActivityStatusCode.Error);
 
+        _logger.LogError(ex, "系统异常：{@Exception}", ex);
+
         if (_environment.IsProduction())
         {
             // 生产环境，不显示异常详情

@@ -53,6 +53,7 @@ internal class SqlSugarMonitoringApi : IMonitoringApi
             .WhereIF(!string.IsNullOrEmpty(queryDto.Name), p => p.Name == queryDto.Name)
             .WhereIF(!string.IsNullOrEmpty(queryDto.Group), p => p.Group == queryDto.Group)
             .WhereIF(!string.IsNullOrEmpty(queryDto.Content), p => p.Content.Contains(queryDto.Content!))
+            .OrderByDescending(p => p.Added)
             .ToPagingAsync(queryDto.CurrentPage + 1, queryDto.PageSize);
         return new PagedQueryResult<MessageDto>
         {

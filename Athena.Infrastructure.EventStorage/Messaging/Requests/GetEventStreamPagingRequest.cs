@@ -9,12 +9,12 @@ namespace Athena.Infrastructure.EventStorage.Messaging.Requests;
 public class GetEventStreamPagingRequest : GetPagingRequestBase
 {
     /// <summary>
-    /// 聚合根ID
+    /// 聚合根ID或用户ID
     /// </summary>
     /// <value></value>
     [MaxLength(36)]
     [Required]
-    public string AggregateRootId { get; set; } = null!;
+    public string Id { get; set; } = null!;
 
     /// <summary>
     /// 排序

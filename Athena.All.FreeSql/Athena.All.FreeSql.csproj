@@ -4,7 +4,7 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>7.0.4-preview.20231201.1</Version>
+        <Version>7.0.4-preview.20231208.1</Version>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
         <PackageIcon>e-athena.png</PackageIcon>
         <Title>Athena.All.FreeSql</Title>
@@ -16,14 +16,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FreeSql.Provider.MySql" Version="3.2.802" />
-        <PackageReference Include="FreeSql.Provider.SqliteCore" Version="3.2.802" />
+        <PackageReference Include="FreeSql.Provider.MySql" Version="3.2.802"/>
+        <PackageReference Include="FreeSql.Provider.SqliteCore" Version="3.2.802"/>
         <PackageReference Include="SQLitePCLRaw.bundle_e_sqlcipher" Version="2.1.6"/>
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Athena.All\Athena.All.csproj"/>
-        <ProjectReference Include="..\Athena.Infrastructure.EventStorage.FreeSql\Athena.Infrastructure.EventStorage.FreeSql.csproj" />
+        <ProjectReference Include="..\Athena.Infrastructure.EventStorage.FreeSql\Athena.Infrastructure.EventStorage.FreeSql.csproj"/>
         <ProjectReference Include="..\Athena.Infrastructure.EventTracking.FreeSql\Athena.Infrastructure.EventTracking.FreeSql.csproj"/>
         <ProjectReference Include="..\Athena.Infrastructure.FreeSql.AspNetCore\Athena.Infrastructure.FreeSql.AspNetCore.csproj"/>
         <ProjectReference Include="..\Athena.Infrastructure.Logger.FreeSql\Athena.Infrastructure.Logger.FreeSql.csproj"/>

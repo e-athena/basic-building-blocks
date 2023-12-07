@@ -158,4 +158,34 @@ public static class AssemblyHelper
 
         return assemblies.ToArray();
     }
+
+    /// <summary>
+    /// 读取程序集关键字
+    /// </summary>
+    /// <param name="configuration"></param>
+    /// <param name="key"></param>
+    /// <param name="sourceKeywords"></param>
+    /// <returns></returns>
+    public static string[] GetAssemblyKeywords(IConfiguration configuration, string key, params string[] sourceKeywords)
+    {
+        // 去掉空值
+        var keywords = sourceKeywords.Where(p => !string.IsNullOrEmpty(p)).ToList();
+        // 读取配置Keyword
+        var assemblyKeyword = configuration.GetEnvValue<string>(key);
+        // 如果不为空，添加到关键字列表
+        if (!string.IsNullOrEmpty(assemblyKeyword))
+        {
+            keywords.Add(assemblyKeyword);
+        }
+
+        // 读取配置Keywords
+        var assemblyKeywords = configuration.GetEnvValues<string>(key);
+        // 如果不为空，添加到关键字列表
+        if (assemblyKeywords is not null && assemblyKeywords.Length > 0)
+        {
+            keywords.AddRange(assemblyKeywords);
+        }
+
+        return keywords.ToArray();
+    }
 }
