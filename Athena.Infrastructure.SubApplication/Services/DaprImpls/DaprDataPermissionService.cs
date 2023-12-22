@@ -34,6 +34,7 @@ public class DaprDataPermissionService : DaprServiceBase, IDataPermissionService
     /// <param name="resourceKey"></param>
     /// <param name="appId"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<QueryFilterGroup>> GetPolicyQueryFilterGroupsAsync(string userId, string resourceKey,
         string? appId)
     {
@@ -61,6 +62,7 @@ public class DaprDataPermissionService : DaprServiceBase, IDataPermissionService
     /// <param name="userId"></param>
     /// <param name="appId"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public List<string> GetUserOrganizationIds(string userId, string? appId)
     {
         return GetUserOrganizationIdsAsync(userId, appId).ConfigureAwait(false).GetAwaiter().GetResult();
@@ -72,6 +74,7 @@ public class DaprDataPermissionService : DaprServiceBase, IDataPermissionService
     /// <param name="userId"></param>
     /// <param name="appId"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<string>> GetUserOrganizationIdsAsync(string userId, string? appId)
     {
         // Key
@@ -97,6 +100,7 @@ public class DaprDataPermissionService : DaprServiceBase, IDataPermissionService
     /// <param name="userId"></param>
     /// <param name="appId"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public List<string> GetUserOrganizationIdsTree(string userId, string? appId)
     {
         return GetUserOrganizationIdsTreeAsync(userId, appId).ConfigureAwait(false).GetAwaiter().GetResult();
@@ -108,6 +112,7 @@ public class DaprDataPermissionService : DaprServiceBase, IDataPermissionService
     /// <param name="userId"></param>
     /// <param name="appId"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<string>> GetUserOrganizationIdsTreeAsync(string userId, string? appId)
     {
         // Key
@@ -130,6 +135,7 @@ public class DaprDataPermissionService : DaprServiceBase, IDataPermissionService
     /// 读取用户角色的数据范围列表
     /// </summary>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public List<DataPermission.Models.DataPermission> GetUserDataScopes(string userId, string? appId)
     {
         return GetUserDataScopesAsync(userId, appId).ConfigureAwait(false).GetAwaiter().GetResult();
@@ -141,6 +147,7 @@ public class DaprDataPermissionService : DaprServiceBase, IDataPermissionService
     /// <param name="userId"></param>
     /// <param name="appId"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<DataPermission.Models.DataPermission>> GetUserDataScopesAsync(string userId, string? appId)
     {
         // Key

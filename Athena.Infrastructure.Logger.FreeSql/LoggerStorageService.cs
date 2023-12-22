@@ -33,6 +33,7 @@ public class LoggerStorageService : ILoggerStorageService
     /// <returns></returns>
     public async Task WriteAsync(Log log)
     {
+        var tableName = $"{IndexHelper.GetTableName(typeof(Log))}_{log.ServiceName}";
         // 判断服务名是否存在,先读取缓存
         if (!ServiceNameList.Contains(log.ServiceName))
         {
@@ -48,8 +49,13 @@ public class LoggerStorageService : ILoggerStorageService
 
         if (!LogBaseRepositoryDict.TryGetValue(log.ServiceName, out var resp))
         {
+            // 创建索引
+            IndexHelper.Create(_freeSql, new Dictionary<Type, string?>
+            {
+                {typeof(Log), tableName}
+            });
             resp = _freeSql.GetRepository<Log, long>();
-            resp.AsTable(oldName => $"{oldName}_{log.ServiceName}");
+            resp.AsTable(_ => tableName);
             LogBaseRepositoryDict.TryAdd(log.ServiceName, resp);
         }
 
@@ -65,7 +71,8 @@ public class LoggerStorageService : ILoggerStorageService
     public Task<Paging<GetLogPagingResponse>> GetPagingAsync(GetLogPagingRequest request)
     {
         return Query(request.ServiceName)
-            .Where(p => p.CreatedOn > request.DateRange[0] && p.CreatedOn < request.DateRange[1].AddDays(1))
+            .HasWhere(request.DateRange,
+                p => p.CreatedOn > request.DateRange![0] && p.CreatedOn < request.DateRange[1].AddDays(1))
             .HasWhere(request.UserId, p => p.UserId == request.UserId)
             .HasWhere(request.TraceId, p => p.TraceId == request.TraceId)
             .HasWhere(request.LogLevel, p => p.LogLevel == request.LogLevel)

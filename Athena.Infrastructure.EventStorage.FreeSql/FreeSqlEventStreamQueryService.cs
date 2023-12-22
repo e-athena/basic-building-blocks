@@ -1,7 +1,3 @@
-using Athena.Infrastructure.EventStorage.Messaging.Requests;
-using Athena.Infrastructure.EventStorage.Messaging.Responses;
-using Athena.Infrastructure.EventStorage.Models;
-
 namespace Athena.Infrastructure.EventStorage.FreeSql;
 
 /// <summary>

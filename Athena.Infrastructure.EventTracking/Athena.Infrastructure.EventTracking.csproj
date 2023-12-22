@@ -4,7 +4,7 @@
         <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>7.0.1-preview.20231122.1</Version>
+        <Version>7.0.5</Version>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
         <PackageIcon>e-athena.png</PackageIcon>
         <Title>Athena.Infrastructure.EventTracking</Title>
@@ -24,7 +24,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Rougamo.Fody" Version="2.0.0"/>
+        <PackageReference Include="Rougamo.Fody" Version="2.1.1" PrivateAssets="contentfiles;analyzers" />
     </ItemGroup>
 
     <ItemGroup>

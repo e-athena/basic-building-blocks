@@ -1,8 +1,3 @@
-using System.Linq.Expressions;
-using Athena.Infrastructure.Expressions;
-using Athena.Infrastructure.Messaging.Requests;
-using Athena.Infrastructure.QueryFilters;
-
 namespace Athena.Infrastructure.EventStorage.FreeSql;
 
 /// <summary>

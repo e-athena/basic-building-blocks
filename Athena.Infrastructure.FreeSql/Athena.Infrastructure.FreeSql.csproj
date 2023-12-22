@@ -4,7 +4,7 @@
         <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>7.0.2-preview.20231201.2</Version>
+        <Version>7.0.5</Version>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
         <PackageIcon>e-athena.png</PackageIcon>
         <Title>Athena.Infrastructure.FreeSql</Title>
@@ -24,14 +24,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FreeSql.Cloud" Version="1.6.6"/>
-        <PackageReference Include="FreeSql.Repository" Version="3.2.802" />
+        <PackageReference Include="FreeSql.Cloud" Version="1.8.2" />
+        <PackageReference Include="FreeSql.Repository" Version="3.2.808" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Athena.Infrastructure.DataPermission\Athena.Infrastructure.DataPermission.csproj"/>
         <ProjectReference Include="..\Athena.Infrastructure.Domain\Athena.Infrastructure.Domain.csproj"/>
-        <ProjectReference Include="..\Athena.Infrastructure.EventStorage\Athena.Infrastructure.EventStorage.csproj" />
+        <ProjectReference Include="..\Athena.Infrastructure.EventStorage\Athena.Infrastructure.EventStorage.csproj"/>
     </ItemGroup>
 
     <ItemGroup>

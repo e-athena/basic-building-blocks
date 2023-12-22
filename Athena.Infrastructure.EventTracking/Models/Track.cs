@@ -1,11 +1,10 @@
-using Microsoft.Extensions.PlatformAbstractions;
-
 namespace Athena.Infrastructure.EventTracking.Models;
 
 /// <summary>
 /// 追踪信息
 /// </summary>
 [Table("event_tracking_tracks")]
+[Index(nameof(TraceId))]
 public class Track : EntityBase
 {
     /// <summary>

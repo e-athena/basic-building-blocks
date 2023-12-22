@@ -17,6 +17,7 @@ public class DefaultOrganizationService : DefaultServiceBase, IOrganizationServi
     /// 读取级联列表
     /// </summary>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<CascaderViewModel>> GetCascaderListAsync(string? parentId = null)
     {
         var url = "/api/SubApplication/GetOrganizationCascaderList";
@@ -34,6 +35,7 @@ public class DefaultOrganizationService : DefaultServiceBase, IOrganizationServi
     /// 读取树形列表
     /// </summary>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<TreeViewModel>> GetTreeListAsync(string? parentId = null)
     {
         var url = "/api/SubApplication/GetOrganizationTreeList";
@@ -52,6 +54,7 @@ public class DefaultOrganizationService : DefaultServiceBase, IOrganizationServi
     /// </summary>
     /// <param name="parentId"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<SelectViewModel>> GetSelectListAsync(string? parentId = null)
     {
         var url = "/api/SubApplication/GetOrganizationSelectList";
@@ -70,6 +73,7 @@ public class DefaultOrganizationService : DefaultServiceBase, IOrganizationServi
     /// </summary>
     /// <param name="name">名称</param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<string?> GetIdByNameAsync(string name)
     {
         const string url = "/api/SubApplication/GetOrganizationIdByName";

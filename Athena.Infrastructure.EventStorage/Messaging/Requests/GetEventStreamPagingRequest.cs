@@ -1,6 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-using Athena.Infrastructure.Messaging.Requests;
-
 namespace Athena.Infrastructure.EventStorage.Messaging.Requests;
 
 /// <summary>

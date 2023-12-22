@@ -556,8 +556,14 @@ public static class Extensions
         string? assemblyKeyword = null
     )
     {
-        return services.AddCustomIntegrationEvent(configuration, capOptions,
-            AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword));
+        var assemblies = Array.Empty<Assembly>();
+        var eventHandlerEnabled = configuration.GetEnvValue<bool>("Module:DbContext:IntegrateEventHandlerEnabled");
+        if (eventHandlerEnabled)
+        {
+            assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword);
+        }
+
+        return services.AddCustomIntegrationEvent(configuration, capOptions, assemblies);
     }
 
     /// <summary>
@@ -576,8 +582,14 @@ public static class Extensions
         params string[] assemblyKeywords
     )
     {
-        return services.AddCustomIntegrationEvent(configuration, capOptions,
-            AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords));
+        var assemblies = Array.Empty<Assembly>();
+        var eventHandlerEnabled = configuration.GetEnvValue<bool>("Module:DbContext:IntegrateEventHandlerEnabled");
+        if (eventHandlerEnabled)
+        {
+            assemblies = AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords);
+        }
+
+        return services.AddCustomIntegrationEvent(configuration, capOptions, assemblies);
     }
 
     /// <summary>

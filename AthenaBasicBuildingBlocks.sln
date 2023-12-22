@@ -104,6 +104,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Infrastructure.Event
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Infrastructure.EventStorage.SqlSugar", "Athena.Infrastructure.EventStorage.SqlSugar\Athena.Infrastructure.EventStorage.SqlSugar.csproj", "{4B546B52-3F83-4CDF-BD01-509D048CCD3E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Infrastructure.FreeSqlHelper", "Athena.Infrastructure.FreeSqlHelper\Athena.Infrastructure.FreeSqlHelper.csproj", "{31370F1E-27FA-4608-9D28-214197834A92}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Athena.Infrastructure.OTel", "Athena.Infrastructure.OTel\Athena.Infrastructure.OTel.csproj", "{EE2779BA-5FAC-42E4-A40A-80E372D9B550}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -314,6 +318,14 @@ Global
 		{4B546B52-3F83-4CDF-BD01-509D048CCD3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4B546B52-3F83-4CDF-BD01-509D048CCD3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4B546B52-3F83-4CDF-BD01-509D048CCD3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31370F1E-27FA-4608-9D28-214197834A92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31370F1E-27FA-4608-9D28-214197834A92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31370F1E-27FA-4608-9D28-214197834A92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31370F1E-27FA-4608-9D28-214197834A92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE2779BA-5FAC-42E4-A40A-80E372D9B550}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE2779BA-5FAC-42E4-A40A-80E372D9B550}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE2779BA-5FAC-42E4-A40A-80E372D9B550}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE2779BA-5FAC-42E4-A40A-80E372D9B550}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{8487FB7B-8DBB-414E-B707-CF8FFC285C75} = {E5B19187-0A21-4BC1-9690-2727240C2158}

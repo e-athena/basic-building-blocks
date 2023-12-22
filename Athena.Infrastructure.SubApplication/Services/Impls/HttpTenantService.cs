@@ -29,6 +29,7 @@ public class HttpTenantService : DefaultServiceBase, ITenantService
     /// <param name="tenantCode"></param>
     /// <param name="appId"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<TenantInfo?> GetAsync(string tenantCode, string? appId)
     {
         var cacheKey = $"tenant:{tenantCode}";

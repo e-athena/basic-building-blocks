@@ -56,7 +56,8 @@ public class LoggerStorageService : ILoggerStorageService
     public Task<Paging<GetLogPagingResponse>> GetPagingAsync(GetLogPagingRequest request)
     {
         return Query(request.ServiceName)
-            .Where(p => p.CreatedOn > request.DateRange[0] && p.CreatedOn < request.DateRange[1].AddDays(1))
+            .HasWhere(request.DateRange,
+                p => p.CreatedOn > request.DateRange![0] && p.CreatedOn < request.DateRange[1].AddDays(1))
             .HasWhere(request.UserId, p => p.UserId == request.UserId)
             .HasWhere(request.TraceId, p => p.TraceId == request.TraceId)
             .HasWhere(request.LogLevel, p => p.LogLevel == request.LogLevel)

@@ -1,6 +1,5 @@
 namespace Athena.Infrastructure.SubApplication;
 
-
 /// <summary>
 /// Dto基类
 /// </summary>

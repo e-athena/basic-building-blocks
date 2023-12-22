@@ -24,14 +24,63 @@ public class AuditLogMiddleware
     /// <param name="context"></param>
     public async Task Invoke(HttpContext context)
     {
-        // 默认get为读取数据
-        var isQuery = context.Request.Path.ToString().ToLower().Contains("get");
-        // 不保存审计日志
-        if (isQuery || !context.Request.Path.HasValue || !context.Request.Path.Value.ToLower().StartsWith("/api/"))
+        var configuration = context.RequestServices.GetService<IConfiguration>();
+
+        #region 前置检查
+
+        // 读取配置，判断是否需要保存审计日志
+        var auditLogScope = configuration?.GetEnvValue<string>("Module:AuditLog:Scope");
+        var path = context.Request.Path.ToString().ToLower();
+        // 1、默认get为读取数据、2、不是api开头的接口不记录日志、3、不是全量日志的接口不记录日志
+        if ((path.Contains("get") || !path.ToLower().StartsWith("/api/")) && auditLogScope != "Full")
         {
             await _next(context);
             return;
         }
+
+        #endregion
+
+        #region 检查是否启用审计日志
+
+        if (!bool.TryParse(configuration?.GetSection("EnableAuditLog").Value, out var enabledAuditLog))
+        {
+            // 默认启用
+            enabledAuditLog = true;
+        }
+
+        // 检查环境变量是否启用审计日志
+        var enabledAuditLogEnv = Environment.GetEnvironmentVariable("ENABLE_AUDIT_LOG");
+        if (enabledAuditLogEnv != null)
+        {
+            enabledAuditLog = bool.TryParse(enabledAuditLogEnv, out enabledAuditLog) && enabledAuditLog;
+        }
+
+        if (!enabledAuditLog)
+        {
+            enabledAuditLog = configuration?.GetEnvValue<bool>("Module:AuditLog:Enabled") ?? false;
+        }
+
+        // 不启用
+        if (!enabledAuditLog)
+        {
+            await _next(context);
+            return;
+        }
+
+        // 读取需要过滤的路由
+        var filterRoutes = configuration?.GetEnvValues<string>("Module:AuditLog:FilterRoutes");
+        if (filterRoutes != null && filterRoutes.Any())
+        {
+            if (filterRoutes.Any(p => p.ToLower() == path))
+            {
+                await _next(context);
+                return;
+            }
+        }
+
+        #endregion
+
+        #region 记录请求日志相关信息
 
         _stopwatch.Restart();
         var startTime = DateTime.Now;
@@ -74,26 +123,7 @@ public class AuditLogMiddleware
         context.Response.OnCompleted(() =>
         {
             _stopwatch.Stop();
-            var configuration = context.RequestServices.GetService<IConfiguration>();
             var serviceName = configuration?.GetSection("ServiceName").Value ?? "CommonService";
-            if (!bool.TryParse(configuration?.GetSection("EnableAuditLog").Value, out var enabledAuditLog))
-            {
-                // 默认启用
-                enabledAuditLog = true;
-            }
-
-            // 检查环境变量是否启用审计日志
-            var enabledAuditLogEnv = Environment.GetEnvironmentVariable("ENABLE_AUDIT_LOG");
-            if (enabledAuditLogEnv != null)
-            {
-                enabledAuditLog = bool.TryParse(enabledAuditLogEnv, out enabledAuditLog) && enabledAuditLog;
-            }
-
-            // 不启用
-            if (!enabledAuditLog)
-            {
-                return Task.CompletedTask;
-            }
 
             // 获取日志服务
             var loggerService = context.RequestServices.GetService<ILoggerService>();
@@ -126,6 +156,8 @@ public class AuditLogMiddleware
             });
             return Task.CompletedTask;
         });
+
+        #endregion
     }
 
     private static async Task<string> GetResponse(HttpResponse response)

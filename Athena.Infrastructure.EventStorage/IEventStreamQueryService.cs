@@ -1,7 +1,3 @@
-using Athena.Infrastructure.EventStorage.Messaging.Requests;
-using Athena.Infrastructure.EventStorage.Messaging.Responses;
-using Athena.Infrastructure.Messaging.Responses;
-
 namespace Athena.Infrastructure.EventStorage;
 
 /// <summary>

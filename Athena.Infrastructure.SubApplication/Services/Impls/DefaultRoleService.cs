@@ -18,6 +18,7 @@ public class DefaultRoleService : DefaultServiceBase, IRoleService
     /// </summary>
     /// <param name="organizationId"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<SelectViewModel>> GetSelectListAsync(string? organizationId = null)
     {
         var url = "/api/SubApplication/GetRoleSelectList";

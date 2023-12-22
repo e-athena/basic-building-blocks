@@ -600,7 +600,7 @@ public static class QueryableExtensions
         CancellationToken cancellationToken = default
     )
     {
-        using var activity = FreeSqlOTelActivityManager.Instance.StartActivity("数据列表查询");
+        using var activity = FreeSqlOTelActivityManager.Instance.StartActivity();
         if (!string.IsNullOrEmpty(sorter))
         {
             activity?.SetTag("query.sorter", sorter);
@@ -615,7 +615,7 @@ public static class QueryableExtensions
         // 兼容组织架构数据权限查询
         query = query.LeftJoinHandler();
 
-        using var listActivity = FreeSqlOTelActivityManager.Instance.StartActivity("读取列表数据");
+        using var listActivity = FreeSqlOTelActivityManager.Instance.StartActivity();
         listActivity?.SetTag("query.sql.text", query.ToSql());
         var result = hasLambda
             ? await query.ToListAsync(funcExpression, cancellationToken)
@@ -998,7 +998,7 @@ public static class QueryableExtensions
         CancellationToken cancellationToken = default
     )
     {
-        using var activity = FreeSqlOTelActivityManager.Instance.StartActivity("分页数据查询");
+        using var activity = FreeSqlOTelActivityManager.Instance.StartActivity();
         activity?.SetTag("query.page.index", pageIndex.ToString());
         activity?.SetTag("query.page.size", pageSize.ToString());
         if (!string.IsNullOrEmpty(sorter))
@@ -1017,7 +1017,7 @@ public static class QueryableExtensions
 
         // sql = query.ToSql();
         long totalItems;
-        using (var countActivity = FreeSqlOTelActivityManager.Instance.StartActivity("读取总记录数"))
+        using (var countActivity = FreeSqlOTelActivityManager.Instance.StartActivity())
         {
             totalItems = await query.CountAsync(cancellationToken);
             countActivity?.SetTag("query.sql.text", query.ToSql());
@@ -1043,7 +1043,7 @@ public static class QueryableExtensions
             return page;
         }
 
-        using (var listActivity = FreeSqlOTelActivityManager.Instance.StartActivity("读取列表数据"))
+        using (var listActivity = FreeSqlOTelActivityManager.Instance.StartActivity())
         {
             query = query.Page(pageIndex, pageSize);
             listActivity?.SetTag("query.sql.text", query.ToSql());

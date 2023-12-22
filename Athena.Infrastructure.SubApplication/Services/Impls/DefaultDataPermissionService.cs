@@ -27,6 +27,7 @@ public class DefaultDataPermissionService : DefaultServiceBase, IDataPermissionS
     /// <param name="resourceKey"></param>
     /// <param name="appId"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<QueryFilterGroup>> GetPolicyQueryFilterGroupsAsync(string userId, string resourceKey,
         string? appId)
     {
@@ -57,6 +58,7 @@ public class DefaultDataPermissionService : DefaultServiceBase, IDataPermissionS
     /// <param name="userId"></param>
     /// <param name="appId"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public List<string> GetUserOrganizationIds(string userId, string? appId)
     {
         return GetUserOrganizationIdsAsync(userId, appId).ConfigureAwait(false).GetAwaiter().GetResult();
@@ -68,6 +70,7 @@ public class DefaultDataPermissionService : DefaultServiceBase, IDataPermissionS
     /// <param name="userId"></param>
     /// <param name="appId"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<string>> GetUserOrganizationIdsAsync(string userId, string? appId)
     {
         // Key
@@ -96,6 +99,7 @@ public class DefaultDataPermissionService : DefaultServiceBase, IDataPermissionS
     /// <param name="userId"></param>
     /// <param name="appId"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public List<string> GetUserOrganizationIdsTree(string userId, string? appId)
     {
         return GetUserOrganizationIdsTreeAsync(userId, appId).ConfigureAwait(false).GetAwaiter().GetResult();
@@ -107,6 +111,7 @@ public class DefaultDataPermissionService : DefaultServiceBase, IDataPermissionS
     /// <param name="userId"></param>
     /// <param name="appId"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<string>> GetUserOrganizationIdsTreeAsync(string userId, string? appId)
     {
         // Key
@@ -134,6 +139,7 @@ public class DefaultDataPermissionService : DefaultServiceBase, IDataPermissionS
     /// 读取用户角色的数据范围列表
     /// </summary>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public List<DataPermission.Models.DataPermission> GetUserDataScopes(string userId, string? appId)
     {
         return GetUserDataScopesAsync(userId, appId).ConfigureAwait(false).GetAwaiter().GetResult();
@@ -145,13 +151,15 @@ public class DefaultDataPermissionService : DefaultServiceBase, IDataPermissionS
     /// <param name="userId"></param>
     /// <param name="appId"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<DataPermission.Models.DataPermission>> GetUserDataScopesAsync(string userId, string? appId)
     {
         // Key
         var key = string.Format(CacheConstant.UserDataScopesKey, userId);
         // 过期时间
         var expireTime = TimeSpan.FromMinutes(30);
-        return await _cacheManager.GetOrCreateAsync(key, QueryFunc, expireTime) ?? new List<DataPermission.Models.DataPermission>();
+        return await _cacheManager.GetOrCreateAsync(key, QueryFunc, expireTime) ??
+               new List<DataPermission.Models.DataPermission>();
 
         async Task<List<DataPermission.Models.DataPermission>> QueryFunc()
         {

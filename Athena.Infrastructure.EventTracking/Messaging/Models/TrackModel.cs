@@ -1,5 +1,3 @@
-using Microsoft.Extensions.PlatformAbstractions;
-
 namespace Athena.Infrastructure.EventTracking.Messaging.Models;
 
 /// <summary>

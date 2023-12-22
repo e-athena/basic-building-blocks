@@ -65,9 +65,19 @@ public class TableColumnAttribute : Attribute
     public bool Sorter { get; set; }
 
     /// <summary>
+    /// 强制禁用排序，一般用于枚举类型
+    /// </summary>
+    public bool ForceDisableSorter { get; set; }
+
+    /// <summary>
     /// 是否可筛选
     /// </summary>
     public bool Filters { get; set; }
+
+    /// <summary>
+    /// 强制禁用筛选，一般用于枚举类型
+    /// </summary>
+    public bool ForceDisableFilters { get; set; }
 
     /// <summary>
     /// 数据类型

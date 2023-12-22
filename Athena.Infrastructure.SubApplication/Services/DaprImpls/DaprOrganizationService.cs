@@ -25,6 +25,7 @@ public class DaprOrganizationService : DaprServiceBase, IOrganizationService
     /// 读取级联列表
     /// </summary>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<CascaderViewModel>> GetCascaderListAsync(string? parentId = null)
     {
         var methodName = "/api/SubApplication/GetOrganizationCascaderList";
@@ -43,6 +44,7 @@ public class DaprOrganizationService : DaprServiceBase, IOrganizationService
     /// 读取树形列表
     /// </summary>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<TreeViewModel>> GetTreeListAsync(string? parentId = null)
     {
         var methodName = "/api/SubApplication/GetOrganizationTreeList";
@@ -62,6 +64,7 @@ public class DaprOrganizationService : DaprServiceBase, IOrganizationService
     /// </summary>
     /// <param name="parentId"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<SelectViewModel>> GetSelectListAsync(string? parentId = null)
     {
         var methodName = "/api/SubApplication/GetOrganizationSelectList";
@@ -81,6 +84,7 @@ public class DaprOrganizationService : DaprServiceBase, IOrganizationService
     /// </summary>
     /// <param name="name">名称</param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<string?> GetIdByNameAsync(string name)
     {
         var methodName = $"/api/SubApplication/GetOrganizationIdByName?organizationName={name}";

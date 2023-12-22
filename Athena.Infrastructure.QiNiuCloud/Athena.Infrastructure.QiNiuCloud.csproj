@@ -33,10 +33,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Resource Include="e-athena.png">
-        <Pack>True</Pack>
-        <PackagePath/>
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Resource>
+        <Resource Include="e-athena.png">
+            <Pack>True</Pack>
+            <PackagePath/>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Resource>
     </ItemGroup>
 </Project>

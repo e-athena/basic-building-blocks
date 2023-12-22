@@ -3,10 +3,15 @@ using Athena.Infrastructure.Files.Models;
 namespace Athena.Infrastructure.Files;
 
 /// <summary>
-///
+/// 文件对象服务接口
 /// </summary>
 public interface IFileObjectService
 {
+    /// <summary>
+    /// 提供程序
+    /// </summary>
+    public string Provider { get; }
+
     /// <summary>
     /// 上传
     /// </summary>
@@ -76,5 +81,6 @@ public interface IFileObjectService
     /// <param name="marker"></param>
     /// <param name="limit"></param>
     /// <returns></returns>
-    Task<List<FileObject>?> ListAsync(string bucketName, string prefix = null, string marker = null, int limit = 1000);
+    Task<List<FileObject>?> ListAsync(string bucketName, string? prefix = null, string? marker = null,
+        int limit = 1000);
 }

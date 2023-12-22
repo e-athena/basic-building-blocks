@@ -35,7 +35,8 @@ public class DaprTenantService : ITenantService
     /// <param name="tenantCode"></param>
     /// <param name="appId"></param>
     /// <returns></returns>
-    public async Task<TenantInfo?> GetAsync(string tenantCode, string? appId)
+    [ServiceInvokeExceptionLogging]
+    public Task<TenantInfo?> GetAsync(string tenantCode, string? appId)
     {
         var cacheKey = $"tenant:{tenantCode}";
         if (!string.IsNullOrEmpty(appId))
@@ -43,7 +44,7 @@ public class DaprTenantService : ITenantService
             cacheKey += ":" + appId;
         }
 
-        return await _cacheManager.GetOrCreateAsync(cacheKey, async () =>
+        return _cacheManager.GetOrCreateAsync(cacheKey, async () =>
         {
             var methodName = $"/api/Util/GetTenantInfo?tenantCode={tenantCode}&appId={appId}";
 

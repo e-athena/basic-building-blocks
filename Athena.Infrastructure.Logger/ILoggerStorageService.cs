@@ -1,6 +1,3 @@
-using Athena.Infrastructure.Messaging.Responses;
-using Athena.Infrastructure.ViewModels;
-
 namespace Athena.Infrastructure.Logger;
 
 /// <summary>

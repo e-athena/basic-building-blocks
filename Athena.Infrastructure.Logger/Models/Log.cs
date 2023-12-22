@@ -1,11 +1,11 @@
-using System.Text.Json.Serialization;
-
 namespace Athena.Infrastructure.Logger.Models;
 
 /// <summary>
 /// 日志模型
 /// </summary>
 [Table("logs")]
+[Index(nameof(CreatedOn))]
+[Index(nameof(UserId))]
 public class Log
 {
     /// <summary>

@@ -1,7 +1,4 @@
-﻿using Athena.Infrastructure.Domain.Attributes;
-using Athena.Infrastructure.SqlSugar.CAPs.Extends.Models;
-
-// ReSharper disable once CheckNamespace
+﻿// ReSharper disable once CheckNamespace
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -36,54 +33,14 @@ public static class Extensions
 
         // 添加CAP的表
         SqlSugarClientHelper.AutoSyncCapMessageTable(sqlSugarClient, isCodeFirst: false);
-        sqlSugarClient.CodeFirst.InitTables(types.ToArray());
-
-        // 处理索引
-        // 读取types中带有IndexAttribute的类
-        var indexTypes = types
-            .Where(p => p.GetCustomAttributes().Any(c => c is IndexAttribute))
-            .ToList();
-
-        // 处理索引
-        foreach (var type in indexTypes)
+        if (types.Count <= 0)
         {
-            // 读取索引
-            var indexAttributes = type.GetCustomAttributes()
-                .Where(p => p is IndexAttribute)
-                .Cast<IndexAttribute>()
-                .ToList();
-
-            // 读取表名
-            var tableName = type.GetCustomAttributes()
-                .Where(p => p is TableAttribute or SugarTable)
-                .Select(p => p is TableAttribute tableAttribute ? tableAttribute.Name : ((SugarTable) p).TableName)
-                .FirstOrDefault();
-
-            foreach (var indexAttribute in indexAttributes)
-            {
-                // 读取索引名
-                var indexName = indexAttribute.Name ??
-                                $"IX_{tableName}_{string.Join("_", indexAttribute.PropertyNames)}";
-                if (indexName.Length > 64)
-                {
-                    indexName = indexName[..64];
-                }
-
-                // 检查是否存在
-                var isExists = sqlSugarClient.DbMaintenance.IsAnyIndex(indexName);
-                // 如果不存在则添加
-                if (!isExists)
-                {
-                    // 添加索引
-                    sqlSugarClient.DbMaintenance.CreateIndex(
-                        tableName,
-                        indexAttribute.PropertyNames.ToArray(),
-                        indexName,
-                        indexAttribute.IsUnique
-                    );
-                }
-            }
+            return;
         }
+
+        var dictionary = types.ToDictionary<Type, Type, string?>(type => type, _ => null);
+        // 处理索引
+        IndexHelper.Create(sqlSugarClient, dictionary);
     }
 
     /// <summary>

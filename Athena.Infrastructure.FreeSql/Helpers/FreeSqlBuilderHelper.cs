@@ -1,3 +1,4 @@
+using Athena.Infrastructure.DataAnnotations.Schema;
 using Athena.Infrastructure.FreeSql.CAPs.Extends;
 
 namespace Athena.Infrastructure.FreeSql.Helpers;

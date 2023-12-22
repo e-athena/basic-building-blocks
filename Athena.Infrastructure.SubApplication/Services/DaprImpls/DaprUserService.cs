@@ -29,6 +29,7 @@ public class DaprUserService : DaprServiceBase, IUserService
     /// </summary>
     /// <param name="userId">用户ID</param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<ExternalPageModel>> GetExternalPagesAsync(string userId)
     {
         var methodName = $"/api/SubApplication/GetExternalPages?userId={userId}";
@@ -47,6 +48,7 @@ public class DaprUserService : DaprServiceBase, IUserService
     /// <param name="appId">应用ID</param>
     /// <param name="moduleName">模块名称</param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<UserCustomColumnModel>> GetUserCustomColumnsAsync(
         string userId,
         string appId,
@@ -74,6 +76,7 @@ public class DaprUserService : DaprServiceBase, IUserService
     /// <param name="moduleName"></param>
     /// <param name="userId"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<UserColumnPermissionModel>?> GetUserColumnPermissionsAsync(string? appId, string moduleName,
         string? userId)
     {
@@ -96,6 +99,7 @@ public class DaprUserService : DaprServiceBase, IUserService
     /// <param name="userId">用户ID</param>
     /// <param name="appId">应用ID</param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<ResourceModel>> GetUserResourceAsync(string userId, string appId)
     {
         var methodName = $"/api/SubApplication/GetUserResource?userId={userId}&appId={appId}";
@@ -116,6 +120,7 @@ public class DaprUserService : DaprServiceBase, IUserService
     /// <param name="userId"></param>
     /// <param name="appId"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<string>> GetUserResourceCodesAsync(string userId, string appId)
     {
         var methodName = $"/api/SubApplication/GetUserResourceCodes?userId={userId}&appId={appId}";
@@ -134,6 +139,7 @@ public class DaprUserService : DaprServiceBase, IUserService
     /// </summary>
     /// <param name="userId"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<GetUserInfoResponse?> GetUserInfoAsync(string userId)
     {
         var methodName = $"/api/SubApplication/GetUserInfo?userId={userId}";
@@ -149,6 +155,7 @@ public class DaprUserService : DaprServiceBase, IUserService
     /// </summary>
     /// <param name="userName"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<string?> GetIdByUserNameAsync(string userName)
     {
         var methodName = $"/api/SubApplication/GetUserIdByUserName?userName={userName}";
@@ -163,6 +170,7 @@ public class DaprUserService : DaprServiceBase, IUserService
     /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<long> UpdateUserCustomColumnsAsync(UpdateUserCustomColumnsRequest request,
         CancellationToken cancellationToken)
     {
@@ -183,6 +191,7 @@ public class DaprUserService : DaprServiceBase, IUserService
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     /// <exception cref="NotImplementedException"></exception>
+    [ServiceInvokeExceptionLogging]
     public async Task<string> CreateUserAsync(CreateUserRequest request, CancellationToken cancellationToken = default)
     {
         var result = await _daprClient
@@ -208,6 +217,7 @@ public class DaprUserService : DaprServiceBase, IUserService
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     /// <exception cref="NotImplementedException"></exception>
+    [ServiceInvokeExceptionLogging]
     public async Task<string> UpdateUserAsync(UpdateUserRequest request, CancellationToken cancellationToken = default)
     {
         var result = await _daprClient
@@ -231,6 +241,7 @@ public class DaprUserService : DaprServiceBase, IUserService
     /// </summary>
     /// <param name="readFromCache"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<SelectViewModel>> GetAllUserAsync(bool readFromCache = true)
     {
         if (!readFromCache)

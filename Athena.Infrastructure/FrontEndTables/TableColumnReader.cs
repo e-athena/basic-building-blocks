@@ -54,10 +54,11 @@ public static class TableColumnReader
         foreach (var property in type.GetProperties())
         {
             var tableColumnInfo = new TableColumnInfo();
+            TableColumnAttribute? attribute = null;
             // 如果包含了TableColumnAttribute特性，则读取
             if (property.IsDefined(typeof(TableColumnAttribute), true))
             {
-                var attribute = property.GetCustomAttribute<TableColumnAttribute>(true);
+                attribute = property.GetCustomAttribute<TableColumnAttribute>(true);
                 if (attribute != null)
                 {
                     if (attribute.Ignore)
@@ -146,16 +147,31 @@ public static class TableColumnReader
                 for (var i = 0; i < enumList.Count; i++)
                 {
                     var @enum = enumList[i];
+                    var status = enumStatus[i % enumStatus.Length];
+                    var valueStatus = @enum.ToValueStatus();
+                    if (valueStatus.HasValue)
+                    {
+                        status = valueStatus.Value.ToString();
+                    }
+
                     valueEnumDict.Add(@enum.GetHashCode(), new
                     {
-                        Status = enumStatus[i % enumStatus.Length],
+                        Status = status,
                         Text = @enum.ToDescription()
                     });
                 }
 
-                // 枚举默认可排序和筛选
-                tableColumnInfo.Sorter = true;
-                tableColumnInfo.Filters = true;
+                // 枚举默认可排序和筛选，如果不是强制禁用的话
+                if (attribute == null)
+                {
+                    tableColumnInfo.Sorter = true;
+                    tableColumnInfo.Filters = true;
+                }
+                else
+                {
+                    tableColumnInfo.Sorter = attribute is {ForceDisableSorter: false};
+                    tableColumnInfo.Filters = attribute is {ForceDisableFilters: false};
+                }
             }
             else if (
                 property.PropertyType == typeof(string) ||

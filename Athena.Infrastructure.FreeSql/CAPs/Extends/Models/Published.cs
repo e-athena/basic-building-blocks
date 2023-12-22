@@ -4,7 +4,7 @@ namespace Athena.Infrastructure.FreeSql.CAPs.Extends.Models;
 /// 
 /// </summary>
 [Table(Name = CapConstant.PublishedTableName)]
-[Domain.Attributes.Index(nameof(ExpiresAt), Name = "IX_Published_ExpiresAt", IsUnique = false)]
+[DataAnnotations.Schema.Index(nameof(ExpiresAt), Name = "IX_Published_ExpiresAt", IsUnique = false)]
 public class Published
 {
     /// <summary>

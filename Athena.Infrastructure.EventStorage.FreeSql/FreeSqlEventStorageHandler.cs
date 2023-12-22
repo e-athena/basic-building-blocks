@@ -1,8 +1,3 @@
-using Athena.Infrastructure.Event.Attributes;
-using Athena.Infrastructure.Event.Interfaces;
-using Athena.Infrastructure.EventStorage.Events;
-using Athena.Infrastructure.EventStorage.Models;
-
 namespace Athena.Infrastructure.EventStorage.FreeSql;
 
 /// <summary>

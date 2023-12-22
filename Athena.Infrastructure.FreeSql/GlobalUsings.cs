@@ -20,7 +20,6 @@ global using Athena.Infrastructure.Messaging.Requests;
 global using Athena.Infrastructure.Messaging.Responses;
 global using Athena.Infrastructure.Domain;
 global using Athena.Infrastructure.Exceptions;
-global using Athena.Infrastructure.Domain.Attributes;
 global using Athena.Infrastructure.Enums;
 global using Athena.Infrastructure.Event;
 global using Athena.Infrastructure.Event.IntegrationEvents;

@@ -14,6 +14,7 @@ builder.AddAthena(services =>
 {
     // 
     // services.AddCustomMiddlewareInjector();
+    services.AddSubApplicationServices(builder.Configuration);
 });
 var app = builder.Build();
 app.UseAthena<Program>(mapActions: application =>

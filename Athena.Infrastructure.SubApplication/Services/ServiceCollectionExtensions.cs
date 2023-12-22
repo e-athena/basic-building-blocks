@@ -40,6 +40,8 @@ public static class ServiceCollectionExtensions
             options.AppId = config.AppId;
             options.HttpApiUrl = config.HttpApiUrl;
             options.CallType = config.CallType;
+            options.ThrowException = config.ThrowException;
+            options.Timeout = config.Timeout;
         });
         // 通用服务
         services.AddScoped<ICommonService, DefaultCommonService>();
@@ -100,6 +102,11 @@ public class ServiceCallConfig
     /// 超时时间/秒
     /// </summary>
     public int Timeout { get; set; } = 30;
+
+    /// <summary>
+    /// 抛出错误
+    /// </summary>
+    public bool ThrowException { get; set; } = true;
 
     /// <summary>
     /// 检查配置是否正确，1、CallType为Dapr时，AppId不能为空，2、CallType为Http时，HttpApiUrl不能为空

@@ -1,7 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using Athena.Infrastructure.Domain.Attributes;
-
 namespace Athena.Infrastructure.EventStorage.Models;
 
 /// <summary>

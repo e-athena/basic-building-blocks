@@ -136,6 +136,14 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
         var serviceName = configuration?.GetSection("ServiceName").Value ?? "CommonService";
 
         var request = context.HttpContext.Request;
+
+        var type = ex.GetType().Name;
+        var innerMessage = $"[{type}] {ex.Message}";
+        if (ex.InnerException != null && ex.Message != ex.InnerException.Message)
+        {
+            innerMessage += "," + ex.InnerException.Message;
+        }
+
         // 写日志
         await loggerService.WriteAsync(new Log
         {
@@ -154,7 +162,7 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
                 InnerMessage = ex.InnerException?.Message,
                 ex.StackTrace
             }),
-            ErrorMessage = ex.Message,
+            ErrorMessage = innerMessage,
             StatusCode = 500,
             UserId = context.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value,
             UserName = context.HttpContext.User.FindFirst(ClaimTypes.Name)?.Value,
@@ -163,7 +171,6 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
             AliasName = "GlobalException"
         });
 
-        var type = ex.GetType().Name;
         const int statusCode = 500;
         context.HttpContext.Response.StatusCode = statusCode;
         const string message = "Internal Server Error";
@@ -189,15 +196,9 @@ public class ApiExceptionFilterAttribute : ExceptionFilterAttribute
             return;
         }
 
-        // 如果是开发环境，则返回详细的错误信息
-        var innerMessage = $"[{type}] {ex.Message}";
-        if (ex.InnerException != null && ex.Message != ex.InnerException.Message)
-        {
-            innerMessage += "," + ex.InnerException.Message;
-        }
-
         context.Result = new ObjectResult(new
         {
+            // 如果是开发环境，则返回详细的错误信息
             InnerMessage = innerMessage,
             Message = message,
             Success = false,
@@ -225,6 +226,7 @@ internal class ValidationResult
     /// <summary>
     /// 错误信息
     /// </summary>
+    // ReSharper disable once CollectionNeverUpdated.Global
     public List<ValidationError> Errors { get; } = new();
 }
 

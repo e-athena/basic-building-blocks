@@ -1,4 +1,6 @@
+using System.ComponentModel.DataAnnotations.Schema;
 // ReSharper disable once CheckNamespace
+using System.Reflection;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -54,43 +56,25 @@ public static class Extensions
                     connectionString,
                     dataType
                 ));
-            sqlSugar.CodeFirst.InitTables(typeof(Track), typeof(TrackConfig));
-            const string trackIndexName = "IX_Track_TraceId";
-            // 检查是否存在
-            var isExists1 = sqlSugar.DbMaintenance.IsAnyIndex(trackIndexName);
-            // 如果不存在则添加
-            if (!isExists1)
+
+            var assembly = Assembly.Load("Athena.Infrastructure.EventTracking");
+            var types = assembly
+                .GetExportedTypes()
+                .Where(t => t
+                    .GetCustomAttributes()
+                    .Any(p =>
+                        p.GetType() == typeof(TableAttribute) ||
+                        p.GetType() == typeof(SugarTable)
+                    )
+                ).ToArray();
+            if (types.Length <= 0)
             {
-                // 添加索引
-                sqlSugar.DbMaintenance
-                    .CreateIndex(
-                        sqlSugar.DbMaintenance.Context.EntityMaintenance.GetTableName(typeof(Track)),
-                        new[]
-                        {
-                            "TraceId"
-                        },
-                        trackIndexName
-                    );
+                return sqlSugar;
             }
 
-            const string trackConfigIndexName = "IX_TrackConfig_ConfigId";
-            // 检查是否存在
-            var isExists2 = sqlSugar.DbMaintenance.IsAnyIndex(trackConfigIndexName);
-            // 如果不存在则添加
-            if (!isExists2)
-            {
-                // 添加索引
-                sqlSugar.DbMaintenance
-                    .CreateIndex(
-                        sqlSugar.DbMaintenance.Context.EntityMaintenance.GetTableName(typeof(TrackConfig)),
-                        new[]
-                        {
-                            "ConfigId"
-                        },
-                        trackConfigIndexName
-                    );
-            }
-
+            var dictionary = types.ToDictionary<Type, Type, string?>(type => type, _ => null);
+            // 处理索引
+            IndexHelper.Create(sqlSugar, dictionary);
             return sqlSugar;
         });
         services.AddSingleton<ITrackService, TrackService>();

@@ -4,7 +4,7 @@
         <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>7.0.1-preview.20231205.1</Version>
+        <Version>7.0.5</Version>
         <PackageIcon>e-athena.png</PackageIcon>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
         <Title>Athena.Infrastructure.CsRedis</Title>
@@ -16,7 +16,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Caching.CSRedis" Version="3.8.671"/>
+        <PackageReference Include="Caching.CSRedis" Version="3.8.800" />
     </ItemGroup>
 
     <ItemGroup>

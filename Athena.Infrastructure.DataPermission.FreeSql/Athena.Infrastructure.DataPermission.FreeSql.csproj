@@ -4,7 +4,7 @@
         <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>7.0.1-preview.20231201.1</Version>
+        <Version>7.0.5</Version>
         <PackageIcon>e-athena.png</PackageIcon>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
         <Title>Athena.Infrastructure.DataPermission.FreeSql</Title>
@@ -20,7 +20,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="FreeSql" Version="3.2.802" />
+        <PackageReference Include="FreeSql" Version="3.2.808" />
     </ItemGroup>
 
     <ItemGroup>

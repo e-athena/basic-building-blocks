@@ -31,6 +31,8 @@ public static class AthenaWebApplicationBuilderExtensions
             map =>
             {
                 map.MapSyncDatabase();
+                map.MapEventSelectList();
+                map.MapEventTrackingList();
                 mapActions?.Invoke(map);
             });
         return webApplication;
@@ -64,6 +66,50 @@ public static class AthenaWebApplicationBuilderExtensions
                 {
                     Success = true,
                     Data = "ok"
+                };
+            })
+            .AddEndpointFilter<BasicAuthEndpointFilter>();
+    }
+
+    /// <summary>
+    /// 事件下拉列表
+    /// </summary>
+    /// <param name="app"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    private static void MapEventSelectList(this WebApplication app)
+    {
+        app.MapGet("/api/external/get-events", () =>
+            {
+                var keywords = AssemblyHelper
+                    .GetAssemblyKeywords(app.Configuration, "Module:EventTracking:AssemblyKeywords");
+                var data = EventTrackingHelper.GetEventSelectList(keywords);
+                return new ApiResult<IList<SelectViewModel>>
+                {
+                    Success = true,
+                    Data = data
+                };
+            })
+            .AddEndpointFilter<BasicAuthEndpointFilter>();
+    }
+
+    /// <summary>
+    /// 事件追踪配置列表
+    /// </summary>
+    /// <param name="app"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    private static void MapEventTrackingList(this WebApplication app)
+    {
+        app.MapGet("/api/external/get-event-tracking-list", () =>
+            {
+                var keywords = AssemblyHelper
+                    .GetAssemblyKeywords(app.Configuration, "Module:EventTracking:AssemblyKeywords");
+                var data = EventTrackingHelper.GetEventTrackingInfos(keywords);
+                return new ApiResult<IList<EventTrackingInfo>>
+                {
+                    Success = true,
+                    Data = data
                 };
             })
             .AddEndpointFilter<BasicAuthEndpointFilter>();

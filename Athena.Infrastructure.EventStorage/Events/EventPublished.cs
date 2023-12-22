@@ -1,6 +1,3 @@
-using Athena.Infrastructure.Event;
-using Athena.Infrastructure.EventStorage.Models;
-
 namespace Athena.Infrastructure.EventStorage.Events;
 
 /// <summary>

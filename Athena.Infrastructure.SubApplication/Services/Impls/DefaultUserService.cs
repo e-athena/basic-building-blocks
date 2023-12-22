@@ -22,6 +22,7 @@ public class DefaultUserService : DefaultServiceBase, IUserService
     /// </summary>
     /// <param name="userId">用户ID</param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<ExternalPageModel>> GetExternalPagesAsync(string userId)
     {
         const string url = "/api/SubApplication/GetExternalPages";
@@ -41,6 +42,7 @@ public class DefaultUserService : DefaultServiceBase, IUserService
     /// <param name="appId">应用ID</param>
     /// <param name="moduleName">模块名称</param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<UserCustomColumnModel>> GetUserCustomColumnsAsync(
         string userId,
         string appId,
@@ -71,6 +73,7 @@ public class DefaultUserService : DefaultServiceBase, IUserService
     /// <param name="moduleName"></param>
     /// <param name="userId"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<UserColumnPermissionModel>?> GetUserColumnPermissionsAsync(string? appId, string moduleName,
         string? userId)
     {
@@ -97,6 +100,7 @@ public class DefaultUserService : DefaultServiceBase, IUserService
     /// <param name="userId">用户ID</param>
     /// <param name="appId">应用ID</param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<ResourceModel>> GetUserResourceAsync(string userId, string appId)
     {
         const string url = "/api/SubApplication/GetUserResource";
@@ -121,6 +125,7 @@ public class DefaultUserService : DefaultServiceBase, IUserService
     /// <param name="userId"></param>
     /// <param name="appId"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<string>> GetUserResourceCodesAsync(string userId, string appId)
     {
         const string url = "/api/SubApplication/GetUserResourceCodes";
@@ -144,6 +149,7 @@ public class DefaultUserService : DefaultServiceBase, IUserService
     /// </summary>
     /// <param name="userId"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<GetUserInfoResponse?> GetUserInfoAsync(string userId)
     {
         const string url = "/api/SubApplication/GetUserInfo";
@@ -162,6 +168,7 @@ public class DefaultUserService : DefaultServiceBase, IUserService
     /// </summary>
     /// <param name="userName"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<string?> GetIdByUserNameAsync(string userName)
     {
         const string url = "/api/SubApplication/GetUserIdByUserName";
@@ -180,12 +187,13 @@ public class DefaultUserService : DefaultServiceBase, IUserService
     /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<long> UpdateUserCustomColumnsAsync(UpdateUserCustomColumnsRequest request,
         CancellationToken cancellationToken)
     {
         const string url = "/api/SubApplication/UpdateUserCustomColumns";
         var result = await GetRequest(url)
-            .PostJsonAsync(request, cancellationToken)
+            .PostJsonAsync(request, cancellationToken: cancellationToken)
             .ReceiveJson<ApiResult<long>>();
         return result?.Data ?? 0;
     }
@@ -197,10 +205,11 @@ public class DefaultUserService : DefaultServiceBase, IUserService
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     /// <exception cref="NotImplementedException"></exception>
+    [ServiceInvokeExceptionLogging]
     public async Task<string> CreateUserAsync(CreateUserRequest request, CancellationToken cancellationToken = default)
     {
         var result = await GetRequest(request.MethodName)
-            .PostJsonAsync(request, cancellationToken)
+            .PostJsonAsync(request, cancellationToken: cancellationToken)
             .ReceiveJson<ApiResult<string>>();
 
         if (!result.Success || string.IsNullOrEmpty(result.Data))
@@ -218,11 +227,12 @@ public class DefaultUserService : DefaultServiceBase, IUserService
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     /// <exception cref="NotImplementedException"></exception>
+    [ServiceInvokeExceptionLogging]
     public async Task<string> UpdateUserAsync(UpdateUserRequest request, CancellationToken cancellationToken = default)
     {
         const string url = "/api/SubApplication/UpdateUser";
         var result = await GetRequest(url)
-            .PostJsonAsync(request, cancellationToken)
+            .PostJsonAsync(request, cancellationToken: cancellationToken)
             .ReceiveJson<ApiResult<string>>();
 
         if (!result.Success || string.IsNullOrEmpty(result.Data))
@@ -239,6 +249,7 @@ public class DefaultUserService : DefaultServiceBase, IUserService
     /// <param name="readFromCache"></param>
     /// <returns></returns>
     /// <exception cref="NotImplementedException"></exception>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<SelectViewModel>> GetAllUserAsync(bool readFromCache = true)
     {
         if (!readFromCache)

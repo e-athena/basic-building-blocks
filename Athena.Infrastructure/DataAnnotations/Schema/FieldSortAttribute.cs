@@ -1,4 +1,4 @@
-namespace Athena.Infrastructure.Domain.Attributes;
+namespace Athena.Infrastructure.DataAnnotations.Schema;
 
 /// <summary>Specifies the data type of the column as a field sort.</summary>
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false, Inherited = true)]

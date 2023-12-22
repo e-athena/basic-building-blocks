@@ -21,8 +21,8 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="FreeSql.Provider.SqliteCore" Version="3.2.802" />
-        <PackageReference Include="SQLitePCLRaw.bundle_e_sqlcipher" Version="2.1.6" />
+        <PackageReference Include="FreeSql.Provider.SqliteCore" Version="3.2.808" />
+        <PackageReference Include="SQLitePCLRaw.bundle_e_sqlcipher" Version="2.1.7" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Athena.Infrastructure.FreeSql.AspNetCore\Athena.Infrastructure.FreeSql.AspNetCore.csproj"/>

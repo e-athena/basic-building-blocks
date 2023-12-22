@@ -1,5 +1,3 @@
-using Athena.Infrastructure.Messaging.Requests;
-
 namespace Athena.Infrastructure.Logger.Messaging.Requests;
 
 /// <summary>
@@ -15,11 +13,7 @@ public class GetLogPagingRequest : GetPagingRequestBase
     /// <summary>
     /// 时间范围
     /// </summary>
-    public IList<DateTime> DateRange { get; set; } = new List<DateTime>
-    {
-        DateTime.Now.Date,
-        DateTime.Now.Date.AddDays(1)
-    };
+    public IList<DateTime>? DateRange { get; set; }
 
     /// <summary>
     /// 用户Id

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq.Expressions;
+using System.Reflection;
 using Athena.Infrastructure.ApiPermission.Attributes;
 using Athena.Infrastructure.Attributes;
 using Athena.Infrastructure.Auths;
@@ -15,9 +16,12 @@ using Athena.Infrastructure.FreeSql.Tenants;
 using Athena.Infrastructure.Messaging.Requests;
 using Athena.Infrastructure.Messaging.Responses;
 using Athena.Infrastructure.Mvc;
+using Athena.Infrastructure.QueryFilters;
 using FluentValidation;
 using FreeSql;
+using FreeSql.DataAnnotations;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FreeSqlWebApiTest.Controllers;
@@ -34,12 +38,21 @@ namespace FreeSqlWebApiTest.Controllers;
     Description = "系统基于角色授权，每个角色对不同的功能模块具备添删改查以及自定义权限等多种权限设定"
 )]
 [ApiPermissionAuthorize]
+// [ApiPermissionAuthorizeFilter]
 public class UserController : ControllerBase
 {
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(CustomBadRequestResult), StatusCodes.Status400BadRequest)]
     public async Task<string> CreateAsync([FromServices] ISender sender, CreateUserRequest request,
+        CancellationToken cancellationToken)
+    {
+        return await sender.Send(request, cancellationToken);
+    }
+
+    [HttpDelete]
+    [ProducesResponseType(typeof(ApiResult<int>), StatusCodes.Status200OK)]
+    public async Task<int> DeleteAsync([FromServices] ISender sender, DeleteUserRequest request,
         CancellationToken cancellationToken)
     {
         return await sender.Send(request, cancellationToken);
@@ -53,7 +66,8 @@ public class UserController : ControllerBase
     }
 }
 
-[Table("users")]
+[System.ComponentModel.DataAnnotations.Schema.Table("users")]
+[Athena.Infrastructure.DataAnnotations.Schema.Index(nameof(Name), IsUnique = false)]
 public class User : FullEntityCore
 {
     /// <summary>
@@ -80,6 +94,15 @@ public class User : FullEntityCore
 
         ApplyEvent(new UserCreatedEvent(name, age));
     }
+
+    public void SoftDelete()
+    {
+        ApplyEvent(new UserDeletedEvent());
+    }
+}
+
+public class UserDeletedEvent : EventBase
+{
 }
 
 public class UserCreatedEvent : EventBase
@@ -146,9 +169,14 @@ public class CreateUserValidator : AbstractValidator<CreateUserRequest>
     }
 }
 
-public class UserRequestHandler : ServiceBase<User>,
+public class DeleteUserRequest : IdRequest, ITxRequest<int>
+{
+}
+
+public class UserRequestHandler : DataPermissionServiceBase<User>,
     IRequestHandler<CreateUserRequest, string>,
-    IMessageHandler<UserCreatedEvent>
+    IMessageHandler<UserCreatedEvent>,
+    IRequestHandler<DeleteUserRequest, int>
 {
     public UserRequestHandler(UnitOfWorkManager unitOfWorkManager, ISecurityContextAccessor accessor) : base(
         unitOfWorkManager, accessor)
@@ -169,6 +197,13 @@ public class UserRequestHandler : ServiceBase<User>,
         Console.WriteLine($"UserCreatedEvent: {payload.Name}, {payload.Age}");
         return Task.CompletedTask;
     }
+
+    public async Task<int> Handle(DeleteUserRequest request, CancellationToken cancellationToken)
+    {
+        var entity = await GetAsync(request.Id, cancellationToken);
+        entity.SoftDelete();
+        return await RegisterSoftDeleteAsync(entity, cancellationToken);
+    }
 }
 
 public class GetUserPagingRequest : GetPagingRequestBase
@@ -181,18 +216,39 @@ public interface IUserQueryService
 }
 
 [Component]
-public class UserQueryService : QueryServiceBase<User>, IUserQueryService
+public class UserQueryService : DataPermissionQueryServiceBase<User>, IUserQueryService
 {
+    public UserQueryService(IFreeSql freeSql, ISecurityContextAccessor accessor) : base(freeSql,
+        accessor)
+    {
+    }
+
     public Task<Paging<User>> GetPagingAsync(GetUserPagingRequest request,
         CancellationToken cancellationToken = default)
     {
+        var parameter = Expression.Parameter(typeof(User), "p");
+
+        var a = new List<string> {"1", "2"};
+        var sql = FreeSqlDbContext.Select<OrganizationalUnitAuth>()
+            .AsTable((_, _) => "business_org_auths")
+            .Where(p => a.Contains(p.OrganizationalUnitId))
+            .Where(p => p.BusinessTable == "User")
+            .ToSql(p => p.BusinessId, FieldAliasOptions.AsProperty);
+
+        var property1 =
+            Expression.Constant("");
+        var left1 = Expression.Property(parameter, "Id");
+        var method1 = typeof(DbFunc).GetMethod("FormatLeftJoin", new[] {typeof(string), typeof(string)});
+        var expression1 = Expression.Call(null, method1!, property1, left1);
+        var exp1 = Expression.Lambda<Func<User, bool>>(expression1, parameter);
+
+        // var sql1 = FreeSqlDbContext.Queryable<User>()
+        //     .Where(exp1)
+        //     .ToSql();
+
         return QueryableNoTracking
             .HasWhere(request.Keyword, p => p.Name.Contains(request.Keyword!))
-            .ToPagingAsync(request, cancellationToken: cancellationToken);
-    }
-
-    public UserQueryService(FreeSqlMultiTenancy multiTenancy, ISecurityContextAccessor accessor) : base(multiTenancy,
-        accessor)
-    {
+            // .Where(exp1)
+            .ToPagingAsync(UserId, request, cancellationToken: cancellationToken);
     }
 }

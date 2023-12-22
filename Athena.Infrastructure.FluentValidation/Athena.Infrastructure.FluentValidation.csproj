@@ -4,7 +4,7 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>7.0.2</Version>
+        <Version>7.0.5</Version>
         <PackageIcon>e-athena.png</PackageIcon>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
         <Title>Athena.Infrastructure.FluentValidation</Title>
@@ -24,7 +24,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FluentValidation" Version="11.8.0"/>
+        <PackageReference Include="FluentValidation" Version="11.9.0" />
         <PackageReference Include="MediatR" Version="11.1.0"/>
         <PackageReference Include="Scrutor" Version="4.2.2"/>
     </ItemGroup>

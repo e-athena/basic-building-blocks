@@ -1,4 +1,4 @@
-namespace Athena.Infrastructure.EventTracking.FreeSql;
+namespace Athena.Infrastructure.FreeSqlHelper;
 
 /// <summary>
 /// 数据库类型帮助类

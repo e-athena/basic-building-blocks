@@ -242,11 +242,6 @@ public class QueryServiceBase<T> where T : class, new()
                 p => p.TenantId == TenantId,
                 QueryFilterProvider.FilterJoinPosition.Where
             )
-            // .Add(new SqlFilterItem
-            // {
-            //     FilterValue = _ => new SqlFilterResult {Sql = "x.IsDeleted==0"},
-            //     FilterName = "SoftDelete"
-            // });
             .AddTableFilter<ISoftDelete>(
                 p => p.IsDeleted == false,
                 QueryFilterProvider.FilterJoinPosition.Where

@@ -1,8 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Athena.Infrastructure.Utilities;
 
-
-namespace Athena.Infrastructure.Domain.Attributes;
+namespace Athena.Infrastructure.DataAnnotations.Schema;
 
 /// <summary>
 ///     Specifies an index to be generated in the database.

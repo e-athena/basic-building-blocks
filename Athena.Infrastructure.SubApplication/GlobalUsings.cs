@@ -12,6 +12,7 @@ global using Athena.Infrastructure.Enums;
 global using Athena.Infrastructure.FrontEndTables;
 global using Athena.Infrastructure.Messaging.Responses;
 global using Athena.Infrastructure.Providers;
+global using Athena.Infrastructure.SubApplication.Aop;
 global using Athena.Infrastructure.SubApplication.Messaging.Requests;
 global using Athena.Infrastructure.SubApplication.Messaging.Responses;
 global using Athena.Infrastructure.SubApplication.Models;

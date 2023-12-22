@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq.Expressions;
 using Athena.Infrastructure.ApiPermission.Attributes;
 using Athena.Infrastructure.Attributes;
 using Athena.Infrastructure.Auths;
@@ -12,6 +13,7 @@ using Athena.Infrastructure.Messaging.Requests;
 using Athena.Infrastructure.Messaging.Responses;
 using Athena.Infrastructure.SqlSugar;
 using Athena.Infrastructure.SqlSugar.Bases;
+using Athena.Infrastructure.SqlSugar.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SqlSugar;
@@ -47,10 +49,18 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<Paging<User>> GetPagingAsync([FromServices] IUserQueryService service,
+    public async Task<Paging<UserInfo>> GetPagingAsync([FromServices] IUserQueryService service,
         GetUserPagingRequest request, CancellationToken cancellationToken)
     {
         return await service.GetPagingAsync(request, cancellationToken);
+    }
+
+    [HttpDelete]
+    [ProducesResponseType(typeof(ApiResult<int>), StatusCodes.Status200OK)]
+    public Task<bool> DeleteAsync([FromServices] ISender sender, DeleteUserRequest request,
+        CancellationToken cancellationToken)
+    {
+        return sender.Send(request, cancellationToken);
     }
 }
 
@@ -81,6 +91,15 @@ public class User : FullEntityCore
 
         ApplyEvent(new UserCreatedEvent(name, age));
     }
+
+    public void SoftDelete()
+    {
+        ApplyEvent(new UserDeletedEvent());
+    }
+}
+
+public class UserDeletedEvent : EventBase
+{
 }
 
 public class UserCreatedEvent : EventBase
@@ -102,9 +121,17 @@ public class CreateUserRequest : ITxRequest<string>
     public int Age { get; set; }
 }
 
-public class UserRequestHandler : ServiceBase<User>,
+/// <summary>
+///
+/// </summary>
+public class DeleteUserRequest : IdRequest, ITxRequest<bool>
+{
+}
+
+public class UserRequestHandler : DataPermissionServiceBase<User>,
     IRequestHandler<CreateUserRequest, string>,
-    IMessageHandler<UserCreatedEvent>
+    IMessageHandler<UserCreatedEvent>,
+    IRequestHandler<DeleteUserRequest, bool>
 {
     public UserRequestHandler(ISqlSugarClient sqlSugarClient, ISecurityContextAccessor accessor) : base(sqlSugarClient,
         accessor)
@@ -125,6 +152,13 @@ public class UserRequestHandler : ServiceBase<User>,
         Console.WriteLine($"UserCreatedEvent: {payload.Name}, {payload.Age}");
         return Task.CompletedTask;
     }
+
+    public async Task<bool> Handle(DeleteUserRequest request, CancellationToken cancellationToken)
+    {
+        var entity = await GetAsync(request.Id, cancellationToken);
+        entity.SoftDelete();
+        return await RegisterSoftDeleteAsync(entity, cancellationToken);
+    }
 }
 
 public class GetUserPagingRequest : GetPagingRequestBase
@@ -133,7 +167,7 @@ public class GetUserPagingRequest : GetPagingRequestBase
 
 public interface IUserQueryService
 {
-    Task<Paging<User>> GetPagingAsync(GetUserPagingRequest request, CancellationToken cancellationToken = default);
+    Task<Paging<UserInfo>> GetPagingAsync(GetUserPagingRequest request, CancellationToken cancellationToken = default);
 }
 
 [Component]
@@ -144,11 +178,45 @@ public class UserQueryService : QueryServiceBase<User>, IUserQueryService
     {
     }
 
-    public Task<Paging<User>> GetPagingAsync(GetUserPagingRequest request,
+    public Task<Paging<UserInfo>> GetPagingAsync(GetUserPagingRequest request,
         CancellationToken cancellationToken = default)
     {
+        var parameter = Expression.Parameter(typeof(User), "p");
+        // var property1 = Expression.Constant("select Id from users");
+        var property1 = Expression.Constant("6408512d46a0d96796cc730c,6409e071bd3497127f4eb984");
+        var left1 = Expression.Property(parameter, "Id");
+        // var method1 = typeof(DbFunc).GetMethod("FormatSubQuery", new[] {typeof(User)});
+        // var method1 = typeof(DbFunc).GetMethods()
+        //     .Single(m => m is {Name: "FormatSubQuery", IsGenericMethodDefinition: true})
+        //     .MakeGenericMethod(typeof(string),typeof(string));
+        var method1 = typeof(DbFunc).GetMethod("FormatLeftJoin", new[] {typeof(string), typeof(string)});
+        var expression1 = Expression.Call(null, method1!, property1, left1);
+        var exp1 = Expression.Lambda<Func<User, bool>>(expression1, parameter);
+
+        var sql1 = DbContext.Queryable<User>()
+            .Where(exp1)
+            .ToSqlString();
+        // var a = new List<string> {"1", "2"};
+        // var sql = DbContext.Queryable<OrganizationalUnitAuth>()
+        //     .AS("business_org_auths")
+        //     .Where(p => a.Contains(p.OrganizationalUnitId))
+        //     .Where(p => p.BusinessTable == "User")
+        //     .Select(p => p.BusinessId)
+        //     .ToSqlString();
+
         return QueryableNoTracking
             .HasWhere(request.Keyword, p => p.Name.Contains(request.Keyword!))
-            .ToPagingAsync(request, cancellationToken: cancellationToken);
+            .Where(exp1)
+            .ToPagingAsync(request, p => new UserInfo
+            {
+                Name = p.Name
+            }, cancellationToken: cancellationToken);
     }
+}
+
+public class UserInfo
+{
+    public string Id { get; set; }
+    public string Name { get; set; }
+    public int Age { get; set; }
 }

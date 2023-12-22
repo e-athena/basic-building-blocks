@@ -25,7 +25,7 @@ public static class Extensions
         try
         {
             var converter = TypeDescriptor.GetConverter(typeof(T));
-            return (T)converter.ConvertFromString(input ?? throw new ArgumentNullException(nameof(input)))!;
+            return (T) converter.ConvertFromString(input ?? throw new ArgumentNullException(nameof(input)))!;
         }
         catch (NotSupportedException)
         {
@@ -89,6 +89,7 @@ public static class Extensions
             config = JsonSerializer.Deserialize<TModel>(env);
         }
 
+        config ??= configuration.GetEnvValue<TModel>(configVariable);
         config ??= configuration.GetOptions<TModel>(configVariable);
 
         if (config == null)
@@ -152,7 +153,7 @@ public static class Extensions
             return configuration.GetValue<TResult>(key);
         }
 
-        return (TResult)Convert.ChangeType(value, typeof(TResult));
+        return (TResult) Convert.ChangeType(value, typeof(TResult));
     }
 
     /// <summary>
@@ -178,7 +179,7 @@ public static class Extensions
 
         // 按,分割
         var arr = value.Split(",");
-        return arr.Select(x => (TResult)Convert.ChangeType(x, typeof(TResult))).ToArray();
+        return arr.Select(x => (TResult) Convert.ChangeType(x, typeof(TResult))).ToArray();
     }
 
     // 转换字符串，如：Module:DbContext:Disabled 转换为MODULE__DB_CONTEXT__DISABLED

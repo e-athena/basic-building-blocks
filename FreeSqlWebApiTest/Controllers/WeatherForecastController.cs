@@ -1,4 +1,6 @@
+using Athena.Infrastructure.Auths;
 using Athena.Infrastructure.Mvc.Middlewares.MiddlewareInjectors;
+using Athena.InstantMessaging.SignalR.Events;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -70,7 +72,7 @@ public class WeatherForecastController : ControllerBase
     public async Task<string> Test1()
     {
         const string token =
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjYxZjdkYmY2ZDc0YTQ2NDU4ZmNhMDkwMyIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IiIsIlJvbGVOYW1lIjoiIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvbmFtZSI6InJvb3QiLCJSZWFsTmFtZSI6IuW8gOWPkeiAhSIsIklzVGVuYW50QWRtaW4iOiJmYWxzZSIsIlRlbmFudElkIjoiIiwibmJmIjoiMTY5Nzg4OTEwOCIsImlhdCI6IjE2OTc4ODkxMDgiLCJqdGkiOiIyOGJkZjMwYmY4MGE0MTViOGEyNGEwNDJlOWFkZWZlNSIsIkFwcElkIjoiIiwiZXhwIjoxNjk3OTc1NTA4LCJpc3MiOiJiYXNpYy1wbGF0Zm9ybS1zc28tY2VudGVyIiwiYXVkIjoiQmFzaWNQbGF0Zm9ybS5XZWJBUEkifQ.uzuzrqh5aFk0wQ3Eh8jPK-LHuU5g9bdEQVcIDAmsKoY";
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjYxZjdkYmY2ZDc0YTQ2NDU4ZmNhMDkwMyIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IiIsIlJvbGVOYW1lIjoiIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvbmFtZSI6InJvb3QiLCJSZWFsTmFtZSI6IuW8gOWPkeiAhSIsIklzVGVuYW50QWRtaW4iOiJmYWxzZSIsIlRlbmFudElkIjoiIiwibmJmIjoiMTY5OTQyNzIzMSIsImlhdCI6IjE2OTk0MjcyMzEiLCJqdGkiOiJhODg0MWY2ZjAwNDA0N2JmOTM4YjM5ZWZkOTQxYTg4OSIsIkFwcElkIjoiIiwiZXhwIjoxNjk5NTEzNjMxLCJpc3MiOiJiYXNpYy1wbGF0Zm9ybS1zc28tY2VudGVyIiwiYXVkIjoiQmFzaWNQbGF0Zm9ybS5XZWJBUEkifQ.beuOGDIjHIAM7RyayV9SPgcC8WNcxI41BokVLBPviEk";
         var connection = new HubConnectionBuilder()
             .WithUrl("http://localhost:5132/hubs/event", opts =>
             {
@@ -86,9 +88,44 @@ public class WeatherForecastController : ControllerBase
             })
             .WithAutomaticReconnect()
             .Build();
+
+        // 监听授权失败事件
+        connection.On<string>("Unauthorized", msg =>
+        {
+            // 
+            Console.WriteLine($"Unauthorized:{msg}");
+        });
+        // 监听调用成功事件
+        connection.On<string>("InvokeSucceed", msg =>
+        {
+            // 
+            Console.WriteLine($"InvokeSucceed:{msg}");
+        });
         await connection.StartAsync();
 
+        if (connection.State == HubConnectionState.Connected)
+        {
+            // 成功示例
+            await connection.SendAsync("Test", "test", "test1");
+            // 失败示例
+            await connection.SendAsync("Test", "fail_test", "test1");
+        }
+
         return await Task.FromResult("succeed");
+    }
+}
+
+public class TestHub : EventHub
+{
+    public TestHub(ISecurityContextAccessor securityContextAccessor, ILoggerFactory loggerFactory) : base(
+        securityContextAccessor, loggerFactory)
+    {
+    }
+
+    public Task TestAsync(string test, string test1)
+    {
+        Console.WriteLine(test);
+        return Task.CompletedTask;
     }
 }
 

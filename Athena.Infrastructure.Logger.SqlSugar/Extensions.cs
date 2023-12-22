@@ -47,6 +47,24 @@ public static class Extensions
                     connectionString,
                     dataType
                 ));
+            var assembly = Assembly.Load("Athena.Infrastructure.EventTracking");
+            var types = assembly
+                .GetExportedTypes()
+                .Where(t => t
+                    .GetCustomAttributes()
+                    .Any(p =>
+                        p.GetType() == typeof(TableAttribute) ||
+                        p.GetType() == typeof(SugarTable)
+                    )
+                ).ToArray();
+            if (types.Length <= 0)
+            {
+                return sqlSugar;
+            }
+
+            var dictionary = types.ToDictionary<Type, Type, string?>(type => type, _ => null);
+            // 处理索引
+            IndexHelper.Create(sqlSugar, dictionary);
             return sqlSugar;
         });
         services.AddSingleton<ILoggerService, LoggerService>();

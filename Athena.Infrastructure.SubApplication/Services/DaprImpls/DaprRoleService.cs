@@ -26,6 +26,7 @@ public class DaprRoleService : DaprServiceBase, IRoleService
     /// </summary>
     /// <param name="organizationId"></param>
     /// <returns></returns>
+    [ServiceInvokeExceptionLogging]
     public async Task<List<SelectViewModel>> GetSelectListAsync(string? organizationId = null)
     {
         var methodName = "/api/SubApplication/GetRoleSelectList";

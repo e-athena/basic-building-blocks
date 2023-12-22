@@ -1,3 +1,5 @@
+using Athena.Infrastructure.DataAnnotations.Schema;
+
 namespace Athena.Infrastructure.Domain;
 
 /// <summary>

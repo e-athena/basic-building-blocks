@@ -4,6 +4,8 @@ namespace Athena.Infrastructure.EventTracking.Models;
 /// 追踪配置
 /// </summary>
 [Table("event_tracking_track_configs")]
+[Index(nameof(EventTypeFullName))]
+[Index(nameof(ConfigId))]
 public class TrackConfig : EntityBase
 {
     /// <summary>
