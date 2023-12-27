@@ -116,7 +116,15 @@ public static class IndexHelper
                         break;
                 }
 
-                freeSql.Ado.ExecuteNonQuery(createIndexSql);
+                try
+                {
+                    freeSql.Ado.ExecuteNonQuery(createIndexSql);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    continue;
+                }
             }
         }
     }
