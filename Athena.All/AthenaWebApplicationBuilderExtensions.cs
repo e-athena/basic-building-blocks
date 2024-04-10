@@ -62,7 +62,7 @@ public static class AthenaWebApplicationBuilderExtensions
         app.MapSpaFront<TType>();
         app.MapHealth();
         app.MapMenuResources<TType>();
-        app.MapDatePermissionResources();
+        app.MapDataPermissionResources();
         mapActions?.Invoke(app);
         return app;
     }
@@ -106,7 +106,7 @@ public static class AthenaWebApplicationBuilderExtensions
     /// <param name="app"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    private static void MapDatePermissionResources(this IEndpointRouteBuilder app)
+    private static void MapDataPermissionResources(this IEndpointRouteBuilder app)
     {
         app.MapGet("/api/external/get-data-permission-resources", () =>
             {

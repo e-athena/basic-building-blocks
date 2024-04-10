@@ -27,4 +27,24 @@ public class IntegratedEventSubscribeAttribute : CapSubscribeAttribute
     {
         Group = $"{StringHelper.ConvertToLowerAndAddPoint(group)}.group";
     }
+
+    /// <summary>
+    /// CAP订阅者
+    /// </summary>
+    /// <param name="topicNameType">主题名称类型</param>
+    /// <param name="group">分组名称</param>
+    public IntegratedEventSubscribeAttribute(Type topicNameType, string group)
+        : this(topicNameType.FullName ?? topicNameType.Name, group)
+    {
+    }
+
+    /// <summary>
+    /// CAP订阅者
+    /// </summary>
+    /// <param name="topicNameType">主题名称类型</param>
+    /// <param name="groupType">分组名称</param>
+    public IntegratedEventSubscribeAttribute(Type topicNameType, Type groupType)
+        : this(topicNameType, groupType.FullName ?? groupType.Name)
+    {
+    }
 }

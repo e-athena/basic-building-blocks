@@ -27,7 +27,7 @@ public static class StringHelper
             i++;
         }
 
-        return value.ToLower();
+        return value.ToLower().Replace("..", ".");
     }
 
     /// <summary>

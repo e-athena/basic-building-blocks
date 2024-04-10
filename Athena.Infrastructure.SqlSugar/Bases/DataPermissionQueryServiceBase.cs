@@ -235,7 +235,7 @@ public class DataPermissionQueryServiceBase<T> : QueryServiceBase<T> where T : F
 
         if (organizationIds.Count <= 0)
         {
-            return QueryableExtensions.MakeFilterWhere<TResult>(filters);
+            return filters.MakeFilterWhere<TResult>();
         }
 
         // 去重
@@ -258,34 +258,7 @@ public class DataPermissionQueryServiceBase<T> : QueryServiceBase<T> where T : F
             ExtendFuncMethodName = "FormatLeftJoin"
         });
 
-        // // 生成sql
-        // var businessSql0 = DbContext.Queryable<OrganizationalUnitAuth>()
-        //     .AS("business_org_auths")
-        //     .Where(p => organizationIds.Contains(p.OrganizationalUnitId))
-        //     .Where(p => p.BusinessTable == typeof(TResult).Name)
-        //     .Select(p => p.BusinessId)
-        //     .ToSqlString();
-        //
-        // filters.Add(new QueryFilter
-        // {
-        //     Key = "Id",
-        //     Operator = "sub_query",
-        //     Value = businessSql0,
-        //     XOR = "or"
-        // });
-
-        // foreach (var orgId in organizationIds)
-        // {
-        //     filters.Add(new QueryFilter
-        //     {
-        //         Key = "OrganizationalUnitId",
-        //         Operator = "contains",
-        //         Value = orgId,
-        //         XOR = "or"
-        //     });
-        // }
-
-        return QueryableExtensions.MakeFilterWhere<TResult>(filters);
+        return filters.MakeFilterWhere<TResult>();
     }
 
     #region 数据查询权限相关

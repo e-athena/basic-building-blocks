@@ -143,37 +143,23 @@ public class SecurityContextAccessor : ISecurityContextAccessor
     {
         get
         {
-            var jwtToken = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"];
-            if (jwtToken?.Count > 0)
+            var token = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"];
+            if (token?.Count > 0)
             {
-                return jwtToken.Value.ToString();
+                return token.Value.ToString();
             }
 
-            jwtToken = _httpContextAccessor.HttpContext?.Request.Query["access_token"].ToString();
+            token = _httpContextAccessor.HttpContext?.Request.Query["access_token"].ToString();
 
-            if (jwtToken?.Count > 0)
+            if (token?.Count > 0)
             {
-                return jwtToken.Value.ToString();
+                return token.Value.ToString();
             }
 
-            jwtToken = _httpContextAccessor.HttpContext?.Request.Query["AccessToken"];
+            token = _httpContextAccessor.HttpContext?.Request.Query["AccessToken"];
 
-            return jwtToken?.Count > 0 ? jwtToken.Value.ToString() : string.Empty;
+            return token?.Count > 0 ? token.Value.ToString() : string.Empty;
         }
-
-        // get
-        // {
-        //     var jwtToken = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"];
-        //     if (!string.IsNullOrEmpty(jwtToken))
-        //     {
-        //         return jwtToken;
-        //     }
-        //
-        //     jwtToken = _httpContextAccessor.HttpContext?.Request.Query["access_token"].ToString();
-        //     return (string.IsNullOrEmpty(jwtToken)
-        //         ? _httpContextAccessor.HttpContext?.Request.Query["AccessToken"]
-        //         : jwtToken) ?? string.Empty;
-        // }
     }
 
     /// <summary>

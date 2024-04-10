@@ -484,6 +484,36 @@ public static class Extensions
     /// 添加集成事件
     /// </summary>
     /// <param name="services"></param>
+    /// <param name="rabbitMqOptions">Redis配置</param>
+    /// <param name="capOptions">CAP配置</param>
+    /// <param name="capSubscribeAssemblies">订阅端程序集</param>
+    /// <remarks>默认使用Mysql和Redis</remarks>
+    /// <returns></returns>
+    public static IServiceCollection AddCustomIntegrationEvent(
+        this IServiceCollection services,
+        Action<RabbitMQOptions> rabbitMqOptions,
+        Action<CapOptions>? capOptions = null,
+        Assembly[]? capSubscribeAssemblies = null)
+    {
+        services.AddCap(options =>
+        {
+            options.UseFreeSql();
+            options.UseRabbitMQ(rabbitMqOptions);
+            options.DefaultGroupName = "default.group";
+            capOptions?.Invoke(options);
+        });
+        if (capSubscribeAssemblies != null && capSubscribeAssemblies.Any())
+        {
+            services.AddCustomIntegrationEventHandler(capSubscribeAssemblies);
+        }
+
+        return services;
+    }
+
+    /// <summary>
+    /// 添加集成事件
+    /// </summary>
+    /// <param name="services"></param>
     /// <param name="configuration"></param>
     /// <param name="assemblyKeyword">订阅端程序集</param>
     /// <remarks>默认使用Mysql和Redis</remarks>
@@ -599,7 +629,7 @@ public static class Extensions
     /// <param name="configuration"></param>
     /// <param name="capOptions">CAP配置</param>
     /// <param name="capSubscribeAssemblies">订阅端程序集</param>
-    /// <remarks>默认使用Mysql和Redis</remarks>
+    /// <remarks></remarks>
     /// <returns></returns>
     public static IServiceCollection AddCustomIntegrationEvent(
         this IServiceCollection services,
@@ -608,14 +638,60 @@ public static class Extensions
         Assembly[] capSubscribeAssemblies
     )
     {
-        return services.AddCustomIntegrationEvent(options =>
+        // 支持的传输方式
+        var supportedTransports = new List<string>
         {
-            var connectionString = configuration.GetCapRedisConnectionString();
-            if (!string.IsNullOrEmpty(connectionString))
-            {
-                options.Configuration = ConfigurationOptions.Parse(connectionString);
-            }
-        }, capOptions, capSubscribeAssemblies);
+            "rabbitmq",
+            "redis"
+        };
+        // 读取CAP传输方式
+        var capTransport = configuration.GetEnvValue<string>("Module:DbContext:CapTransport:Type");
+        if (string.IsNullOrEmpty(capTransport))
+        {
+            // 默认使用redis
+            capTransport = "redis";
+        }
+
+        capTransport = capTransport.ToLower();
+        // 如果传输方式不支持，则抛出异常
+        if (!supportedTransports.Contains(capTransport))
+        {
+            throw new NotSupportedException($"不支持的CAP传输方式：{capTransport}");
+        }
+
+        switch (capTransport)
+        {
+            case "rabbitmq":
+                return services.AddCustomIntegrationEvent(rabbitMqOptions =>
+                {
+                    var config = configuration.GetConfig<RabbitMQOptions>("Module:DbContext:CapTransport:RabbitMQ");
+                    rabbitMqOptions.UserName = config.UserName;
+                    rabbitMqOptions.Password = config.Password;
+                    rabbitMqOptions.HostName = config.HostName;
+                    rabbitMqOptions.Port = config.Port;
+                    rabbitMqOptions.VirtualHost = config.VirtualHost;
+                    rabbitMqOptions.ExchangeName = config.ExchangeName;
+                    rabbitMqOptions.PublishConfirms = config.PublishConfirms;
+                }, capOptions, capSubscribeAssemblies);
+            default:
+                return services.AddCustomIntegrationEvent(options =>
+                {
+                    var connectionString = configuration.GetCapRedisConnectionString();
+                    if (!string.IsNullOrEmpty(connectionString))
+                    {
+                        options.Configuration = ConfigurationOptions.Parse(connectionString);
+                        return;
+                    }
+
+                    var connectionString2 =
+                        configuration.GetEnvValue<string>("Module:DbContext:CapTransport:Redis:ConnectionString");
+
+                    if (!string.IsNullOrEmpty(connectionString2))
+                    {
+                        options.Configuration = ConfigurationOptions.Parse(connectionString2);
+                    }
+                }, capOptions, capSubscribeAssemblies);
+        }
     }
 
     /// <summary>

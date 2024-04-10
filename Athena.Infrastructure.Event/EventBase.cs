@@ -113,6 +113,15 @@ public abstract class EventBase : IDomainEvent, IIntegrationEvent
     /// <summary>
     /// 构造函数
     /// </summary>
+    protected EventBase(bool isFullEventName)
+    {
+        var name = isFullEventName ? GetType().FullName ?? GetType().Name : GetType().Name;
+        EventName = StringHelper.ConvertToLowerAndAddPoint(name);
+    }
+
+    /// <summary>
+    /// 构造函数
+    /// </summary>
     /// <param name="eventName">事件名</param>
     protected EventBase(string eventName)
     {
