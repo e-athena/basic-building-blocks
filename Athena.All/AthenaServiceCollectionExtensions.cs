@@ -21,6 +21,7 @@ public static class AthenaServiceCollectionExtensions
 
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         // Add services to the container.
+        services.AddOptions();
         services.AddAthenaProvider();
         services.AddCustomServiceComponent(configuration);
         services.AddCustomValidators(configuration);
