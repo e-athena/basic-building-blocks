@@ -155,7 +155,7 @@ public static class AthenaWebApplicationBuilderExtensions
     /// <param name="app"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    private static void UseCapDashboard(this IEndpointRouteBuilder app)
+    private static void UseCapDashboard(this WebApplication app)
     {
         // 读取当前程序集
         var assembly = Assembly.GetExecutingAssembly();
@@ -163,6 +163,25 @@ public static class AthenaWebApplicationBuilderExtensions
         var assemblyName = assembly.GetName().Name;
         // assemblyName
         var embeddedFileNamespace = $"{assemblyName}.wwwroot";
+
+        // 判断是否登录
+        app.Use(async (context, next) =>
+        {
+            if (context.Request.Path != "/cap")
+            {
+                await next();
+                return;
+            }
+
+            if (!context.User.Identity?.IsAuthenticated ?? true)
+            {
+                context.Response.StatusCode = 301;
+                context.Response.Headers["Location"] = "/cap/login";
+                return;
+            }
+
+            await next();
+        });
 
         app.Map("/cap/login", async httpContext =>
         {
@@ -232,6 +251,14 @@ public static class AthenaWebApplicationBuilderExtensions
                 }
 
                 tempName = "login_error.html";
+            }
+
+            // 如果已经登录，则直接跳转
+            if (httpContext.User.Identity?.IsAuthenticated ?? false)
+            {
+                httpContext.Response.StatusCode = 301;
+                httpContext.Response.Headers["Location"] = "/cap";
+                return;
             }
 
             var name = $"{embeddedFileNamespace}.{tempName}";
