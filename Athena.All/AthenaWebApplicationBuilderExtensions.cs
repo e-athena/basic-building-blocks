@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using System.Reflection;
 using System.Security.Claims;
 using Athena.Infrastructure.ApiPermission.Models;
@@ -11,6 +12,7 @@ using Athena.Infrastructure.Providers;
 using Athena.Infrastructure.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Primitives;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Builder;
@@ -156,6 +158,86 @@ public static class AthenaWebApplicationBuilderExtensions
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
     private static void UseCapDashboard(this WebApplication app)
+    {
+        // 如果是访问/cap页面，则判断是否登录，如果未登录，则使用Basic Auth登录
+        app.Use(async (context, next) =>
+        {
+            if (context.Request.Path.ToString().StartsWith("/cap"))
+            {
+                if (!context.User.Identity?.IsAuthenticated ?? true)
+                {
+                    var header = (string)context.Request.Headers["Authorization"]!;
+                    if (!string.IsNullOrWhiteSpace(header))
+                    {
+                        var authenticationHeaderValue = AuthenticationHeaderValue.Parse(header);
+                        if ("Basic".Equals(authenticationHeaderValue.Scheme, StringComparison.OrdinalIgnoreCase))
+                        {
+                            var strArray = Encoding.UTF8
+                                .GetString(Convert.FromBase64String(authenticationHeaderValue.Parameter!)).Split(':');
+                            if (strArray.Length > 1)
+                            {
+                                var login = strArray[0];
+                                var pwd = strArray[1];
+                                // 读取配置
+                                var configuration = AthenaProvider.Provider?.GetService<IConfiguration>();
+                                if (configuration == null) throw new InvalidOperationException();
+                                var userName = configuration.GetEnvValue<string>("Module:DbContext:Dashboard:UserName");
+                                var password = configuration.GetEnvValue<string>("Module:DbContext:Dashboard:Password");
+                                userName ??= "admin";
+                                password ??= "admin123456";
+
+                                // 如果用户名和密码正确，则登录成功，生成Cookies，然后重定向到/cap
+                                if (login == userName && pwd == password)
+                                {
+                                    var claims = new List<Claim>
+                                    {
+                                        new(ClaimTypes.NameIdentifier, login),
+                                        new(ClaimTypes.Name, login),
+                                        new(ClaimTypes.Role, "admin")
+                                    };
+                                    var claimsIdentity =
+                                        new ClaimsIdentity(claims,
+                                            CapCookieAuthenticationDefaults.AuthenticationScheme);
+                                    // 读取配置中的过期时间
+                                    var expireMinutes =
+                                        configuration.GetEnvValue<int>("Module:DbContext:Dashboard:CookieExpires");
+                                    expireMinutes = expireMinutes <= 0 ? 60 : expireMinutes;
+                                    var authProperties = new AuthenticationProperties
+                                    {
+                                        ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(expireMinutes),
+                                        IsPersistent = true
+                                    };
+                                    await context.SignInAsync(
+                                        CapCookieAuthenticationDefaults.AuthenticationScheme,
+                                        new ClaimsPrincipal(claimsIdentity),
+                                        authProperties
+                                    );
+                                    context.Response.StatusCode = 301;
+                                    context.Response.Headers["Location"] = context.Request.Path.ToString();
+                                    return;
+                                }
+                            }
+                        }
+                    }
+
+                    context.Response.StatusCode = 401;
+                    context.Response.Headers.Append("WWW-Authenticate",
+                        (StringValues)$"Basic realm=\"{CapCookieAuthenticationDefaults.AuthenticationScheme}\"");
+                    return;
+                }
+            }
+
+            await next();
+        });
+    }
+
+    /// <summary>
+    /// Cap Dashboard
+    /// </summary>
+    /// <param name="app"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    private static void UseCapDashboard1(this WebApplication app)
     {
         // 读取当前程序集
         var assembly = Assembly.GetExecutingAssembly();
