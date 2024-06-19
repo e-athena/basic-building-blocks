@@ -167,7 +167,7 @@ public static class AthenaWebApplicationBuilderExtensions
         // 判断是否登录
         app.Use(async (context, next) =>
         {
-            if (context.Request.Path != "/cap")
+            if (context.Request.Path != "/cap" && context.Request.Path != "/cap/index.html")
             {
                 await next();
                 return;
