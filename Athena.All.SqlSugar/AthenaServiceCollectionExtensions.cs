@@ -28,14 +28,15 @@ public static class AthenaServiceCollectionExtensions
                     // 启用仪表盘
                     if (!configuration.GetEnvValue<bool>("Module:DbContext:Dashboard:Disabled"))
                     {
-                        // Dashboard
-                        capOptions.UseDashboard(options =>
-                        {
-                            options.UseAuth =
-                                !configuration.GetEnvValue<bool>("Module:DbContext:Dashboard:DisabledAuth");
-                            options.DefaultAuthenticationScheme = CapCookieAuthenticationDefaults.AuthenticationScheme;
-                            options.AuthorizationPolicy = CapCookieAuthenticationDefaults.AuthenticationScheme;
-                        });
+                        // // Dashboard
+                        // capOptions.UseDashboard(options =>
+                        // {
+                        //     options.UseAuth =
+                        //         !configuration.GetEnvValue<bool>("Module:DbContext:Dashboard:DisabledAuth");
+                        //     options.DefaultAuthenticationScheme = CapCookieAuthenticationDefaults.AuthenticationScheme;
+                        //     options.AuthorizationPolicy = CapCookieAuthenticationDefaults.AuthenticationScheme;
+                        // });
+                        capOptions.UseDashboard();
                     }
                 });
             }

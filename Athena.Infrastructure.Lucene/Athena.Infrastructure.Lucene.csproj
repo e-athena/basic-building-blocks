@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+
+    <ItemGroup>
+        <PackageReference Include="Lucene.Net" Version="4.8.0-beta00016"/>
+        <PackageReference Include="Lucene.Net.Analysis.Common" Version="4.8.0-beta00016"/>
+        <!--<PackageReference Include="Lucene.Net.Contrib" Version="3.0.3" />-->
+        <PackageReference Include="Lucene.Net.Facet" Version="4.8.0-beta00016"/>
+        <PackageReference Include="Lucene.Net.Grouping" Version="4.8.0-beta00016"/>
+        <PackageReference Include="Lucene.Net.Highlighter" Version="4.8.0-beta00016"/>
+        <PackageReference Include="Lucene.Net.Join" Version="4.8.0-beta00016"/>
+        <PackageReference Include="Lucene.Net.Memory" Version="4.8.0-beta00016"/>
+        <PackageReference Include="Lucene.Net.Queries" Version="4.8.0-beta00016"/>
+        <PackageReference Include="Lucene.Net.QueryParser" Version="4.8.0-beta00016"/>
+        <PackageReference Include="Lucene.Net.Sandbox" Version="4.8.0-beta00016"/>
+        <PackageReference Include="Lucene.Net.Spatial" Version="4.8.0-beta00016"/>
+        <PackageReference Include="J2N" Version="2.0.0"/>
+        <PackageReference Include="jieba.NET" Version="0.42.2"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    </ItemGroup>
+</Project>

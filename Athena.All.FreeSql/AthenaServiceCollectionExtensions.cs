@@ -30,13 +30,14 @@ public static class AthenaServiceCollectionExtensions
                     if (!configuration.GetEnvValue<bool>("Module:DbContext:Dashboard:Disabled"))
                     {
                         // Dashboard
-                        capOptions.UseDashboard(options =>
-                        {
-                            options.UseAuth =
-                                !configuration.GetEnvValue<bool>("Module:DbContext:Dashboard:DisabledAuth");
-                            options.DefaultAuthenticationScheme = CapCookieAuthenticationDefaults.AuthenticationScheme;
-                            options.AuthorizationPolicy = CapCookieAuthenticationDefaults.AuthenticationScheme;
-                        });
+                        // capOptions.UseDashboard(options =>
+                        // {
+                        //     options.UseAuth =
+                        //         !configuration.GetEnvValue<bool>("Module:DbContext:Dashboard:DisabledAuth");
+                        //     options.DefaultAuthenticationScheme = CapCookieAuthenticationDefaults.AuthenticationScheme;
+                        //     options.AuthorizationPolicy = CapCookieAuthenticationDefaults.AuthenticationScheme;
+                        // });
+                        capOptions.UseDashboard();
                     }
                 });
             }

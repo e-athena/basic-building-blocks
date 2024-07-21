@@ -64,6 +64,10 @@ public static class SqlSugarBuilderHelper
             connectionString = res.connectionString;
         }
 
+        var logger = AthenaProvider
+            .Provider?
+            .GetService<ILoggerFactory>()?
+            .CreateLogger(typeof(ISqlSugarClient));
         return new ConnectionConfig
         {
             AopEvents = new AopEvents
@@ -78,21 +82,21 @@ public static class SqlSugarBuilderHelper
                     var parameter = it.Parameters;
                     var data = it.BusinessData; // 这边会显示你传进来的对象
                     var time = it.Time;
-                    var diffType = it.DiffType; // enum insert 、update and delete  
+                    var diffType = it.DiffType; // enum insert 、update and delete
                     // 打印日志
-                    AthenaProvider.DefaultLog?.LogDebug("操作前数据：{@EditBeforeData}", editBeforeData);
-                    AthenaProvider.DefaultLog?.LogDebug("操作后数据：{@EditAfterData}", editAfterData);
-                    AthenaProvider.DefaultLog?.LogDebug("SQL监控：{Sql}", sql);
+                    logger?.LogDebug("操作前数据：{@EditBeforeData}", editBeforeData);
+                    logger?.LogDebug("操作后数据：{@EditAfterData}", editAfterData);
+                    logger?.LogDebug("SQL监控：{Sql}", sql);
                     // ReSharper disable once CoVariantArrayConversion
-                    AthenaProvider.DefaultLog?.LogDebug("参数：{@Parameter}", parameter);
-                    AthenaProvider.DefaultLog?.LogDebug("业务数据：{@Data}", data);
-                    AthenaProvider.DefaultLog?.LogDebug("耗时：{@Time}", time);
-                    AthenaProvider.DefaultLog?.LogDebug("操作类型：{@DiffType}", diffType);
+                    logger?.LogDebug("参数：{@Parameter}", parameter);
+                    logger?.LogDebug("业务数据：{@Data}", data);
+                    logger?.LogDebug("耗时：{@Time}", time);
+                    logger?.LogDebug("操作类型：{@DiffType}", diffType);
                 },
                 OnLogExecuted = (sql, _) =>
                 {
                     // 
-                    AthenaProvider.DefaultLog?.LogDebug("执行SQL：{Sql}", sql);
+                    logger?.LogDebug("执行SQL：{Sql}", sql);
                 }
             },
             DbType = dataType.Value,
@@ -133,7 +137,7 @@ public static class SqlSugarBuilderHelper
                     if (attributes.Any(it => it is FieldSortAttribute))
                     {
                         column.CreateTableFieldSort =
-                            ((FieldSortAttribute) attributes.First(it => it is FieldSortAttribute))
+                            ((FieldSortAttribute)attributes.First(it => it is FieldSortAttribute))
                             .Value;
                     }
 
@@ -161,7 +165,7 @@ public static class SqlSugarBuilderHelper
 
                     if (attributes.Any(it => it is TableAttribute))
                     {
-                        column.DbTableName = ((TableAttribute) attributes.First(it => it is TableAttribute))
+                        column.DbTableName = ((TableAttribute)attributes.First(it => it is TableAttribute))
                             .Name;
                     }
                 },

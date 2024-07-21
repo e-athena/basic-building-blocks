@@ -22,6 +22,7 @@ public class TenantQueryServiceBase<T> : QueryServiceBase<T> where T : class
         {
             throw new NullReferenceException("FreeSqlMultiTenancy is null.");
         }
+
         _multiTenancy = multiTenancy;
         _tenantService = tenantService;
     }
@@ -37,6 +38,7 @@ public class TenantQueryServiceBase<T> : QueryServiceBase<T> where T : class
         _multiTenancy = multiTenancy;
         _tenantService = tenantService;
     }
+
     /// <summary>
     /// 
     /// </summary>
@@ -54,6 +56,7 @@ public class TenantQueryServiceBase<T> : QueryServiceBase<T> where T : class
         {
             throw new NullReferenceException("FreeSqlMultiTenancy is null.");
         }
+
         _multiTenancy = multiTenancy;
         _tenantService = tenantService;
     }
@@ -82,6 +85,9 @@ public class TenantQueryServiceBase<T> : QueryServiceBase<T> where T : class
     protected void ChangeTenant(EventBase eventBase)
     {
         ChangeTenant(eventBase.TenantId, eventBase.AppId);
+        SetUserId(eventBase.GetUserId());
+        SetUserName(eventBase.GetUserName());
+        SetRealName(eventBase.GetRealName());
     }
 
     /// <summary>
@@ -99,6 +105,10 @@ public class TenantQueryServiceBase<T> : QueryServiceBase<T> where T : class
         var exists = _multiTenancy.ExistsRegister(tenantId);
         if (exists)
         {
+            if (tenantId != Constant.DefaultMainTenant)
+            {
+                SetTenantId(tenantId);
+            }
             SetContext(_multiTenancy.Change(tenantId));
             return;
         }
@@ -109,6 +119,16 @@ public class TenantQueryServiceBase<T> : QueryServiceBase<T> where T : class
             throw new Exception("租户不存在");
         }
 
+        // 共享租户, 使用默认连接字符串
+        if (tenant.IsolationLevel == TenantIsolationLevel.Shared)
+        {
+            tenant.ConnectionString = _multiTenancy.Ado.ConnectionString;
+        }
+
+        if (tenantId != Constant.DefaultMainTenant)
+        {
+            SetTenantId(tenantId);
+        }
         // 注册租户
         // 只会首次注册，如果已经注册过则不生效
         _multiTenancy.Register(tenantId, () =>

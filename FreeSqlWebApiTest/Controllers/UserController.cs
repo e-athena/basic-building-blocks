@@ -17,12 +17,15 @@ using Athena.Infrastructure.Messaging.Requests;
 using Athena.Infrastructure.Messaging.Responses;
 using Athena.Infrastructure.Mvc;
 using Athena.Infrastructure.QueryFilters;
+using Athena.Infrastructure.Tenants;
 using FluentValidation;
 using FreeSql;
 using FreeSql.DataAnnotations;
+using Hangfire;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace FreeSqlWebApiTest.Controllers;
 
@@ -41,6 +44,7 @@ namespace FreeSqlWebApiTest.Controllers;
 // [ApiPermissionAuthorizeFilter]
 public class UserController : ControllerBase
 {
+    [AllowAnonymous]
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(CustomBadRequestResult), StatusCodes.Status400BadRequest)]
@@ -99,10 +103,31 @@ public class User : FullEntityCore
     {
         ApplyEvent(new UserDeletedEvent());
     }
+
+    public void Update(string name, int age)
+    {
+        Name = name;
+        Age = age;
+
+        ApplyEvent(new UserUpdatedEvent(name, age));
+    }
 }
 
 public class UserDeletedEvent : EventBase
 {
+}
+
+public class UserUpdatedEvent : EventBase
+{
+    public string Name { get; set; }
+
+    public int Age { get; set; }
+
+    public UserUpdatedEvent(string name, int age)
+    {
+        Name = name;
+        Age = age;
+    }
 }
 
 public class UserCreatedEvent : EventBase
@@ -176,11 +201,16 @@ public class DeleteUserRequest : IdRequest, ITxRequest<int>
 public class UserRequestHandler : DataPermissionServiceBase<User>,
     IRequestHandler<CreateUserRequest, string>,
     IMessageHandler<UserCreatedEvent>,
+    IDomainEventHandler<UserUpdatedEvent>,
     IRequestHandler<DeleteUserRequest, int>
 {
-    public UserRequestHandler(UnitOfWorkManager unitOfWorkManager, ISecurityContextAccessor accessor) : base(
+    private readonly ILogger<UserRequestHandler> _logger;
+
+    public UserRequestHandler(UnitOfWorkManager unitOfWorkManager, ISecurityContextAccessor accessor,
+        ILogger<UserRequestHandler> logger) : base(
         unitOfWorkManager, accessor)
     {
+        _logger = logger;
     }
 
     public async Task<string> Handle(CreateUserRequest request, CancellationToken cancellationToken)
@@ -203,6 +233,79 @@ public class UserRequestHandler : DataPermissionServiceBase<User>,
         var entity = await GetAsync(request.Id, cancellationToken);
         entity.SoftDelete();
         return await RegisterSoftDeleteAsync(entity, cancellationToken);
+    }
+
+    public Task Handle(UserUpdatedEvent notification, CancellationToken cancellationToken)
+    {
+        // throw new NotImplementedException();
+        // 如果当前时间/2==0则抛出异常
+        if (DateTime.Now.Second % 2 == 0)
+        {
+            throw new Exception("测试异常");
+        }
+
+        _logger.LogInformation("UserUpdatedEvent: {Name}, {Age}", notification.Name, notification.Age);
+
+        // var entity = await GetAsync(notification.AggregateRootId, cancellationToken);
+        // entity.Update("通过事件更新", 100);
+        // await RegisterDirtyAsync(entity, cancellationToken);
+        return Task.CompletedTask;
+    }
+}
+
+public class HangfireTestHandler : TenantServiceBase<User>,
+    IMessageHandler<UserCreatedEvent>,
+    IMessageHandler<UserUpdatedEvent>
+{
+    private readonly IBackgroundJobClient _backgroundJobClient;
+    private readonly ILogger<HangfireTestHandler> _logger;
+
+    public HangfireTestHandler(UnitOfWorkManagerCloud cloud, ITenantService tenantService, ILoggerFactory factory,
+        IPublisher publisher, IBackgroundJobClient backgroundJobClient) : base(cloud, tenantService, factory, publisher)
+    {
+        _backgroundJobClient = backgroundJobClient;
+        _logger = factory.CreateLogger<HangfireTestHandler>();
+    }
+
+    [EventTracking]
+    [IntegratedEventSubscribe(nameof(UserCreatedEvent), nameof(HangfireTestHandler))]
+    public Task HandleAsync(UserCreatedEvent payload, CancellationToken cancellationToken)
+    {
+        var str = JsonConvert.SerializeObject(payload);
+        var str1 = payload.ToString();
+        var jobId = _backgroundJobClient.Schedule(
+            () => ScheduleJobHandlerAsync(payload.ToString()),
+            TimeSpan.FromSeconds(10)
+        );
+        _logger.LogInformation("添加定时处理任务, JobId:{JobId}", jobId);
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// 支付结果处理
+    /// </summary>
+    /// <returns></returns>
+    // ReSharper disable once MemberCanBePrivate.Global
+    public async Task ScheduleJobHandlerAsync(string payloadStr)
+    {
+        var payload = JsonConvert.DeserializeObject<UserCreatedEvent>(payloadStr);
+        _logger.LogInformation("定时任务执行");
+        // 事务
+        await UseTransactionAsync(payload, async () =>
+        {
+            _logger.LogInformation("当前租户:{TenantCode}", payload.TenantId);
+            var user = await GetAsync(payload.AggregateRootId);
+            user.Update("通过定时任务更新", 100);
+            await base.RegisterDirtyAsync(user);
+        });
+    }
+
+    [EventTracking]
+    [IntegratedEventSubscribe(nameof(UserUpdatedEvent), nameof(HangfireTestHandler))]
+    public Task HandleAsync(UserUpdatedEvent payload, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("-------------UserUpdatedEvent, {Name}, {Age}", payload.Name, payload.Age);
+        return Task.CompletedTask;
     }
 }
 
@@ -228,7 +331,7 @@ public class UserQueryService : DataPermissionQueryServiceBase<User>, IUserQuery
     {
         var parameter = Expression.Parameter(typeof(User), "p");
 
-        var a = new List<string> {"1", "2"};
+        var a = new List<string> { "1", "2" };
         var sql = FreeSqlDbContext.Select<OrganizationalUnitAuth>()
             .AsTable((_, _) => "business_org_auths")
             .Where(p => a.Contains(p.OrganizationalUnitId))
@@ -238,7 +341,7 @@ public class UserQueryService : DataPermissionQueryServiceBase<User>, IUserQuery
         var property1 =
             Expression.Constant("");
         var left1 = Expression.Property(parameter, "Id");
-        var method1 = typeof(DbFunc).GetMethod("FormatLeftJoin", new[] {typeof(string), typeof(string)});
+        var method1 = typeof(DbFunc).GetMethod("FormatLeftJoin", new[] { typeof(string), typeof(string) });
         var expression1 = Expression.Call(null, method1!, property1, left1);
         var exp1 = Expression.Lambda<Func<User, bool>>(expression1, parameter);
 

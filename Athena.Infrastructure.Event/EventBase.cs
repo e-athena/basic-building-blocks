@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Athena.Infrastructure.Event.DomainEvents;
 using Athena.Infrastructure.Event.IntegrationEvents;
@@ -137,5 +138,20 @@ public abstract class EventBase : IDomainEvent, IIntegrationEvent
     {
         EventName = eventName;
         CallbackName = callbackName;
+    }
+
+    /// <summary>
+    /// 构造函数
+    /// </summary>
+    /// <returns></returns>
+    public override string ToString()
+    {
+        // 将事件转换为JSON字符串
+        // MetaData需要特殊处理
+        return JsonSerializer.Serialize(this, new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            Converters = { new JsonStringEnumConverter() }
+        });
     }
 }

@@ -4,6 +4,7 @@ global using Athena.Infrastructure.Event.DomainEvents;
 global using System.Linq.Expressions;
 global using System.Collections.Concurrent;
 global using System.ComponentModel.DataAnnotations;
+global using System.Data;
 global using System.Diagnostics;
 global using System.Reflection;
 global using System.Text.Json;

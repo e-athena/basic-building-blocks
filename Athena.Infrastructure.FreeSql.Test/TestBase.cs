@@ -45,6 +45,7 @@ public class TestBase
         services.AddHttpContextAccessor();
         services.AddLogging();
         services.AddCustomFreeSql(Configuration, false);
+        services.AddScoped<ISecurityContextAccessor, DefaultSecurityContextAccessor>();
         RegistryServices(services);
         Provider = services.BuildServiceProvider();
     }

@@ -6,4 +6,5 @@ namespace Athena.Infrastructure.Domain;
 /// <typeparam name="TResponse"></typeparam>
 public interface ITxRequest<out TResponse> : IRequest<TResponse>, ITransactionRequest
 {
+
 }

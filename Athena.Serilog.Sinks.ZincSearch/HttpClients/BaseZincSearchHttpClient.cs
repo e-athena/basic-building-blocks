@@ -1,0 +1,98 @@
+// Copyright 2020-2022 Mykhailo Shevchuk & Contributors
+//
+// Licensed under the MIT license;
+// you may not use this file except in compliance with the License.
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See LICENSE file in the project root for full license information.
+
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.RegularExpressions;
+
+namespace Athena.Serilog.Sinks.ZincSearch.HttpClients;
+
+/// <summary>
+/// Base http client for sending log events to Grafana Loki.
+/// Implements method for sending authorization header
+/// </summary>
+public abstract class BaseZincSearchHttpClient : IZincSearchHttpClient
+{
+    /// <summary>
+    /// <see cref="HttpClient"/> used for requests.
+    /// </summary>
+    protected readonly HttpClient HttpClient;
+
+    /// <summary>
+    /// Header used for passing tenant ID. See <a href="https://grafana.com/docs/loki/latest/operations/multi-tenancy/">docs</a>.
+    /// </summary>
+    private const string TenantHeader = "X-Scope-OrgID";
+
+    /// <summary>
+    /// Regex for Tenant ID validation.
+    /// </summary>
+    private static readonly Regex TenantIdValueRegex = new Regex(@"^[a-zA-Z0-9]*$");
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BaseZincSearchHttpClient"/> class.
+    /// </summary>
+    /// <param name="httpClient">
+    /// <see cref="HttpClient"/> be used for HTTP requests.
+    /// </param>
+    protected BaseZincSearchHttpClient(HttpClient? httpClient = null)
+    {
+        HttpClient = httpClient ?? new HttpClient();
+    }
+
+    /// <inheritdoc/>
+    public abstract Task<HttpResponseMessage> PostAsync(string requestUri, Stream contentStream);
+
+    /// <inheritdoc/>
+    public virtual void SetCredentials(ZincSearchCredentials? credentials)
+    {
+        if (credentials == null || credentials.IsEmpty)
+        {
+            return;
+        }
+
+        var headers = HttpClient.DefaultRequestHeaders;
+
+        if (headers.Any(h => h.Key == "Authorization"))
+        {
+            return;
+        }
+
+        var token = Base64Encode($"{credentials.Username}:{credentials.Password ?? string.Empty}");
+        headers.Authorization = new AuthenticationHeaderValue("Basic", token);
+    }
+
+    /// <inheritdoc/>
+    public virtual void SetTenant(string? tenant)
+    {
+        if (string.IsNullOrEmpty(tenant))
+        {
+            return;
+        }
+
+        if (!TenantIdValueRegex.IsMatch(tenant))
+        {
+            throw new ArgumentException($"{tenant} argument does not follow rule for Tenant ID", nameof(tenant));
+        }
+
+        var headers = HttpClient.DefaultRequestHeaders;
+
+        if (headers.Any(h => h.Key == TenantHeader))
+        {
+            return;
+        }
+
+        headers.Add(TenantHeader, tenant);
+    }
+
+    /// <inheritdoc/>
+    public virtual void Dispose() => HttpClient.Dispose();
+
+    private static string Base64Encode(string str) => Convert.ToBase64String(Encoding.UTF8.GetBytes(str));
+}

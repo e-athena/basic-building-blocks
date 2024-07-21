@@ -8,7 +8,8 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Athena.All.SqlSugar\Athena.All.SqlSugar.csproj"/>
-        <ProjectReference Include="..\Athena.Infrastructure.SubApplication\Athena.Infrastructure.SubApplication.csproj" />
+        <ProjectReference Include="..\Athena.Infrastructure.SubApplication\Athena.Infrastructure.SubApplication.csproj"/>
+        <ProjectReference Include="..\Athena.Serilog.Sinks.ZincSearch\Athena.Serilog.Sinks.ZincSearch.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -18,5 +19,9 @@
     <ItemGroup>
         <Folder Include="wwwroot\"/>
     </ItemGroup>
+
+<!--    <ItemGroup>-->
+<!--        <PackageReference Include="Athena.Serilog.Sinks.ZincSearch" Version="1.0.0"/>-->
+<!--    </ItemGroup>-->
 
 </Project>

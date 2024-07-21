@@ -34,6 +34,9 @@ public class TenantServiceBase<T> : ServiceBase<T> where T : EntityCore, new()
     protected void ChangeTenant(EventBase eventBase)
     {
         ChangeTenant(eventBase.TenantId, eventBase.AppId);
+        SetUserId(eventBase.GetUserId());
+        SetUserName(eventBase.GetUserName());
+        SetRealName(eventBase.GetRealName());
     }
 
     /// <summary>
@@ -51,6 +54,10 @@ public class TenantServiceBase<T> : ServiceBase<T> where T : EntityCore, new()
         var exists = _sqlSugarClient.AsTenant().IsAnyConnection(tenantId);
         if (exists)
         {
+            if (tenantId != Constant.DefaultMainTenant)
+            {
+                SetTenantId(tenantId);
+            }
             SetContext(_sqlSugarClient.AsTenant().GetConnectionScope(tenantId));
             return;
         }
@@ -61,10 +68,21 @@ public class TenantServiceBase<T> : ServiceBase<T> where T : EntityCore, new()
             throw new Exception("租户不存在");
         }
 
+        // 共享租户, 使用默认连接字符串
+        if (tenant.IsolationLevel == TenantIsolationLevel.Shared)
+        {
+            tenant.ConnectionString = _sqlSugarClient.Ado.Connection.ConnectionString;
+        }
+
+        if (tenantId != Constant.DefaultMainTenant)
+        {
+            SetTenantId(tenantId);
+        }
+
         var content = SqlSugarBuilderHelper.Registry(
             _sqlSugarClient, tenant.DbKey,
             tenant.ConnectionString,
-            tenant.DataType.HasValue ? (DbType) tenant.DataType.Value : null
+            tenant.DataType.HasValue ? (DbType)tenant.DataType.Value : null
         );
         SetContext(content);
     }

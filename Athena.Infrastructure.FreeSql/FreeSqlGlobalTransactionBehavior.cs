@@ -3,7 +3,6 @@ using Athena.Infrastructure.EventStorage.Events;
 using Athena.Infrastructure.EventStorage.Models;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Athena.Infrastructure.FreeSql;
 
@@ -78,90 +77,45 @@ public class FreeSqlGlobalTransactionBehavior<TRequest, TResponse> : IPipelineBe
         var txRequest = request as ITxTraceRequest<TResponse>;
         var rootTraceId = txRequest?.RootTraceId ?? Activity.Current?.TraceId.ToString();
 
-        var freeSqlActivitySource = FreeSqlOTelActivityManager.Instance;
-        using var activity = FreeSqlOTelActivityManager.Instance.StartActivity("全局事务处理");
-        activity?.SetTag("execute.request", JsonSerializer.Serialize(request));
-        activity?.SetTag("execute.request.type", request.GetType().FullName);
-        IUnitOfWork? uow;
         ICapTransaction? capTransaction = null;
-        using (freeSqlActivitySource.StartActivity("开启事务"))
+        var uow = _unitOfWorkManager.Begin();
+        if (_capPublisher != null)
         {
-            uow = _unitOfWorkManager.Begin();
-            if (_capPublisher != null)
-            {
-                capTransaction = _capPublisher.BeginTransaction(uow);
-                // capTransaction = uow.BeginTransaction(_capPublisher);
-            }
+            capTransaction = _capPublisher.BeginTransaction(uow);
         }
 
         try
         {
-            TResponse? response;
-            using (freeSqlActivitySource.StartActivity("执行方法"))
-            {
-                // 执行方法
-                response = await next();
-            }
-
-            using (freeSqlActivitySource.StartActivity("领域事件发布"))
-            {
-                // 领域事件发布处理
-                await DomainEventHandleAsync(rootTraceId, cancellationToken);
-            }
-
-            using (freeSqlActivitySource.StartActivity("集成事件发布"))
-            {
-                // 集成事件发布处理
-                await IntegrationEventHandleAsync(rootTraceId, cancellationToken);
-            }
-
-            using (freeSqlActivitySource.StartActivity("提交事务"))
-            {
-                // 提交事务
-                Commit(capTransaction, uow);
-            }
-
-            activity?.SetTag("execute.response", JsonSerializer.Serialize(response));
-
+            var response = await next();
+            // 领域事件发布处理
+            await DomainEventHandleAsync(rootTraceId, cancellationToken);
+            // 集成事件发布处理
+            await IntegrationEventHandleAsync(rootTraceId, cancellationToken);
+            // 提交事务
+            Commit(capTransaction, uow);
             return response;
         }
         catch (FriendlyException ex)
         {
-            using var errorActivity = freeSqlActivitySource.StartActivity("发生业务异常");
-            errorActivity?.SetTag("execute.friendly.exception", ex.Message);
             uow?.Rollback();
+            _logger.LogError(ex, "{Message}", ex.Message);
             throw;
         }
         catch (DbUpdateVersionException ex)
         {
-            using var errorActivity = freeSqlActivitySource.StartActivity("发生数据库异常");
-            errorActivity?.SetTag("execute.exception", ex.Message);
-            errorActivity?.SetStatus(ActivityStatusCode.Error);
             uow?.Rollback();
+            _logger.LogWarning("{Message}", ex.Message);
             throw FriendlyException.Of("数据已被修改，请刷新后重试");
         }
         catch (Exception ex)
         {
-            using var errorActivity = freeSqlActivitySource.StartActivity("发生未知异常");
-            errorActivity?.SetTag("execute.exception", ex.Message);
-            errorActivity?.SetTag("execute.exception.type", ex.GetType().FullName);
-            if (ex.InnerException != null)
-            {
-                errorActivity?.SetTag("inner.exception", ex.InnerException?.Message ?? string.Empty);
-                errorActivity?.SetTag("inner.exception.type", ex.InnerException?.GetType().FullName ?? string.Empty);
-            }
-
-            errorActivity?.SetStatus(ActivityStatusCode.Error);
             _logger.LogError(ex, "{Message}", ex.Message);
             uow?.Rollback();
             throw;
         }
         finally
         {
-            using (freeSqlActivitySource.StartActivity("事务释放"))
-            {
-                uow?.Dispose();
-            }
+            uow?.Dispose();
         }
     }
 

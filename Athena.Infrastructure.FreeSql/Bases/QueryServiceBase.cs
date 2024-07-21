@@ -21,6 +21,14 @@ public class QueryServiceBase<T> where T : class
     /// </summary>
     protected const string SoftDelete = "soft_delete";
 
+    private string? _tenantId;
+
+    private string? _userId;
+
+    private string? _userName;
+
+    private string? _realName;
+
     private readonly ISecurityContextAccessor? _accessor;
     private readonly FreeSqlMultiTenancy? _multiTenancy;
 
@@ -81,7 +89,16 @@ public class QueryServiceBase<T> where T : class
     /// <summary>
     /// 用户ID
     /// </summary>
-    protected string? UserId => _accessor?.UserId;
+    protected string? UserId => _userId ?? _accessor?.UserId;
+
+    /// <summary>
+    /// 设置用户ID
+    /// </summary>
+    /// <param name="userId"></param>
+    protected void SetUserId(string? userId)
+    {
+        _userId = userId;
+    }
 
     /// <summary>
     /// 用户名
@@ -89,19 +106,48 @@ public class QueryServiceBase<T> where T : class
     protected string? UserName => _accessor?.UserName;
 
     /// <summary>
+    /// 设置用户名
+    /// </summary>
+    /// <param name="userName"></param>
+    protected void SetUserName(string? userName)
+    {
+        _userName = userName;
+    }
+
+    /// <summary>
     /// 用户姓名
     /// </summary>
-    protected string? RealName => _accessor?.RealName;
+    protected string? RealName => _realName ?? _accessor?.RealName;
+
+    /// <summary>
+    /// 设置用户姓名
+    /// </summary>
+    /// <param name="realName"></param>
+    protected void SetRealName(string? realName)
+    {
+        _realName = realName;
+    }
 
     /// <summary>
     /// 是否为开发者帐号
     /// </summary>
-    protected bool IsRoot => _accessor?.IsRoot ?? false;
+    protected bool IsRoot =>
+        !string.IsNullOrEmpty(_userName) && _userName == "root" || (_accessor?.IsRoot ?? false);
 
     /// <summary>
     /// 租户ID
     /// </summary>
-    protected string? TenantId => _accessor?.TenantId == "" ? null : _accessor?.TenantId;
+    protected string? TenantId => _tenantId ?? (_accessor?.TenantId == "" ? null : _accessor?.TenantId);
+
+    /// <summary>
+    /// 设置租户ID
+    /// </summary>
+    /// <param name="tenantId"></param>
+    protected void SetTenantId(string? tenantId)
+    {
+        _tenantId = tenantId;
+        GlobalFilterHandler();
+    }
 
     /// <summary>
     /// 是否为租户管理员

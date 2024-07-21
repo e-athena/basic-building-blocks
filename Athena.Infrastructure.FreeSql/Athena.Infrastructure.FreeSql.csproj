@@ -4,13 +4,13 @@
         <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>7.0.5</Version>
+        <Version>7.0.13</Version>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
         <PackageIcon>e-athena.png</PackageIcon>
         <Title>Athena.Infrastructure.FreeSql</Title>
         <Authors>VanZheng</Authors>
         <Description>ORM基于FreeSql的实现</Description>
-        <Copyright>Copyright (c) 2023 e-athena</Copyright>
+        <Copyright>Copyright (c) 2024 e-athena</Copyright>
         <PackageProjectUrl>https://github.com/e-athena/basic-building-blocks</PackageProjectUrl>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>

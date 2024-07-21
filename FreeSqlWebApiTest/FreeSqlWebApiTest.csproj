@@ -9,10 +9,12 @@
     <ItemGroup>
         <ProjectReference Include="..\Athena.All.FreeSql\Athena.All.FreeSql.csproj"/>
         <ProjectReference Include="..\Athena.Infrastructure.SubApplication\Athena.Infrastructure.SubApplication.csproj" />
+        <ProjectReference Include="..\Athena.Serilog.Sinks.ZincSearch\Athena.Serilog.Sinks.ZincSearch.csproj" />
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.13" />
+        <PackageReference Include="Athena.Infrastructure.Hangfire" Version="7.0.5" />
     </ItemGroup>
 
 </Project>

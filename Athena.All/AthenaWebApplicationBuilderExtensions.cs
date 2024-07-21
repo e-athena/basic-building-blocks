@@ -10,8 +10,10 @@ using Athena.Infrastructure.Messaging.Responses;
 using Athena.Infrastructure.Mvc.Messaging.Requests;
 using Athena.Infrastructure.Providers;
 using Athena.Infrastructure.ViewModels;
+using DotNetCore.CAP;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 
 // ReSharper disable once CheckNamespace
@@ -159,6 +161,70 @@ public static class AthenaWebApplicationBuilderExtensions
     /// <exception cref="InvalidOperationException"></exception>
     private static void UseCapDashboard(this WebApplication app)
     {
+        // 读取配置
+        var configuration = app.Services.GetService<IConfiguration>();
+
+        if (configuration == null)
+        {
+            return;
+        }
+        // 读取配置
+        var capDashboardOptions = app.Services.GetService<IOptionsMonitor<DashboardOptions>>();
+        // 如果是访问/cap页面，则判断是否登录，如果未登录，则使用Basic Auth登录
+        app.Use(async (context, next) =>
+        {
+            // cap dashboard
+            if (context.Request.Path.ToString().StartsWith(capDashboardOptions?.CurrentValue.PathMatch ?? "/cap"))
+            {
+                var isDisabledAuth = configuration.GetEnvValue<bool>("Module:DbContext:Dashboard:DisabledAuth");
+                // 需要授权访问
+                if (!isDisabledAuth)
+                {
+                    var header = (string)context.Request.Headers["Authorization"]!;
+                    if (!string.IsNullOrWhiteSpace(header))
+                    {
+                        var authenticationHeaderValue = AuthenticationHeaderValue.Parse(header);
+                        if ("Basic".Equals(authenticationHeaderValue.Scheme, StringComparison.OrdinalIgnoreCase))
+                        {
+                            var strArray = Encoding.UTF8
+                                .GetString(Convert.FromBase64String(authenticationHeaderValue.Parameter!)).Split(':');
+                            if (strArray.Length > 1)
+                            {
+                                var login = strArray[0];
+                                var pwd = strArray[1];
+                                var userName = configuration.GetEnvValue<string>("Module:DbContext:Dashboard:UserName");
+                                var password = configuration.GetEnvValue<string>("Module:DbContext:Dashboard:Password");
+                                userName ??= "admin";
+                                password ??= "admin123456";
+
+                                // 如果用户名和密码正确，则登录成功，生成Cookies，然后重定向到/cap
+                                if (login == userName && pwd == password)
+                                {
+                                    await next();
+                                    return;
+                                }
+                            }
+                        }
+                    }
+
+                    context.Response.StatusCode = 401;
+                    context.Response.Headers.Append("WWW-Authenticate", (StringValues)"Basic realm=\"CAP Dashboard\"");
+                    return;
+                }
+            }
+
+            await next();
+        });
+    }
+
+    /// <summary>
+    /// Cap Dashboard
+    /// </summary>
+    /// <param name="app"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    private static void UseCapDashboard1(this WebApplication app)
+    {
         // 如果是访问/cap页面，则判断是否登录，如果未登录，则使用Basic Auth登录
         app.Use(async (context, next) =>
         {
@@ -237,7 +303,7 @@ public static class AthenaWebApplicationBuilderExtensions
     /// <param name="app"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    private static void UseCapDashboard1(this WebApplication app)
+    private static void UseCapDashboard2(this WebApplication app)
     {
         // 读取当前程序集
         var assembly = Assembly.GetExecutingAssembly();

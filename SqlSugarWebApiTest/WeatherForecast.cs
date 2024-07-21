@@ -1,3 +1,5 @@
+using Athena.Infrastructure.Attributes;
+
 namespace SqlSugarWebApiTest;
 
 public class WeatherForecast

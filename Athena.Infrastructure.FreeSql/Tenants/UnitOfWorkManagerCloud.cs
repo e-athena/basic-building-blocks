@@ -1,5 +1,3 @@
-using System.Data;
-
 namespace Athena.Infrastructure.FreeSql.Tenants;
 
 /// <summary>

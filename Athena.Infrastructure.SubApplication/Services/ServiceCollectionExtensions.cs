@@ -109,6 +109,21 @@ public class ServiceCallConfig
     public bool ThrowException { get; set; } = true;
 
     /// <summary>
+    /// 是否需要认证
+    /// </summary>
+    public bool IsAuth { get; set; }
+
+    /// <summary>
+    /// 用户名
+    /// </summary>
+    public string? UserName { get; set; }
+
+    /// <summary>
+    /// 密码
+    /// </summary>
+    public string? Password { get; set; }
+
+    /// <summary>
     /// 检查配置是否正确，1、CallType为Dapr时，AppId不能为空，2、CallType为Http时，HttpApiUrl不能为空
     /// </summary>
     public void Check()
@@ -126,6 +141,19 @@ public class ServiceCallConfig
             if (string.IsNullOrEmpty(HttpApiUrl))
             {
                 throw new ArgumentNullException(nameof(HttpApiUrl), "HttpApiUrl不能为空");
+            }
+        }
+
+        if (IsAuth)
+        {
+            if (string.IsNullOrEmpty(UserName))
+            {
+                throw new ArgumentNullException(nameof(UserName), "用户名不能为空");
+            }
+
+            if (string.IsNullOrEmpty(Password))
+            {
+                throw new ArgumentNullException(nameof(Password), "密码不能为空");
             }
         }
     }
