@@ -52,7 +52,7 @@ public static class QueryableExtensions
     public static ISelect<TSource> HasWhere<TSource>(this ISelect<TSource> query, IList<DateTime>? dateRange,
         Expression<Func<TSource, bool>> whereExpression) where TSource : class
     {
-        if (dateRange is {Count: 2})
+        if (dateRange is { Count: 2 })
         {
             query = query.Where(whereExpression);
         }
@@ -615,12 +615,20 @@ public static class QueryableExtensions
         // 兼容组织架构数据权限查询
         query = query.LeftJoinHandler();
 
+        // sql = query.ToSql();
+        var sw = new Stopwatch();
+        sw.Start();
         using var listActivity = FreeSqlOTelActivityManager.Instance.StartActivity();
         listActivity?.SetTag("query.sql.text", query.ToSql());
         var result = hasLambda
             ? await query.ToListAsync(funcExpression, cancellationToken)
             : await query.ToListAsync<TResult>(cancellationToken);
-
+        sw.Stop();
+        var meter = AthenaProvider.GetService<FreeSqlInstrumentation>();
+        meter?.QueryDurationSeconds.Record(sw.ElapsedMilliseconds / 1000.000000,
+            new KeyValuePair<string, object?>("command_type", "list")
+        );
+        meter?.QueryListCounter.Add(1);
         return result;
     }
 
@@ -1016,6 +1024,8 @@ public static class QueryableExtensions
         query = query.LeftJoinHandler();
 
         // sql = query.ToSql();
+        var sw = new Stopwatch();
+        sw.Start();
         long totalItems;
         using (var countActivity = FreeSqlOTelActivityManager.Instance.StartActivity())
         {
@@ -1023,6 +1033,13 @@ public static class QueryableExtensions
             countActivity?.SetTag("query.sql.text", query.ToSql());
             countActivity?.SetTag("result.total.count", totalItems.ToString());
         }
+
+        sw.Stop();
+        var meter = AthenaProvider.GetService<FreeSqlInstrumentation>();
+        meter?.QueryListCounter.Add(1);
+        meter?.QueryDurationSeconds.Record(sw.ElapsedMilliseconds / 1000.000000,
+            new KeyValuePair<string, object?>("command_type", "count")
+        );
 
         activity?.SetTag("query.sql.text", query.ToSql());
         var totalPages = totalItems != 0
@@ -1043,6 +1060,7 @@ public static class QueryableExtensions
             return page;
         }
 
+        sw.Restart();
         using (var listActivity = FreeSqlOTelActivityManager.Instance.StartActivity())
         {
             query = query.Page(pageIndex, pageSize);
@@ -1051,6 +1069,11 @@ public static class QueryableExtensions
                 ? await query.ToListAsync(funcExpression, cancellationToken)
                 : await query.ToListAsync<TResult>(cancellationToken);
         }
+
+        sw.Stop();
+        meter?.QueryDurationSeconds.Record(sw.ElapsedMilliseconds / 1000.000000,
+            new KeyValuePair<string, object?>("command_type", "list")
+        );
 
         return page;
     }

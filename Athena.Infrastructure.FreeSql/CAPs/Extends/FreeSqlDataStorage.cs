@@ -369,9 +369,9 @@ public class FreeSqlDataStorage : IDataStorage
     /// 
     /// </summary>
     /// <returns></returns>
-    public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry()
+    public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry(TimeSpan lookbackSeconds)
     {
-        var fourMinAgo = DateTime.Now.AddMinutes(-4);
+        var fourMinAgo = DateTime.Now.Subtract(lookbackSeconds); //DateTime.Now.AddMinutes(-4);
         var result = await _freeSql.Queryable<Published>()
             .AsTable((_, _) => _pubName)
             .Where(p => p.Retries < _capOptions.Value.FailedRetryCount)
@@ -429,9 +429,9 @@ public class FreeSqlDataStorage : IDataStorage
     /// 
     /// </summary>
     /// <returns></returns>
-    public async Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry()
+    public async Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry(TimeSpan lookbackSeconds)
     {
-        var fourMinAgo = DateTime.Now.AddMinutes(-4);
+        var fourMinAgo = DateTime.Now.Subtract(lookbackSeconds); //DateTime.Now.AddMinutes(-4);
         var result = await _freeSql.Queryable<Received>()
             .AsTable((_, _) => _recName)
             .Where(p => p.Retries < _capOptions.Value.FailedRetryCount)

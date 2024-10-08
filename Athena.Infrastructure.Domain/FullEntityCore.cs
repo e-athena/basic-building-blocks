@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using Athena.Infrastructure.DataAnnotations.Schema;
 
 namespace Athena.Infrastructure.Domain;
@@ -5,9 +6,9 @@ namespace Athena.Infrastructure.Domain;
 /// <summary>
 /// 全功能实体
 /// </summary>
-[Index(nameof(IsDeleted), IsUnique = false)]
-[Index(nameof(TenantId), IsUnique = false)]
-[Index(nameof(TenantId), nameof(OrganizationalUnitId), IsUnique = false)]
+[Index("is_deleted", IsUnique = false)]
+[Index("tenant_id", IsUnique = false)]
+[Index("tenant_id", "organizational_unit_id", IsUnique = false)]
 public class FullEntityCore : EntityCore, IFullCore
 {
     /// <summary>
@@ -15,6 +16,7 @@ public class FullEntityCore : EntityCore, IFullCore
     /// </summary>
     [MaxLength(36)]
     [FieldSort(999)]
+    [Column("created_user_id")]
     public string? CreatedUserId { get; set; }
 
     /// <summary>
@@ -22,18 +24,21 @@ public class FullEntityCore : EntityCore, IFullCore
     /// </summary>
     [MaxLength(36)]
     [FieldSort(999)]
+    [Column("last_updated_user_id")]
     public string? LastUpdatedUserId { get; set; }
 
     /// <summary>
     /// 是否已标记删除
     /// </summary>
     [FieldSort(999)]
+    [Column("is_deleted")]
     public bool IsDeleted { get; set; }
 
     /// <summary>
     /// 删除时间
     /// </summary>
     [FieldSort(999)]
+    [Column("deleted_on")]
     public DateTime? DeletedOn { get; set; }
 
     /// <summary>
@@ -41,6 +46,7 @@ public class FullEntityCore : EntityCore, IFullCore
     /// </summary>
     [MaxLength(36)]
     [FieldSort(999)]
+    [Column("deleted_user_id")]
     public string? DeletedUserId { get; set; }
 
     /// <summary>
@@ -48,6 +54,7 @@ public class FullEntityCore : EntityCore, IFullCore
     /// </summary>
     [MaxLength(36)]
     [FieldSort(999)]
+    [Column("organizational_unit_id")]
     public string? OrganizationalUnitId { get; set; }
 
     /// <summary>
@@ -55,6 +62,7 @@ public class FullEntityCore : EntityCore, IFullCore
     /// </summary>
     [MaxLength(36)]
     [FieldSort(999)]
+    [Column("tenant_id")]
     public string? TenantId { get; set; }
 
     /// <summary>

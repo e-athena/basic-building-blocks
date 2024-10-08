@@ -10,8 +10,8 @@ namespace Athena.Infrastructure.Domain;
 /// <summary>
 /// Entity基类
 /// </summary>
-[Index(nameof(UpdatedOn), IsUnique = false)]
-[Index(nameof(CreatedOn), IsUnique = false)]
+[Index("created_on", IsUnique = false)]
+[Index("updated_on", IsUnique = false)]
 public abstract class EntityCore : IAggregateRoot
 {
     /// <summary>
@@ -20,6 +20,7 @@ public abstract class EntityCore : IAggregateRoot
     [Required]
     [MaxLength(36)]
     [Key]
+    [Column("id")]
     public string Id { get; set; } = ObjectId.GenerateNewStringId();
 
     /// <summary>
@@ -28,6 +29,7 @@ public abstract class EntityCore : IAggregateRoot
     [Required]
     [RowVersion]
     [FieldSort(999)]
+    [Column("version")]
     public long Version { get; set; }
 
     /// <summary>
@@ -35,12 +37,14 @@ public abstract class EntityCore : IAggregateRoot
     /// </summary>
     [Required]
     [FieldSort(999)]
+    [Column("created_on")]
     public DateTime CreatedOn { get; set; } = DateTime.Now;
 
     /// <summary>
     /// 更新时间
     /// </summary>
     [FieldSort(999)]
+    [Column("updated_on")]
     public DateTime? UpdatedOn { get; set; } = DateTime.Now;
 
     /// <summary>
@@ -70,7 +74,7 @@ public abstract class EntityCore : IAggregateRoot
     }
 
     /// <summary>
-    /// 添加领域事件[兼容ENode的方法]
+    /// 添加领域事件
     /// </summary>
     /// <param name="eventItem"></param>
     public void ApplyEvent(EventBase eventItem)
@@ -127,26 +131,29 @@ public abstract class EntityCore : IAggregateRoot
 /// 组织架构数据权限
 /// </summary>
 [Table("business_org_auths")]
-[Index(nameof(OrganizationalUnitId), IsUnique = false)]
-[Index(nameof(BusinessTable), nameof(BusinessId), IsUnique = false)]
+[Index("organizational_unit_id", IsUnique = false)]
+[Index("business_table", "business_id", IsUnique = true)]
 public class OrganizationalUnitAuth : ValueObject
 {
     /// <summary>
     /// 组织ID
     /// </summary>
     [MaxLength(36)]
+    [Column("organizational_unit_id")]
     public string OrganizationalUnitId { get; set; } = null!;
 
     /// <summary>
     /// 业务ID
     /// </summary>
     [MaxLength(36)]
+    [Column("business_id")]
     public string BusinessId { get; set; } = null!;
 
     /// <summary>
     /// 业务表
     /// </summary>
     [MaxLength(64)]
+    [Column("business_table")]
     public string BusinessTable { get; set; } = null!;
 
     /// <summary>

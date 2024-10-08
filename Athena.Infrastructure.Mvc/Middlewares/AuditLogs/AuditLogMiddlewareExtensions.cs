@@ -1,5 +1,4 @@
-using Athena.Infrastructure.Mvc.Middlewares.AuditLogs;
-
+// ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Builder;
 
 /// <summary>

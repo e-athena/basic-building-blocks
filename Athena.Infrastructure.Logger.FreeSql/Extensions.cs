@@ -33,13 +33,14 @@ public static class Extensions
     {
         if (string.IsNullOrEmpty(sourceConnectionString))
         {
-            throw new ArgumentNullException(nameof(sourceConnectionString), "日志存储的数据库连接字符串不能为空");
+            return services;
         }
 
         var (dataType, connectionString) = DbTypeHelper.GetDataTypeAndConnectionString(sourceConnectionString);
         if (string.IsNullOrEmpty(connectionString))
         {
-            throw new ArgumentNullException(nameof(connectionString), "日志存储的数据库连接字符串不能为空");
+            Console.WriteLine("日志存储的数据库连接字符串配置不正确");
+            return services;
         }
 
         var assembly = Assembly.Load("Athena.Infrastructure.Logger");
@@ -72,6 +73,7 @@ public static class Extensions
     /// <param name="configuration"></param>
     /// <param name="configVariable"></param>
     /// <param name="envVariable"></param>
+    /// <exception cref="ArgumentNullException"></exception>
     /// <returns></returns>
     private static string GetConnectionStringByEnv(
         this IConfiguration configuration,

@@ -18,7 +18,7 @@ public class IndexAttribute : Attribute
     /// <summary>
     /// 名称
     /// </summary>
-    public string FieldName { get; set; }
+    public required string FieldName { get; set; }
     /// <summary>
     /// 是否存储
     /// </summary>

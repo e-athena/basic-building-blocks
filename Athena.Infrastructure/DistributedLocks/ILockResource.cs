@@ -3,7 +3,7 @@ namespace Athena.Infrastructure.DistributedLocks;
 /// <summary>
 /// 锁资源接口
 /// </summary>
-public interface ILockResource
+public interface ILockResource : IDisposable, IAsyncDisposable
 {
     /// <summary>
     /// 锁定资源

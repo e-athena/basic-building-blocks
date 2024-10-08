@@ -17,24 +17,18 @@ public class WechatApiClientFactory : IWechatApiClientFactory
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="httpClientFactory"></param>
     /// <param name="wechatApiClientOptions"></param>
     /// <param name="cacheManager"></param>
     /// <param name="loggerFactory"></param>
     /// <exception cref="ArgumentNullException"></exception>
     public WechatApiClientFactory(
-        IHttpClientFactory httpClientFactory,
         IOptions<WechatApiClientOptions> wechatApiClientOptions,
         ICacheManager cacheManager,
         ILoggerFactory loggerFactory)
     {
-        httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
-        _wechatApiClientOptions =
-            wechatApiClientOptions ?? throw new ArgumentNullException(nameof(wechatApiClientOptions));
+        _wechatApiClientOptions = wechatApiClientOptions ?? throw new ArgumentNullException(nameof(wechatApiClientOptions));
         _cacheManager = cacheManager;
         _logger = loggerFactory.CreateLogger<WechatApiClientFactory>();
-
-        FlurlHttp.GlobalSettings.FlurlClientFactory = new DelegatingFlurlClientFactory(httpClientFactory);
     }
 
     /// <summary>

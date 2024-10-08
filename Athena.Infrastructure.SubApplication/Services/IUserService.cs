@@ -91,5 +91,5 @@ public interface IUserService
     /// 读取用户列表
     /// </summary>
     /// <returns></returns>
-    Task<List<SelectViewModel>> GetAllUserAsync(bool readFromCache = true);
+    Task<List<SelectViewModel>> GetAllUserAsync(bool readFromCache = true, int expireSeconds = 86400);
 }

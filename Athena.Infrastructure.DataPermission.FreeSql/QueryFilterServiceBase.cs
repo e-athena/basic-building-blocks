@@ -11,6 +11,12 @@ public class QueryFilterServiceBase
     private readonly DataPermissionFactory _dataPermissionFactory;
     private readonly IDataPermissionService _dataPermissionService;
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="freeSql"></param>
+    /// <param name="dataPermissions"></param>
+    /// <param name="dataPermissionService"></param>
     public QueryFilterServiceBase(
         IFreeSql freeSql,
         IEnumerable<IDataPermission> dataPermissions,

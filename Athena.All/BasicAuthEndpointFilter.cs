@@ -1,6 +1,4 @@
-using System.Net.Http.Headers;
 using Athena.Infrastructure.Auth.Configs;
-using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Builder;

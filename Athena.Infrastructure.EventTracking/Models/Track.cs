@@ -4,12 +4,14 @@ namespace Athena.Infrastructure.EventTracking.Models;
 /// 追踪信息
 /// </summary>
 [Table("event_tracking_tracks")]
-[Index(nameof(TraceId))]
+[Index("trace_id")]
 public class Track : EntityBase
 {
     /// <summary>
     /// 业务Id
     /// </summary>
+    [MaxLength(36)]
+    [Column("business_id")]
     public string? BusinessId { get; set; }
 
     /// <summary>
@@ -17,85 +19,100 @@ public class Track : EntityBase
     /// <remarks>为空时为根节点</remarks>
     /// </summary>
     [MaxLength(36)]
+    [Column("parent_id")]
     public string? ParentId { get; set; }
 
     /// <summary>
     /// 追踪ID
     /// </summary>
     [MaxLength(36)]
+    [Column("trace_id")]
     public string TraceId { get; set; } = null!;
 
     /// <summary>
     /// 事件类型
     /// </summary>
+    [Column("event_type")]
     public EventType? EventType { get; set; }
 
     /// <summary>
     /// 事件名
     /// </summary>
     [MaxLength(64)]
+    [Column("event_name")]
     public string EventName { get; set; } = null!;
 
     /// <summary>
     /// 事件类型全名
     /// </summary>
     [MaxLength(128)]
+    [Column("event_type_full_name")]
     public string? EventTypeFullName { get; set; }
 
     /// <summary>
     /// 执行状态
     /// <remarks>0、未执行，1、执行成功，2、执行失败</remarks>
     /// </summary>
+    [Column("track_status")]
     public TrackStatus TrackStatus { get; set; } = TrackStatus.NotExecute;
 
     /// <summary>
     /// 开始执行时间
     /// </summary>
+    [Column("begin_execute_time")]
     public DateTime? BeginExecuteTime { get; set; }
 
     /// <summary>
     /// 执行完成时间
     /// </summary>
+    [Column("end_execute_time")]
     public DateTime? EndExecuteTime { get; set; }
 
     /// <summary>
     /// 事件参数
     /// </summary>
     [MaxLength(-1)]
+    [Column("payload")]
     public string? Payload { get; set; }
 
     /// <summary>
     /// 处理器全名
     /// </summary>
     [MaxLength(128)]
+    [Column("processor_full_name")]
     public string? ProcessorFullName { get; set; }
 
     /// <summary>
     /// 执行应用名
     /// </summary>
+    [Column("execute_app_name")]
     public string ExecuteAppName { get; set; } = PlatformServices.Default.Application.ApplicationName;
 
     /// <summary>
     /// 异常信息
     /// </summary>
     [MaxLength(-1)]
+    [Column("exception_message")]
     public string? ExceptionMessage { get; set; }
 
     /// <summary>
     /// 异常内联信息
     /// </summary>
     [MaxLength(-1)]
+    [Column("exception_inner_message")]
     public string? ExceptionInnerMessage { get; set; }
 
     /// <summary>
     /// 异常内联类型
     /// </summary>
+    [Column("exception_inner_type")]
     public string? ExceptionInnerType { get; set; }
 
     /// <summary>
     /// 异常堆栈
     /// </summary>
     [MaxLength(-1)]
+    [Column("exception_stack_trace")]
     public string? ExceptionStackTrace { get; set; }
 
     /// <summary>

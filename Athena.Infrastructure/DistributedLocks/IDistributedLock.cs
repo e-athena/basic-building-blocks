@@ -54,4 +54,14 @@ public interface IDistributedLock
     /// <param name="timeSpan">要锁定的时间</param> 
     /// <returns>如果锁成功，则返回true，否则返回false</returns>
     Task<ILockResource?> TryGetLockAsync(string resourceName, string key, TimeSpan timeSpan);
+
+    /// <summary>
+    /// 试图锁一个关键词，如果锁成功，则返回true，否则返回false，会持续等待，直到锁成功或者超时
+    /// </summary>
+    /// <param name="resourceName"></param>
+    /// <param name="key"></param>
+    /// <param name="timeout"></param>
+    /// <param name="expiry"></param>
+    /// <returns></returns>
+    Task<ILockResource?> TryAcquireLockAsync(string resourceName, string key, TimeSpan timeout, TimeSpan? expiry = null);
 }

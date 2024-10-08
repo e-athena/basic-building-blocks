@@ -6,6 +6,19 @@ namespace Athena.Infrastructure.CSRedis;
 public sealed class DistributedLock : IDistributedLock
 {
     private readonly TimeSpan _defaultExpiredTimeSpan = new(0, 1, 0);
+    private readonly ILoggerFactory _loggerFactory;
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="loggerFactory"></param>
+    public DistributedLock(ILoggerFactory loggerFactory)
+    {
+        _loggerFactory = loggerFactory;
+    }
+
+    private const double BaseDelay = 100;
+    private const double MaxDelay = 10000;
 
     /// <summary>
     /// 在集群中锁定一个关键词。如果锁成功则返回；如果锁失败，则等待1分钟继续尝试锁，直到锁成功
@@ -14,7 +27,7 @@ public sealed class DistributedLock : IDistributedLock
     /// <param name="key">要锁定的关键词</param> 
     public async Task<ILockResource> LockAsync(string resourceName, string key)
     {
-        var lockResource = new LockResource(resourceName, key);
+        var lockResource = new LockResource(resourceName, key, _loggerFactory);
         while (true)
         {
             var res = await lockResource.LockAsync(_defaultExpiredTimeSpan);
@@ -35,7 +48,7 @@ public sealed class DistributedLock : IDistributedLock
     /// <param name="timeSpan">有效时间</param> 
     public async Task<ILockResource> LockAsync(string resourceName, string key, TimeSpan timeSpan)
     {
-        var lockResource = new LockResource(resourceName, key);
+        var lockResource = new LockResource(resourceName, key, _loggerFactory);
         while (true)
         {
             var res = await lockResource.LockAsync(timeSpan);
@@ -75,14 +88,75 @@ public sealed class DistributedLock : IDistributedLock
 
     public Task<ILockResource?> TryGetLockAsync(string resourceName, string key)
     {
-        var lockResource = new LockResource(resourceName, key);
+        var lockResource = new LockResource(resourceName, key, _loggerFactory);
         return lockResource.LockAsync(_defaultExpiredTimeSpan);
     }
 
     public Task<ILockResource?> TryGetLockAsync(string resourceName, string key, TimeSpan timeSpan)
     {
-        var lockResource = new LockResource(resourceName, key);
+        var lockResource = new LockResource(resourceName, key, _loggerFactory);
         return lockResource.LockAsync(timeSpan);
+    }
+
+    /// <summary>
+    /// 尝试异步获取分布式锁
+    /// </summary>
+    /// <param name="resourceName">服务的名称</param>
+    /// <param name="key">锁的唯一标识符</param>
+    /// <param name="timeout">尝试获取锁的超时时间</param>
+    /// <param name="expiry">锁的有效期，如果未指定，默认为无限期</param>
+    /// <returns>返回一个元组，包含锁对象和一个布尔值表示是否成功获取锁</returns>
+    public async Task<ILockResource?> TryAcquireLockAsync(string resourceName, string key, TimeSpan timeout,
+        TimeSpan? expiry = null)
+    {
+        var lockResource = new LockResource(resourceName, key, _loggerFactory);
+        if (timeout == TimeSpan.MaxValue)
+        {
+            timeout = Timeout.InfiniteTimeSpan;
+        }
+
+        using var cts = new CancellationTokenSource(timeout);
+        var retries = 0.0;
+
+        while (!cts.IsCancellationRequested)
+        {
+            var locker = await lockResource.LockAsync(expiry ?? TimeSpan.MaxValue);
+            if (locker != null)
+            {
+                return locker;
+            }
+
+            try
+            {
+                await Task.Delay(GetDelay(++retries), cts.Token);
+            }
+            catch (TaskCanceledException)
+            {
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// 100     100
+    /// 164     171
+    /// 256     312
+    /// 401     519
+    /// 754     766
+    /// 1327    1562
+    /// 2950    3257
+    /// 4596    4966
+    /// 7215    8667
+    /// 10000   10000
+    /// </summary>
+    /// <param name="retries"></param>
+    /// <returns></returns>
+    private static TimeSpan GetDelay(double retries)
+    {
+        var delay = BaseDelay *
+                    (1.0 + ((Math.Pow(1.8, retries - 1.0) - 1.0) * (0.6 + new Random().NextDouble() * 0.4)));
+        return TimeSpan.FromMilliseconds(Math.Min(delay, MaxDelay));
     }
 }
 
@@ -93,6 +167,8 @@ public class LockResource : ILockResource
 {
     private const string Prefix = "DistributedLock_";
     private const int LockKeyLengthLimit = 256;
+    private bool _disposed;
+    private readonly ILogger<LockResource> _logger;
 
     private const string UnlockCommand = @"
             if redis.call(""get"",KEYS[1]) == ARGV[1] then
@@ -122,11 +198,13 @@ public class LockResource : ILockResource
     /// </summary>
     /// <param name="resourceName"></param>
     /// <param name="key"></param>
-    public LockResource(string resourceName, string key)
+    /// <param name="loggerFactory"></param>
+    public LockResource(string resourceName, string key, ILoggerFactory loggerFactory)
     {
         _requestId = Guid.NewGuid().ToString();
         _resourceName = resourceName;
         _key = key;
+        _logger = loggerFactory.CreateLogger<LockResource>();
     }
 
     /// <summary>
@@ -148,7 +226,7 @@ public class LockResource : ILockResource
         var res = result?.ToString() == "0" ? this : null;
         if (EnvironmentHelper.IsDevelopment)
         {
-            Console.WriteLine(res == null ? "获取锁失败，{0}" : "获取锁成功，{0}", k);
+            _logger.LogDebug("[{Key}]获取锁{Status}", k, res == null ? "失败" : "成功");
         }
 
         return res;
@@ -163,7 +241,7 @@ public class LockResource : ILockResource
         await RedisHelper.EvalAsync(UnlockCommand, k, _requestId).ConfigureAwait(false);
         if (EnvironmentHelper.IsDevelopment)
         {
-            Console.WriteLine("释放锁成功，{0}", k);
+            _logger.LogDebug("[{Key}]释放锁成功", k);
         }
     }
 
@@ -176,5 +254,29 @@ public class LockResource : ILockResource
         }
 
         return newKey;
+    }
+
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        // 释放锁资源
+        ReleaseAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+
+        // 释放锁资源
+        await ReleaseAsync();
     }
 }

@@ -15,4 +15,5 @@ global using Athena.Infrastructure.Enums;
 global using Athena.Infrastructure.Attributes;
 global using Microsoft.Extensions.Configuration;
 global using Athena.Infrastructure.Helpers;
+global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.PlatformAbstractions;

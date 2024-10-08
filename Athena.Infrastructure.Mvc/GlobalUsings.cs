@@ -16,6 +16,7 @@ global using System.Text.Json;
 global using Athena.Infrastructure.Logger.Models;
 global using Athena.Infrastructure.Logger;
 global using Athena.Infrastructure.Mvc.Helpers;
+global using Athena.Infrastructure.Mvc.Middlewares.AuditLogs;
 global using Athena.Infrastructure.Mvc.Middlewares.MiddlewareInjectors;
 global using Athena.Infrastructure.Providers;
 global using Microsoft.AspNetCore.Builder;

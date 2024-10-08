@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+        <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>7.0.8</Version>
+        <Version>8.1.0</Version>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
         <PackageIcon>e-athena.png</PackageIcon>
         <Title>Athena.Infrastructure.FreeSql.AspNetCore</Title>
@@ -24,8 +24,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="DotNetCore.CAP.RabbitMQ" Version="7.2.2" />
-        <PackageReference Include="DotNetCore.CAP.RedisStreams" Version="7.2.2" />
+        <PackageReference Include="DotNetCore.CAP.RabbitMQ" Version="8.2.0"/>
+        <PackageReference Include="DotNetCore.CAP.RedisStreams" Version="8.2.0"/>
         <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0"/>
     </ItemGroup>
 

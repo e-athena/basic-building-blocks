@@ -55,7 +55,7 @@ public static class ServiceCollectionExtensions
             services.AddScoped<IRoleService, DefaultRoleService>();
             services.AddScoped<IUserService, DefaultUserService>();
             services.AddScoped<ITenantService, HttpTenantService>();
-            services.AddScoped<IDataPermissionService, DefaultDataPermissionService>();
+            services.AddSingleton<IDataPermissionService, DefaultDataPermissionService>();
             return services;
         }
 
@@ -64,7 +64,7 @@ public static class ServiceCollectionExtensions
             return services;
         }
 
-        // 添加Dapr客户端
+        // 添加DAPR客户端
         services.AddDaprClient(daprConfigure);
         // 添加服务
         services.AddScoped<IOrganizationService, DaprOrganizationService>();
@@ -72,7 +72,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRoleService, DaprRoleService>();
         services.AddScoped<IUserService, DaprUserService>();
         services.AddScoped<ITenantService, DaprTenantService>();
-        services.AddScoped<IDataPermissionService, DaprDataPermissionService>();
+        services.AddSingleton<IDataPermissionService, DaprDataPermissionService>();
 
         return services;
     }

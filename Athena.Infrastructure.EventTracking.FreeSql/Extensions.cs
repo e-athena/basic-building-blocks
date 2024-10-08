@@ -34,13 +34,14 @@ public static class Extensions
     {
         if (string.IsNullOrEmpty(sourceConnectionString))
         {
-            throw new ArgumentNullException(nameof(sourceConnectionString), "事件追踪存储的数据库连接字符串不能为空");
+            return services;
         }
 
         var (dataType, connectionString) = DbTypeHelper.GetDataTypeAndConnectionString(sourceConnectionString);
         if (string.IsNullOrEmpty(connectionString))
         {
-            throw new ArgumentNullException(nameof(connectionString), "事件追踪存储的数据库连接字符串不能为空");
+            Console.WriteLine("事件追踪存储的数据库连接字符串配置不正确");
+            return services;
         }
 
         var assembly = Assembly.Load("Athena.Infrastructure.EventTracking");

@@ -247,10 +247,11 @@ public class DefaultUserService : DefaultServiceBase, IUserService
     /// 读取用户列表
     /// </summary>
     /// <param name="readFromCache"></param>
+    /// <param name="expireSeconds">过期时间/秒</param>
     /// <returns></returns>
     /// <exception cref="NotImplementedException"></exception>
     [ServiceInvokeExceptionLogging]
-    public async Task<List<SelectViewModel>> GetAllUserAsync(bool readFromCache = true)
+    public async Task<List<SelectViewModel>> GetAllUserAsync(bool readFromCache = true, int expireSeconds = 86400)
     {
         if (!readFromCache)
         {
@@ -258,7 +259,7 @@ public class DefaultUserService : DefaultServiceBase, IUserService
         }
 
         const string cacheKey = "userService:GetAllUserAsync";
-        return await _cacheManager.GetOrCreateAsync(cacheKey, Get, TimeSpan.FromDays(1)) ?? new List<SelectViewModel>();
+        return await _cacheManager.GetOrCreateAsync(cacheKey, Get, TimeSpan.FromSeconds(expireSeconds)) ?? new List<SelectViewModel>();
 
         // 是否读取缓存
         async Task<List<SelectViewModel>> Get()

@@ -4,10 +4,10 @@ namespace Athena.Infrastructure.EventStorage.Models;
 /// 事件源
 /// </summary>
 [Table("event_streams")]
-[Index(nameof(UserId))]
-[Index(nameof(Version))]
-[Index(nameof(CreatedOn))]
-[Index(nameof(AggregateRootId))]
+[Index("user_id")]
+[Index("version")]
+[Index("created_on")]
+[Index("aggregate_root_id")]
 public class EventStream
 {
     /// <summary>
@@ -17,6 +17,7 @@ public class EventStream
     [Key]
     [Required]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    [Column("sequence")]
     public long Sequence { get; set; }
 
     /// <summary>
@@ -25,6 +26,7 @@ public class EventStream
     /// <value></value>
     [MaxLength(256)]
     [Required]
+    [Column("aggregate_root_type_name")]
     public string AggregateRootTypeName { get; set; } = null!;
 
     /// <summary>
@@ -33,6 +35,7 @@ public class EventStream
     /// <value></value>
     [MaxLength(36)]
     [Required]
+    [Column("aggregate_root_id")]
     public string AggregateRootId { get; set; } = null!;
 
     /// <summary>
@@ -40,17 +43,21 @@ public class EventStream
     /// </summary>
     /// <value></value>
     [Required]
+    [Column("version")]
     public int Version { get; set; }
 
     /// <summary>
     /// 事件ID
     /// </summary>
     /// <value></value>
+    [MaxLength(36)]
+    [Column("event_id")]
     public string EventId { get; set; } = null!;
 
     /// <summary>
     /// 事件名称
     /// </summary>
+    [Column("event_name")]
     public string EventName { get; set; } = null!;
 
     /// <summary>
@@ -58,6 +65,7 @@ public class EventStream
     /// </summary>
     /// <value></value>
     [Required]
+    [Column("created_on")]
     public DateTime CreatedOn { get; set; }
 
     /// <summary>
@@ -66,11 +74,13 @@ public class EventStream
     /// <value></value>
     [Required]
     [MaxLength(-1)]
+    [Column("events")]
     public string Events { get; set; } = null!;
 
     /// <summary>
     /// 用户Id
     /// </summary>
     [MaxLength(36)]
+    [Column("user_id")]
     public string? UserId { get; set; }
 }

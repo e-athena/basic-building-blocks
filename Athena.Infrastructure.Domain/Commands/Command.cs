@@ -44,7 +44,7 @@ public class Command : TxTraceRequest<string>
     }
 
     /// <summary>
-    /// 兼容ENode的Command
+    /// Command
     /// </summary>
     public Command()
     {
@@ -53,7 +53,7 @@ public class Command : TxTraceRequest<string>
     }
 
     /// <summary>
-    /// 兼容ENode的Command
+    /// Command
     /// </summary>
     /// <param name="id">ID</param>
     public Command(string id)

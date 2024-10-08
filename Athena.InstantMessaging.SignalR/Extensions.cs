@@ -54,7 +54,8 @@ public static class Extensions
                 var config = configuration.GetRedisConfig();
                 var configurationOptions = ConfigurationOptions.Parse(config.Configuration);
                 configurationOptions.DefaultDatabase = config.DefaultDatabase;
-                configurationOptions.ChannelPrefix = config.InstanceName + "signalr:";
+                configurationOptions.ChannelPrefix =  RedisChannel.Literal(config.InstanceName + "signalr:");//config.InstanceName + "signalr:";
+                // configurationOptions.
                 options.Configuration = configurationOptions;
 
                 setupAction?.Invoke(options);

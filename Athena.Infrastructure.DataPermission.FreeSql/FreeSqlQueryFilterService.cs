@@ -10,6 +10,7 @@ public class FreeSqlQueryFilterService : QueryFilterServiceBase, IQueryFilterSer
     private readonly DataPermissionConfig _config;
 
 
+    /// <inheritdoc />
     public FreeSqlQueryFilterService(
         ICacheManager cacheManager,
         ILoggerFactory loggerFactory,

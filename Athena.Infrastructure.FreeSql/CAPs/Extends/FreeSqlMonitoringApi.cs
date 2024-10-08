@@ -15,6 +15,12 @@ internal class FreeSqlMonitoringApi : IMonitoringApi
     private readonly ISerializer _serializer;
     private readonly IFreeSql _freeSql;
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="initializer"></param>
+    /// <param name="serializer"></param>
+    /// <param name="freeSql"></param>
     public FreeSqlMonitoringApi(
         IStorageInitializer initializer,
         ISerializer serializer, IFreeSql freeSql)

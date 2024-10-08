@@ -141,7 +141,7 @@ public class FileObjectService : IFileObjectService
     /// <param name="marker"></param>
     /// <param name="limit"></param>
     /// <returns></returns>
-    public async Task<List<FileObject>?> ListAsync(string bucketName, string prefix = null, string marker = null,
+    public async Task<List<FileObject>?> ListAsync(string bucketName, string? prefix = null, string? marker = null,
         int limit = 1000)
     {
         var mac = new Mac(Config.AccessKey, Config.SecretKey);

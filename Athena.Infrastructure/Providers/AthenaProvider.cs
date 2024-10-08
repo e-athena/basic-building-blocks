@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Logging;
-
 namespace Athena.Infrastructure.Providers;
 
 /// <summary>
@@ -28,5 +26,27 @@ public class AthenaProvider : IAthenaProvider
         }
 
         return Provider.GetService(typeof(TService)) as TService;
+    }
+
+    /// <summary>
+    /// 获取日志
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    public static ILogger<T>? GetLogger<T>()
+    {
+        return GetService<ILoggerFactory>()?.CreateLogger<T>();
+    }
+
+    /// <summary>
+    /// 获取日志
+    /// </summary>
+    /// <param name="categoryName"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    public static ILogger? GetLogger(string categoryName)
+    {
+        return GetService<ILoggerFactory>()?.CreateLogger(categoryName);
     }
 }

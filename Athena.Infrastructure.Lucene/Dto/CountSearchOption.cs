@@ -8,5 +8,5 @@ public class CountSearchOption
     /// <summary>
     ///
     /// </summary>
-    public virtual string FieldName { get; set; }
+    public virtual required string FieldName { get; set; }
 }

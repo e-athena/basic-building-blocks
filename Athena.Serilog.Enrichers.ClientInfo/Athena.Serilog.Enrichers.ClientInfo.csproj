@@ -11,8 +11,9 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2"/>
-        <PackageReference Include="NewLife.IP" Version="2.1.2023.1101" />
-        <PackageReference Include="Serilog" Version="3.0.1"/>
+        <PackageReference Include="NewLife.IP" Version="2.2.2024.902" />
+        <PackageReference Include="Serilog" Version="4.0.1" />
+        <PackageReference Include="System.Text.Encodings.Web" Version="4.7.2" />
     </ItemGroup>
 
 </Project>

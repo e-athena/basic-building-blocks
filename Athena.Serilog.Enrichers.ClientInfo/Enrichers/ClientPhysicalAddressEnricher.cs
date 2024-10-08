@@ -57,9 +57,10 @@ public class ClientPhysicalAddressEnricher : ILogEventEnricher
             ipAddress = "unknown";
         }
 
-        var physicalAddress = NewLife.IP.Ip.GetAddress(ipAddress);
+        // var physicalAddress = NewLife.IP.Ip.GetAddress(ipAddress);
+        var physicalAddress = new NewLife.IP.Ip().GetAddress(ipAddress);
 
-        var physicalAddressProperty = new LogEventProperty(PropertyName, new ScalarValue(physicalAddress));
+        var physicalAddressProperty = new LogEventProperty(PropertyName, new ScalarValue(physicalAddress.addr));
         httpContext.Items.Add(ItemKey, physicalAddressProperty);
 
         logEvent.AddPropertyIfAbsent(physicalAddressProperty);

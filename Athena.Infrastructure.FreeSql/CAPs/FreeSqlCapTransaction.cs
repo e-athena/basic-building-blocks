@@ -104,7 +104,7 @@ public static class CapTransactionExtensions
         bool autoCommit = false)
     {
         var dispatcher = publisher.ServiceProvider.GetRequiredService<IDispatcher>();
-        publisher.Transaction.Value = new FreeSqlCapTransaction(dispatcher, unitOfWork);
-        return publisher.Transaction.Value.Begin(autoCommit);
+        publisher.Transaction = new FreeSqlCapTransaction(dispatcher, unitOfWork);
+        return publisher.Transaction.Begin(autoCommit);
     }
 }

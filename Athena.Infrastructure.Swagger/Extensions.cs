@@ -18,8 +18,8 @@ public static class Extensions
     {
         return services.AddCustomSwaggerGen(configuration, new OpenApiContact
         {
-            Email = "zheng_jinfan@126.com",
-            Name = "Mango",
+            Email = "user@example.com",
+            Name = "Example",
         }, configAction);
     }
 

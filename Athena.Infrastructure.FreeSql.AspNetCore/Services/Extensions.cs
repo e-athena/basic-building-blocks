@@ -123,7 +123,7 @@ public static class Extensions
             {
                 // 读取索引名
                 var indexName = indexAttribute.Name ??
-                                $"IX_{tableName}_{string.Join("_", indexAttribute.PropertyNames)}";
+                                $"ix_{tableName}_{string.Join("_", indexAttribute.PropertyNames)}";
 
                 // 如果indexName超出64个字符则截取
                 if (indexName.Length > 64)
@@ -164,17 +164,19 @@ public static class Extensions
                         createIndexSql =
                             $"ALTER TABLE {tableName} ADD {(indexAttribute.IsUnique ? "UNIQUE" : "")} INDEX {indexName} ({string.Join(",", indexAttribute.PropertyNames)})";
                         break;
-                    // sqlite
-                    case DataType.Sqlite:
                     // pgsql
                     case DataType.PostgreSQL:
+                    // createIndexSql = $"CREATE {(indexAttribute.IsUnique ? "UNIQUE" : "")} INDEX IF NOT EXISTS {indexName} ON {tableName} ({string.Join(",", indexAttribute.PropertyNames.Select(p => $"\"{p}\""))})";
+                    // break;
+                    // sqlite
+                    case DataType.Sqlite:
                     // oracle
                     case DataType.Oracle:
                     // sqlserver
                     case DataType.SqlServer:
                         // indexAttribute.IsUnique
                         createIndexSql =
-                            $"CREATE {(indexAttribute.IsUnique ? "UNIQUE" : "")} INDEX {indexName} ON {tableName} ({string.Join(",", indexAttribute.PropertyNames)})";
+                            $"CREATE {(indexAttribute.IsUnique ? "UNIQUE" : "")} INDEX IF NOT EXISTS {indexName} ON {tableName} ({string.Join(",", indexAttribute.PropertyNames)})";
                         break;
                     // 其他数据库
                     default:
@@ -472,7 +474,7 @@ public static class Extensions
             options.DefaultGroupName = "default.group";
             capOptions?.Invoke(options);
         });
-        if (capSubscribeAssemblies != null && capSubscribeAssemblies.Any())
+        if (capSubscribeAssemblies != null && capSubscribeAssemblies.Length != 0)
         {
             services.AddCustomIntegrationEventHandler(capSubscribeAssemblies);
         }
@@ -502,7 +504,7 @@ public static class Extensions
             options.DefaultGroupName = "default.group";
             capOptions?.Invoke(options);
         });
-        if (capSubscribeAssemblies != null && capSubscribeAssemblies.Any())
+        if (capSubscribeAssemblies != null && capSubscribeAssemblies.Length != 0)
         {
             services.AddCustomIntegrationEventHandler(capSubscribeAssemblies);
         }

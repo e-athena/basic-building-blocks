@@ -1,5 +1,6 @@
 using Athena.Infrastructure.DataAnnotations.Schema;
 using Athena.Infrastructure.Providers;
+using FreeSql.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace Athena.Infrastructure.FreeSqlHelper;
@@ -35,26 +36,19 @@ public static class FreeSqlBuilderHelper
             .UseConnectionString(dataType.Value, connectionString)
             .UseMonitorCommand(null, (cmd, traceLog) =>
             {
-                if (AthenaProvider.DefaultLog == null || !AthenaProvider.DefaultLog.IsEnabled(LogLevel.Debug))
+                var logger = AthenaProvider.GetLogger("FreeSqlMonitorCommand");
+                if (logger == null || !logger.IsEnabled(LogLevel.Debug))
                 {
                     return;
                 }
 
-                // // cap的表不处理
-                // if (cmd.CommandText.Contains(CapConstant.PublishedTableName) ||
-                //     cmd.CommandText.Contains(CapConstant.ReceivedTableName) ||
-                //     cmd.CommandText.Contains(CapConstant.LockTableName))
-                // {
-                //     return;
-                // }
-
                 // 打印日志
-                Console.WriteLine("----------------------------------SQL监控开始----------------------------------");
-                Console.WriteLine($"{cmd.Connection?.Database ?? string.Empty} {traceLog}");
-                Console.WriteLine("----------------------------------SQL监控结束----------------------------------");
-                // AthenaProvider.DefaultLog?.LogDebug("SQL监控：{Sql}", traceLog);
-                // AthenaProvider.DefaultLog?.LogDebug("CommandText：{CommandText}", cmd.CommandText);
+                // Console.WriteLine("----------------------------------SQL监控开始----------------------------------");
+                // Console.WriteLine($"{cmd.Connection?.Database ?? string.Empty} {traceLog}");
+                // Console.WriteLine("----------------------------------SQL监控结束----------------------------------");
+                logger.LogDebug("SQL监控：{Sql}，{CommandText}", traceLog, cmd.CommandText);
             })
+            .UseNameConvert(NameConvertType.PascalCaseToUnderscoreWithLower)
             // 自动同步实体结构到数据库
             .UseAutoSyncStructure(isAutoSyncStructure);
 
@@ -143,6 +137,7 @@ public static class FreeSqlBuilderHelper
                 Console.WriteLine($"{cmd.Connection?.Database ?? string.Empty} {traceLog}");
                 Console.WriteLine("----------------------------------SQL监控结束----------------------------------");
             })
+            .UseNameConvert(NameConvertType.PascalCaseToUnderscoreWithLower)
             // 自动同步实体结构到数据库
             .UseAutoSyncStructure(isAutoSyncStructure);
 
@@ -157,7 +152,8 @@ public static class FreeSqlBuilderHelper
             }
 
             // 打印日志
-            AthenaProvider.DefaultLog?.LogWarning("SQL监控，执行时间超过800毫秒：{Sql}", args.Log.Replace("\r\n", " "));
+            AthenaProvider.GetLogger("FreeSqlAopCommandAfter")
+                ?.LogWarning("SQL监控，执行时间超过800毫秒：{Sql}", args.Log.Replace("\r\n", " "));
         };
         freeSql.Aop.ConfigEntityProperty += (_, e) =>
         {

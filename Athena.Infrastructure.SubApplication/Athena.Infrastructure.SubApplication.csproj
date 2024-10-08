@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>7.0.9</Version>
+        <Version>8.1.0</Version>
         <PackageIcon>e-athena.png</PackageIcon>
         <RepositoryUrl>https://github.com/e-athena/basic-building-blocks</RepositoryUrl>
         <Title>Athena.Infrastructure</Title>
@@ -16,17 +16,17 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-        <DocumentationFile>bin\Debug\net7.0\Athena.Infrastructure.SubApplication.xml</DocumentationFile>
+        <DocumentationFile>bin\Debug\Athena.Infrastructure.SubApplication.xml</DocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-        <DocumentationFile>bin\Release\net7.0\Athena.Infrastructure.SubApplication.xml</DocumentationFile>
+        <DocumentationFile>bin\Release\Athena.Infrastructure.SubApplication.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Rougamo.Fody" Version="2.1.1" PrivateAssets="contentfiles;analyzers"/>
-        <PackageReference Include="Dapr.AspNetCore" Version="1.12.0"/>
-        <PackageReference Include="Flurl.Http" Version="3.2.4"/>
+        <PackageReference Include="Rougamo.Fody" Version="2.3.1" PrivateAssets="contentfiles;analyzers" />
+        <PackageReference Include="Dapr.AspNetCore" Version="1.14.0" />
+        <PackageReference Include="Flurl.Http" Version="4.0.2" />
     </ItemGroup>
 
     <ItemGroup>

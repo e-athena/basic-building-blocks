@@ -43,7 +43,7 @@ public class ScoredSearchOption:SearchOptionBase
     /// </summary>
     public Filter Filter { get; set; }
 
-    public ScoredSearchOption(string keyword,List<string> fields,int maxHits=100,Dictionary<string,float> boosts=null)
+    public ScoredSearchOption(string keyword,List<string> fields,int maxHits=100,Dictionary<string,float>? boosts=null)
     {
         if (string.IsNullOrWhiteSpace(keyword))
         {

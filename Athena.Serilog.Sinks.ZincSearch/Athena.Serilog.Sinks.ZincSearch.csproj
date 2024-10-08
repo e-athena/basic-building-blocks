@@ -5,7 +5,7 @@
         <Description>A Serilog sink sending log events to ZincSearch</Description>
         <LangVersion>10</LangVersion>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <TargetFrameworks>net5.0;net6.0;net7.0;net8.0;netstandard2.0;netstandard2.1</TargetFrameworks>
+        <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <!--SourceLink -->
@@ -22,11 +22,11 @@
 <!--        <PackageReadmeFile>README.md</PackageReadmeFile>-->
         <PackageReleaseNotes>For release notes, please see the change log on GitHub.</PackageReleaseNotes>
         <PackageTags>serilog;zincsearch;sinks</PackageTags>
-        <Version>1.0.2</Version>
+        <Version>8.0.0</Version>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Serilog" Version="3.1.1"/>
-        <PackageReference Include="System.Text.Json" Version="4.7.0"/>
+        <PackageReference Include="Serilog" Version="4.0.1" />
+        <PackageReference Include="System.Text.Json" Version="8.0.4" />
     </ItemGroup>
 </Project>

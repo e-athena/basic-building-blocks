@@ -7,7 +7,7 @@ public class SecurityContextAccessor : ISecurityContextAccessor
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger<SecurityContextAccessor> _logger;
-    private readonly JwtConfig _jwtConfig;
+    private readonly IOptionsMonitor<JwtConfig> _jwtConfigOptions;
 
     /// <summary>
     /// 
@@ -17,12 +17,12 @@ public class SecurityContextAccessor : ISecurityContextAccessor
     /// <param name="loggerFactory"></param>
     /// <exception cref="ArgumentNullException"></exception>
     public SecurityContextAccessor(
-        IOptions<JwtConfig> options,
+        IOptionsMonitor<JwtConfig> options,
         IHttpContextAccessor httpContextAccessor,
         ILoggerFactory loggerFactory
     )
     {
-        _jwtConfig = options.Value;
+        _jwtConfigOptions = options;
         _logger = loggerFactory.CreateLogger<SecurityContextAccessor>();
         _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
     }
@@ -232,7 +232,7 @@ public class SecurityContextAccessor : ISecurityContextAccessor
     /// <returns></returns>
     public string CreateToken(List<Claim> claims)
     {
-        return CreateToken(_jwtConfig, claims);
+        return CreateToken(_jwtConfigOptions.CurrentValue, claims);
     }
 
     /// <summary>
@@ -243,7 +243,7 @@ public class SecurityContextAccessor : ISecurityContextAccessor
     /// <returns></returns>
     public string CreateToken(List<Claim> claims, string scheme)
     {
-        return CreateToken(_jwtConfig, claims, true, scheme);
+        return CreateToken(_jwtConfigOptions.CurrentValue, claims, true, scheme);
     }
 
     /// <summary>
@@ -359,6 +359,6 @@ public class SecurityContextAccessor : ISecurityContextAccessor
     /// <returns></returns>
     public string CreateTokenNotScheme(List<Claim> claims)
     {
-        return CreateToken(_jwtConfig, claims, false);
+        return CreateToken(_jwtConfigOptions.CurrentValue, claims, false);
     }
 }

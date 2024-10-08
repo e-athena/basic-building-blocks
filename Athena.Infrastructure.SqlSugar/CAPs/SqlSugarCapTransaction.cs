@@ -113,7 +113,7 @@ public static class CapTransactionExtensions
         bool autoCommit = false)
     {
         var dispatcher = publisher.ServiceProvider.GetRequiredService<IDispatcher>();
-        publisher.Transaction.Value = new SqlSugarCapTransaction(dispatcher, dbConnection, isolationLevel);
-        return publisher.Transaction.Value.Begin(autoCommit);
+        publisher.Transaction = new SqlSugarCapTransaction(dispatcher, dbConnection, isolationLevel);
+        return publisher.Transaction.Begin(autoCommit);
     }
 }

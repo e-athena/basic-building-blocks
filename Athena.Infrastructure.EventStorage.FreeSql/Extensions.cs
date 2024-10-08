@@ -45,14 +45,16 @@ public static class Extensions
     {
         if (string.IsNullOrEmpty(eventStorageOptions.ConnectionString))
         {
-            throw new ArgumentNullException(nameof(eventStorageOptions.ConnectionString), "事件存储的数据库连接字符串不能为空");
+            // throw new ArgumentNullException(nameof(eventStorageOptions.ConnectionString), "事件存储的数据库连接字符串不能为空");
+            return services;
         }
 
-        var (dataType, connectionString) =
-            DbTypeHelper.GetDataTypeAndConnectionString(eventStorageOptions.ConnectionString);
+        var (dataType, connectionString) = DbTypeHelper.GetDataTypeAndConnectionString(eventStorageOptions.ConnectionString);
         if (string.IsNullOrEmpty(connectionString))
         {
-            throw new ArgumentNullException(nameof(connectionString), "事件存储的数据库连接字符串不能为空");
+            // throw new ArgumentNullException(nameof(connectionString), "事件存储的数据库连接字符串不能为空");
+            Console.WriteLine("事件存储的数据库连接字符串配置不正确");
+            return services;
         }
 
         // 配置Options

@@ -20,7 +20,7 @@ public static class AthenaBuilderExtensions
             OnPrepareResponse = c =>
             {
                 // 
-                c.Context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
+                c.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
             }
         });
     }

@@ -25,12 +25,22 @@ public static class MediatRExtensions
         {
             typeof(TType)
         };
-        if (types is {Count: > 0})
+        if (types is { Count: > 0 })
         {
             list.AddRange(types);
         }
 
-        services.AddMediatR(configuration, list.ToArray());
+        // services.AddMediatR(configuration, list.ToArray());
+
+        services.AddMediatR(cfg =>
+        {
+            foreach (var type in list)
+            {
+                cfg.RegisterServicesFromAssemblyContaining(type);
+            }
+
+            configuration?.Invoke(cfg);
+        });
 
         return services;
     }
@@ -51,12 +61,19 @@ public static class MediatRExtensions
         {
             typeof(TType)
         };
-        if (types is {Count: > 0})
+        if (types is { Count: > 0 })
         {
             list.AddRange(types);
         }
 
-        services.AddMediatR(list.ToArray());
+        // services.AddMediatR(list.ToArray());
+        services.AddMediatR(cfg =>
+        {
+            foreach (var type in list)
+            {
+                cfg.RegisterServicesFromAssemblyContaining(type);
+            }
+        });
 
         return services;
     }
@@ -106,7 +123,11 @@ public static class MediatRExtensions
     // ReSharper disable once IdentifierTypo
     public static IServiceCollection AddCustomMediatR(this IServiceCollection services, string? assemblyKeyword = null)
     {
-        services.AddMediatR(AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword));
+        // services.AddMediatR(AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword));
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblies(AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword));
+        });
         return services;
     }
 
@@ -122,7 +143,11 @@ public static class MediatRExtensions
         Action<MediatRServiceConfiguration>? configuration,
         string? assemblyKeyword = null)
     {
-        services.AddMediatR(configuration, AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword));
+        // services.AddMediatR(configuration, AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword));
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblies(AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeyword));
+        });
         return services;
     }
 
@@ -136,7 +161,11 @@ public static class MediatRExtensions
     public static IServiceCollection AddCustomMediatR(this IServiceCollection services,
         params string[] assemblyKeywords)
     {
-        services.AddMediatR(AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords));
+        // services.AddMediatR(AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords));
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblies(AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords));
+        });
         return services;
     }
 
@@ -152,7 +181,11 @@ public static class MediatRExtensions
         Action<MediatRServiceConfiguration>? configuration,
         params string[] assemblyKeywords)
     {
-        services.AddMediatR(configuration, AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords));
+        // services.AddMediatR(configuration, AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords));
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblies(AssemblyHelper.GetCurrentDomainBusinessAssemblies(assemblyKeywords));
+        });
         return services;
     }
 
@@ -167,7 +200,11 @@ public static class MediatRExtensions
         this IServiceCollection services,
         params Assembly[] assemblies)
     {
-        services.AddMediatR(assemblies);
+        // services.AddMediatR(assemblies);
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblies(assemblies);
+        });
         return services;
     }
 
@@ -184,7 +221,12 @@ public static class MediatRExtensions
         Action<MediatRServiceConfiguration>? configuration,
         params Assembly[] assemblies)
     {
-        services.AddMediatR(configuration, assemblies);
+        // services.AddMediatR(configuration, assemblies);
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblies(assemblies);
+            configuration?.Invoke(cfg);
+        });
         return services;
     }
 

@@ -261,12 +261,13 @@ public class SqlSugarDataStorage : IDataStorage
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
+    /// <param name="lookbackSeconds"></param>
     /// <returns></returns>
-    public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry()
+    public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry(TimeSpan lookbackSeconds)
     {
-        var fourMinAgo = DateTime.Now.AddMinutes(-4);
+        var fourMinAgo = DateTime.Now.Subtract(lookbackSeconds); //DateTime.Now.AddMinutes(-4);
 
         var result = await _sqlSugarClient.Queryable<Published>()
             .AS(_pubName)
@@ -330,13 +331,13 @@ public class SqlSugarDataStorage : IDataStorage
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
+    /// <param name="lookbackSeconds"></param>
     /// <returns></returns>
-    public async Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry()
+    public async Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry(TimeSpan lookbackSeconds)
     {
-        var fourMinAgo = DateTime.Now.AddMinutes(-4);
-
+        var fourMinAgo = DateTime.Now.Subtract(lookbackSeconds); //DateTime.Now.AddMinutes(-4);
         var result = await _sqlSugarClient.Queryable<Received>()
             .AS(_recName)
             .Where(p => p.Retries < _capOptions.CurrentValue.FailedRetryCount)

@@ -48,7 +48,7 @@ public class
     /// </summary>
     public virtual TTaxoDirectory TaxoDirectory { get; }
 
-    private Spatial4n.Context.SpatialContext _spatialContext;
+    private readonly Spatial4n.Context.SpatialContext _spatialContext;
     private readonly SpatialStrategy _spatialStrategy;
 
     public SearchManager(TDirectory directory, TAnalyzer analyzer, TTaxoDirectory taxoDirectory)

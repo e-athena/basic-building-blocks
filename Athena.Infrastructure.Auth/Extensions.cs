@@ -63,7 +63,7 @@ public static class Extensions
         Action<IServiceCollection>? configureMoreActions = null)
     {
         services.AddHttpContextAccessor();
-        services.AddScoped<ISecurityContextAccessor, SecurityContextAccessor>();
+        services.AddSingleton<ISecurityContextAccessor, SecurityContextAccessor>();
         var config = configuration.GetJwtConfig();
         services.Configure<JwtConfig>(cfg =>
         {
